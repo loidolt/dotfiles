@@ -5,6 +5,6 @@ local cfg = {}
 
 -- Font settings
 cfg.font = wezterm.font("JetBrains Mono")
-cfg.font_size = 18
+cfg.font_size = 16
 
 return cfg

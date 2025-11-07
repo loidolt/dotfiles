@@ -1,0 +1,27 @@
+{
+  "mcpServers": {
+    "ref": {
+      "command": "npx",
+      "args": ["-y", "@ref-tools/mcp-server"],
+      "env": {
+        "REF_API_KEY": "${REF_API_KEY}"
+      }
+    },
+    "sequentialthinking": {
+      "command": "docker",
+      "args": ["run", "--rm", "-i", "mcp/sequentialthinking"]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["--isolated", "@playwright/mcp@latest"]
+    },
+    "cloudflare": {
+      "command": "npx",
+      "args": ["mcp-remote", "https://docs.mcp.cloudflare.com/mcp"]
+    },
+    "mui": {
+      "command": "npx",
+      "args": ["-y", "@mui/mcp@latest"]
+    }
+  }
+}
