@@ -44,9 +44,23 @@ create_symlink() {
     # Check if target already exists
     if [ -e "$target" ] || [ -L "$target" ]; then
         # If it's already the correct symlink, skip
-        if [ -L "$target" ] && [ "$(readlink "$target")" == "$source" ]; then
-            echo -e "${GREEN}  Already linked correctly${NC}"
-            return 0
+        if [ -L "$target" ]; then
+            # Get the actual symlink target (works on both macOS and Linux)
+            local current_link
+            if command -v realpath &> /dev/null; then
+                # Linux/Ubuntu has realpath
+                current_link="$(realpath "$target" 2>/dev/null || readlink "$target")"
+                source_real="$(realpath "$source" 2>/dev/null || echo "$source")"
+            else
+                # macOS fallback
+                current_link="$(readlink "$target")"
+                source_real="$source"
+            fi
+            
+            if [ "$current_link" == "$source_real" ] || [ "$current_link" == "$source" ]; then
+                echo -e "${GREEN}  Already linked correctly${NC}"
+                return 0
+            fi
         fi
 
         # Backup existing file/directory
