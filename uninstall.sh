@@ -12,6 +12,13 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
+# Determine the actual user's home directory (even when run with sudo)
+if [ -n "$SUDO_USER" ]; then
+    USER_HOME=$(getent passwd "$SUDO_USER" | cut -d: -f6)
+else
+    USER_HOME="$HOME"
+fi
+
 # Function to remove a symlink
 remove_symlink() {
     local target="$1"
@@ -32,18 +39,19 @@ remove_symlink() {
 }
 
 echo -e "${BLUE}=== Uninstalling Dotfiles ===${NC}"
+echo -e "${BLUE}Uninstalling for user: ${SUDO_USER:-$(whoami)} (${USER_HOME})${NC}"
 echo ""
 
 # Remove OpenCode configuration
-remove_symlink "$HOME/.config/opencode" "OpenCode configuration"
+remove_symlink "$USER_HOME/.config/opencode" "OpenCode configuration"
 echo ""
 
 # Remove WezTerm configuration
-remove_symlink "$HOME/.wezterm.lua" "WezTerm configuration"
+remove_symlink "$USER_HOME/.config/wezterm" "WezTerm configuration"
 echo ""
 
 # Remove Neovim configuration
-remove_symlink "$HOME/.config/nvim" "Neovim configuration"
+remove_symlink "$USER_HOME/.config/nvim" "Neovim configuration"
 echo ""
 
 echo -e "${GREEN}=== Uninstallation Complete ===${NC}"

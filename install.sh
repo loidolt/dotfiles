@@ -15,7 +15,15 @@ NC='\033[0m' # No Color
 # Get the directory where this script is located
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Determine the actual user's home directory (even when run with sudo)
+if [ -n "$SUDO_USER" ]; then
+    USER_HOME=$(getent passwd "$SUDO_USER" | cut -d: -f6)
+else
+    USER_HOME="$HOME"
+fi
+
 echo -e "${BLUE}Dotfiles Directory: ${DOTFILES_DIR}${NC}"
+echo -e "${BLUE}Installing for user: ${SUDO_USER:-$(whoami)} (${USER_HOME})${NC}"
 echo ""
 
 # Function to create a symlink with backup
@@ -81,7 +89,7 @@ echo ""
 if [ -d "$DOTFILES_DIR/opencode" ]; then
     create_symlink \
         "$DOTFILES_DIR/opencode" \
-        "$HOME/.config/opencode" \
+        "$USER_HOME/.config/opencode" \
         "OpenCode configuration"
     echo ""
 fi
@@ -90,7 +98,7 @@ fi
 if [ -d "$DOTFILES_DIR/wezterm" ]; then
     create_symlink \
         "$DOTFILES_DIR/wezterm" \
-        "$HOME/.config/wezterm" \
+        "$USER_HOME/.config/wezterm" \
         "WezTerm configuration"
     echo ""
 fi
@@ -99,7 +107,7 @@ fi
 if [ -d "$DOTFILES_DIR/neovim" ]; then
     create_symlink \
         "$DOTFILES_DIR/neovim" \
-        "$HOME/.config/nvim" \
+        "$USER_HOME/.config/nvim" \
         "Neovim configuration"
     echo ""
 fi
