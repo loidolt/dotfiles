@@ -23,7 +23,15 @@
     "memory": {
       "type": "local",
       "enabled": false,
-      "command": ["docker", "run", "-i", "-v", "claude-memory:/app/dist", "--rm", "mcp/memory"]
+      "command": [
+        "docker",
+        "run",
+        "-i",
+        "-v",
+        "claude-memory:/app/dist",
+        "--rm",
+        "mcp/memory"
+      ]
     },
     "playwright": {
       "type": "local",
