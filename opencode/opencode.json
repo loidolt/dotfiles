@@ -10,15 +10,7 @@
     "memory": {
       "type": "local",
       "enabled": false,
-      "command": [
-        "docker",
-        "run",
-        "-i",
-        "-v",
-        "claude-memory:/app/dist",
-        "--rm",
-        "mcp/memory"
-      ]
+      "command": ["docker", "run", "-i", "-v", "claude-memory:/app/dist", "--rm", "mcp/memory"]
     },
     "playwright": {
       "type": "local",
@@ -29,16 +21,6 @@
       "type": "remote",
       "enabled": false,
       "url": "https://api.githubcopilot.com/mcp/"
-    },
-    "cloudflare": {
-      "type": "remote",
-      "enabled": true,
-      "url": "https://docs.mcp.cloudflare.com/mcp"
-    },
-    "mui": {
-      "type": "local",
-      "enabled": true,
-      "command": ["npx", "-y", "@mui/mcp@latest"]
     }
   }
 }
