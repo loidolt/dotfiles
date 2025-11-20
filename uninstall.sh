@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-
 # Dotfiles Uninstallation Script
 # This script will remove symlinks created by install.sh
 
-set -e
+set -euo pipefail
 
 # Colors for output
 RED='\033[0;31m'
@@ -13,10 +12,10 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Determine the actual user's home directory (even when run with sudo)
-if [ -n "$SUDO_USER" ]; then
-    USER_HOME=$(getent passwd "$SUDO_USER" | cut -d: -f6)
+if [[ -n "${SUDO_USER:-}" ]]; then
+    readonly USER_HOME="$(getent passwd "${SUDO_USER}" | cut -d: -f6)"
 else
-    USER_HOME="$HOME"
+    readonly USER_HOME="${HOME}"
 fi
 
 # Function to remove a symlink

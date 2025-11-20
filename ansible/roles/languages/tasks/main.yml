@@ -1,0 +1,111 @@
+---
+- name: Check if mise is installed
+  command: which mise
+  register: mise_installed
+  ignore_errors: yes
+  changed_when: false
+
+- name: Download mise installation script
+  get_url:
+    url: https://mise.run
+    dest: /tmp/mise-install.sh
+    mode: '0755'
+    force: yes
+  when: mise_installed.rc != 0
+
+- name: Install mise (version manager)
+  shell: /tmp/mise-install.sh
+  args:
+    creates: "{{ ansible_env.HOME }}/.local/bin/mise"
+  when: mise_installed.rc != 0
+  register: mise_install_result
+
+- name: Clean up mise installation script
+  file:
+    path: /tmp/mise-install.sh
+    state: absent
+  when: mise_installed.rc != 0
+
+- name: Add mise to PATH in shell rc file
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/.zshrc"
+    line: 'eval "$(~/.local/bin/mise activate zsh)"'
+    create: yes
+  when: mise_installed.rc != 0
+
+- name: Install Node.js via mise
+  shell: |
+    {{ ansible_env.HOME }}/.local/bin/mise use -g node@{{ languages.node_version }}
+  args:
+    creates: "{{ ansible_env.HOME }}/.local/share/mise/installs/node/{{ languages.node_version }}"
+  when: languages.install_node
+
+- name: Install global npm packages
+  npm:
+    name: "{{ item }}"
+    global: yes
+  loop: "{{ node_global_packages }}"
+  when: languages.install_node
+  ignore_errors: yes
+
+- name: Check if Bun is installed
+  command: which bun
+  register: bun_installed
+  ignore_errors: yes
+  changed_when: false
+
+- name: Download Bun installation script
+  get_url:
+    url: https://bun.sh/install
+    dest: /tmp/bun-install.sh
+    mode: '0755'
+    force: yes
+  when: languages.install_bun and bun_installed.rc != 0
+
+- name: Install Bun
+  shell: bash /tmp/bun-install.sh
+  args:
+    creates: "{{ ansible_env.HOME }}/.bun/bin/bun"
+  when: languages.install_bun and bun_installed.rc != 0
+  register: bun_install_result
+
+- name: Clean up Bun installation script
+  file:
+    path: /tmp/bun-install.sh
+    state: absent
+  when: languages.install_bun and bun_installed.rc != 0
+
+- name: Install Python via mise
+  shell: |
+    {{ ansible_env.HOME }}/.local/bin/mise use -g python@{{ languages.python_version }}
+  args:
+    creates: "{{ ansible_env.HOME }}/.local/share/mise/installs/python/{{ languages.python_version }}"
+  when: languages.install_python
+
+- name: Install Go via mise
+  shell: |
+    {{ ansible_env.HOME }}/.local/bin/mise use -g go@{{ languages.go_version }}
+  args:
+    creates: "{{ ansible_env.HOME }}/.local/share/mise/installs/go/{{ languages.go_version }}"
+  when: languages.install_go
+
+- name: Download Rust installation script
+  get_url:
+    url: https://sh.rustup.rs
+    dest: /tmp/rustup-init.sh
+    mode: '0755'
+    force: yes
+  when: languages.install_rust
+
+- name: Install Rust
+  shell: /tmp/rustup-init.sh -y
+  args:
+    creates: "{{ ansible_env.HOME }}/.cargo/bin/rustc"
+  when: languages.install_rust
+  register: rust_install_result
+
+- name: Clean up Rust installation script
+  file:
+    path: /tmp/rustup-init.sh
+    state: absent
+  when: languages.install_rust

@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-
 # Dotfiles Installation Script
 # This script will create symlinks for all configuration files
 
-set -e
+set -euo pipefail
 
 # Colors for output
 RED='\033[0;31m'
@@ -13,13 +12,13 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Get the directory where this script is located
-DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Determine the actual user's home directory (even when run with sudo)
-if [ -n "$SUDO_USER" ]; then
-    USER_HOME=$(getent passwd "$SUDO_USER" | cut -d: -f6)
+if [[ -n "${SUDO_USER:-}" ]]; then
+    readonly USER_HOME="$(getent passwd "${SUDO_USER}" | cut -d: -f6)"
 else
-    USER_HOME="$HOME"
+    readonly USER_HOME="${HOME}"
 fi
 
 echo -e "${BLUE}Dotfiles Directory: ${DOTFILES_DIR}${NC}"
@@ -91,6 +90,17 @@ if [ -d "$DOTFILES_DIR/opencode" ]; then
         "$DOTFILES_DIR/opencode" \
         "$USER_HOME/.config/opencode" \
         "OpenCode configuration"
+    
+    # List installed agents
+    if [ -d "$DOTFILES_DIR/opencode/agent" ]; then
+        agent_count=$(find "$DOTFILES_DIR/opencode/agent" -name "*.md" | wc -l | tr -d ' ')
+        if [ "$agent_count" -gt 0 ]; then
+            echo -e "${GREEN}  ✓ Installed $agent_count custom agents:${NC}"
+            find "$DOTFILES_DIR/opencode/agent" -name "*.md" -exec basename {} .md \; | sort | while read agent; do
+                echo -e "    • $agent"
+            done
+        fi
+    fi
     echo ""
 fi
 
@@ -118,3 +128,9 @@ echo -e "${BLUE}Notes:${NC}"
 echo -e "  - Your original configs have been backed up with timestamp"
 echo -e "  - Restart your applications for changes to take effect"
 echo -e "  - For Neovim, plugins will be installed automatically on first launch"
+echo ""
+echo -e "${BLUE}OpenCode Agents:${NC}"
+echo -e "  - Agents are available at: ~/.config/opencode/agent/"
+echo -e "  - Use Tab key to switch between primary agents"
+echo -e "  - Use @agent-name to invoke subagents"
+echo -e "  - Run 'opencode agent create' to create new agents"

@@ -1,0 +1,46 @@
+---
+- name: Install core packages (macOS)
+  homebrew:
+    name: "{{ packages.core }}"
+    state: present
+  when: ansible_os_family == "Darwin"
+  tags: [core]
+
+- name: Install core packages (Linux)
+  apt:
+    name: "{{ packages.core }}"
+    state: present
+    update_cache: yes
+  become: yes
+  when: ansible_os_family == "Debian"
+  tags: [core]
+
+- name: Install CLI tools (macOS)
+  homebrew:
+    name: "{{ packages.cli_tools }}"
+    state: present
+  when: ansible_os_family == "Darwin"
+  tags: [cli]
+
+- name: Install CLI tools (Linux)
+  apt:
+    name: "{{ packages.cli_tools }}"
+    state: present
+  become: yes
+  when: ansible_os_family == "Debian"
+  tags: [cli]
+
+- name: Install macOS-specific packages
+  homebrew:
+    name: "{{ packages.macos_specific }}"
+    state: present
+  when: ansible_os_family == "Darwin"
+  tags: [macos]
+
+- name: Install Linux-specific packages
+  apt:
+    name: "{{ packages.linux_specific }}"
+    state: present
+  become: yes
+  when: ansible_os_family == "Debian"
+  tags: [linux]

@@ -1,10 +1,27 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # GitHub SSH Setup Script
+#
+# Usage:
+#   ./ssh-setup.sh [email@example.com]
+#
+# This script will:
+#   - Generate an ED25519 SSH key for GitHub
+#   - Display the public key for you to add to GitHub
+#   - Test the connection to GitHub
+#   - Configure SSH config for GitHub
+#   - Set up automatic SSH agent initialization
 
-set -e
+set -euo pipefail
 
-EMAIL="${1:-loidolt@gmail.com}"
-KEY_FILE="$HOME/.ssh/id_ed25519_github"
+readonly EMAIL="${1:-$(git config user.email 2>/dev/null || echo 'user@example.com')}"
+readonly KEY_FILE="${HOME}/.ssh/id_ed25519_github"
+
+# Validate email format
+if [[ ! "${EMAIL}" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
+    echo "Error: Invalid email format: ${EMAIL}"
+    echo "Usage: $0 [email@example.com]"
+    exit 1
+fi
 
 echo "=== GitHub SSH Key Setup ==="
 echo
@@ -40,12 +57,15 @@ echo "✓ Key added to agent"
 # Test connection
 echo
 echo "Testing GitHub connection..."
-if ssh -T git@github.com 2>&1 | grep -q "successfully authenticated"; then
-	echo "✓ Successfully authenticated with GitHub!"
-else
+if ! ssh -T git@github.com 2>&1 | grep -q "successfully authenticated"; then
 	echo "✗ Authentication failed. Please check that you added the key correctly."
+	echo "  Common issues:"
+	echo "  - Key not added to GitHub (https://github.com/settings/keys)"
+	echo "  - Firewall blocking SSH on port 22"
+	echo "  - SSH agent not running"
 	exit 1
 fi
+echo "✓ Successfully authenticated with GitHub!"
 
 # Configure SSH config
 echo

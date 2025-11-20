@@ -1,0 +1,88 @@
+---
+# Package lists for different categories
+packages:
+  core:
+    - git
+    - curl
+    - wget
+    - vim
+    - tmux
+    - htop
+    - tree
+    - jq
+    - unzip
+  
+  cli_tools:
+    - ripgrep
+    - fd
+    - bat
+    - fzf
+    - eza
+    - zoxide
+  
+  macos_specific:
+    - coreutils
+    - gnu-sed
+    - gnu-tar
+    - watch
+  
+  linux_specific:
+    - build-essential
+    - software-properties-common
+
+# Programming languages and versions
+languages:
+  install_node: true
+  node_version: "20"  # LTS version
+  
+  install_python: false
+  python_version: "3.11"
+  
+  install_go: false
+  go_version: "1.21"
+  
+  install_rust: false
+  
+  install_bun: true
+
+# Docker configuration
+docker:
+  install: true
+  install_docker_desktop: true  # macOS only
+
+# Shell configuration
+shell:
+  install_zsh_plugins: true
+  plugins:
+    - zsh-autosuggestions
+    - zsh-syntax-highlighting
+  
+  install_starship: true  # Modern prompt
+
+# GUI Applications (macOS only)
+applications:
+  install_gui_apps: true
+  apps:
+    - visual-studio-code
+    - google-chrome
+    - firefox
+    - slack
+    - discord
+    - 1password
+    - rectangle  # Window management
+    # wezterm is already in your dotfiles
+
+# Node global packages
+node_global_packages:
+  - typescript
+  - ts-node
+  - prettier
+  - eslint
+
+# Fonts
+fonts:
+  install_nerd_fonts: true
+  fonts_to_install:
+    - font-fira-code-nerd-font
+    - font-jetbrains-mono-nerd-font
+    - font-meslo-lg-nerd-font

@@ -1,0 +1,46 @@
+---
+- name: Setup Development Environment
+  hosts: localhost
+  connection: local
+  
+  vars_files:
+    - group_vars/all.yml
+  
+  pre_tasks:
+    - name: Display setup information
+      debug:
+        msg:
+          - "=== Development Environment Setup ==="
+          - "OS: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+          - "Architecture: {{ ansible_architecture }}"
+          - "Home: {{ ansible_env.HOME }}"
+  
+  roles:
+    - role: packages
+      tags: [packages, core]
+    
+    - role: languages
+      tags: [languages, dev]
+      when: languages.install_node or languages.install_python or languages.install_go
+    
+    - role: docker
+      tags: [docker, dev]
+      when: docker.install
+    
+    - role: shell
+      tags: [shell, core]
+    
+    - role: applications
+      tags: [applications, gui]
+      when: applications.install_gui_apps and ansible_os_family == "Darwin"
+  
+  post_tasks:
+    - name: Display completion message
+      debug:
+        msg:
+          - "=== Setup Complete ==="
+          - "Next steps:"
+          - "1. Run ./install.sh to symlink dotfiles"
+          - "2. Run ./scripts/env-setup.sh to configure environment variables"
+          - "3. Run ./scripts/ssh-setup.sh to setup SSH keys"
+          - "4. Restart your terminal for changes to take effect"
