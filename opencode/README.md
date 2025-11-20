@@ -7,6 +7,7 @@ This directory contains the OpenCode configuration.
 - `opencode.json` - Main OpenCode configuration file
 - `.env.example` - Example environment variables for API keys
 - `package.json` - OpenCode plugin dependencies
+- `agent/` - Custom specialized agents for specific tasks
 
 ## Installation
 
@@ -59,6 +60,24 @@ Edit `opencode.json` to customize:
 - Model preferences
 
 The configuration uses OpenCode's built-in variable substitution with `{env:VARIABLE_NAME}` syntax to securely reference API keys from environment variables.
+
+## Custom Agents
+
+This configuration includes specialized agents for common development tasks:
+
+- **bug-fixer** - Investigates and fixes bugs with minimal scope changes
+- **docs-writer** - Creates and maintains project documentation
+- **refactor** - Improves code structure and maintainability
+- **review** - Reviews code for quality and best practices (read-only)
+- **test-writer** - Writes comprehensive tests for existing code
+
+See [`agent/README.md`](agent/README.md) for detailed documentation on each agent and how to create your own.
+
+### Using Agents
+
+- Use **Tab** to cycle through primary agents (Build, Plan)
+- Use **@agent-name** to invoke a specific subagent (e.g., `@bug-fixer`, `@review`)
+- Create new agents with `opencode agent create`
 
 ## MCP Servers
 
