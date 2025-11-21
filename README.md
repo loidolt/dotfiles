@@ -10,6 +10,7 @@ This repository provides a **full-stack development environment setup** that inc
 - **OpenCode** - AI-powered code editor CLI
 - **WezTerm** - GPU-accelerated terminal emulator
 - **Neovim** - Modern text editor based on kickstart.nvim
+- **Tmux** - Terminal multiplexer with truecolor support
 
 ### Automated Installation (New!)
 - **Ansible automation** - Installs packages, languages, and tools
@@ -54,6 +55,9 @@ dotfiles/
 ├── neovim/             # Neovim configuration
 │   ├── init.lua       # Main init file
 │   └── lua/           # Lua modules
+├── tmux/               # Tmux configuration
+│   ├── .tmux.conf     # Main config with truecolor
+│   └── README.md
 │
 └── docs/               # 📚 Documentation
     └── SETUP.md       # Detailed setup guide
@@ -246,6 +250,7 @@ ln -s ~/dotfiles/neovim ~/.config/nvim
 ### OpenCode
 - MCP servers configured: context7, sequentialthinking, memory, playwright, github
 - Theme: Catppuccin
+- **Note**: For themes to work in tmux, see [docs/OPENCODE_TMUX_FIX.md](docs/OPENCODE_TMUX_FIX.md)
 - See `opencode/README.md` for more details
 
 ### WezTerm
@@ -269,6 +274,8 @@ ln -s ~/dotfiles/neovim ~/.config/nvim
   - [opencode/README.md](opencode/README.md) - OpenCode configuration
   - [wezterm/README.md](wezterm/README.md) - WezTerm configuration
   - [neovim/README.md](neovim/README.md) - Neovim configuration
+  - [tmux/README.md](tmux/README.md) - Tmux configuration
+- **[docs/OPENCODE_TMUX_FIX.md](docs/OPENCODE_TMUX_FIX.md)** - Fix for OpenCode themes in tmux
 
 ## Best Practices
 
@@ -357,6 +364,13 @@ newgrp docker  # Or log out/in
 ```bash
 chmod +x install.sh
 ls -la ~/.config/opencode  # Check symlink
+```
+
+**OpenCode theme not working in tmux**
+```bash
+# See docs/OPENCODE_TMUX_FIX.md for detailed fix
+tmux kill-server  # Restart tmux
+tmux
 ```
 
 **API keys not working**

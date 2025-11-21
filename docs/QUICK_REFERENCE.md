@@ -1,325 +1,199 @@
-# Quick Reference
+# Quick Reference Guide
+
+## OpenCode Theme Not Working in Tmux
+
+**Quick Fix:**
+```bash
+# Kill and restart tmux
+tmux kill-server
+tmux
+```
+
+**Why?** Tmux needs 24-bit truecolor support for OpenCode themes. The fix has been applied to your `.tmux.conf`.
+
+**Details:** See [OPENCODE_TMUX_FIX.md](OPENCODE_TMUX_FIX.md)
+
+---
 
 ## Common Commands
 
-### Initial Setup
+### Bootstrap
 ```bash
-# Clone and setup everything
-git clone https://github.com/yourusername/dotfiles.git ~/dotfiles
-cd ~/dotfiles
-./bootstrap.sh
-
-# Full setup (non-interactive)
-./bootstrap.sh --full
-
-# Minimal setup
-./bootstrap.sh --minimal
-
-# Just dotfiles
-./bootstrap.sh --dotfiles-only
-
-# Dry run
-./bootstrap.sh --dry-run
+./bootstrap.sh              # Interactive setup
+./bootstrap.sh --full       # Install everything
+./bootstrap.sh --minimal    # Core packages only
+./bootstrap.sh --dry-run    # Preview changes
 ```
 
-### Update Existing System
+### Dotfiles
 ```bash
-# Update dotfiles
-cd ~/dotfiles
-git pull
-
-# Update packages
-cd ~/dotfiles/ansible
-ansible-playbook setup.yml --tags packages
-
-# Update everything
-cd ~/dotfiles
-./bootstrap.sh --full
+./install.sh                # Install dotfiles
+./uninstall.sh              # Remove symlinks
 ```
 
 ### Validation
 ```bash
-# Check installation
-./scripts/validate.sh
+./scripts/validate.sh       # Check installation
+```
 
-# Check what's installed
-which git node docker ansible
+### Ansible
+```bash
+cd ansible
+ansible-playbook setup.yml              # Run all
+ansible-playbook setup.yml --tags packages   # Packages only
+ansible-playbook setup.yml --check --diff    # Dry run
+```
+
+### Tmux
+```bash
+tmux source ~/.tmux.conf    # Reload config
+tmux kill-server            # Restart tmux server
+tmux new -s myname          # New named session
+tmux attach -t myname       # Attach to session
 ```
 
 ### Environment
 ```bash
-# Edit environment
-nvim ~/.dotfiles_env
-
-# Reload environment
-source ~/.dotfiles_env
-
-# Setup environment (creates file)
-./scripts/env-setup.sh
+source ~/.dotfiles_env      # Load environment variables
+echo $OPENCODE_API_KEY      # Check API key
 ```
 
-### SSH
-```bash
-# Setup SSH keys
-./scripts/ssh-setup.sh
-
-# Test GitHub connection
-ssh -T git@github.com
-```
-
-### Ansible Tasks
-```bash
-cd ~/dotfiles/ansible
-
-# Run specific tags
-ansible-playbook setup.yml --tags packages
-ansible-playbook setup.yml --tags languages
-ansible-playbook setup.yml --tags docker
-ansible-playbook setup.yml --tags shell
-ansible-playbook setup.yml --tags applications
-
-# Dry run
-ansible-playbook setup.yml --check --diff
-
-# Verbose
-ansible-playbook setup.yml -v
-```
-
-### Dotfiles Management
-```bash
-# Link dotfiles
-./install.sh
-
-# Unlink dotfiles
-./uninstall.sh
-
-# Check symlinks
-ls -la ~/.config/opencode
-ls -la ~/.config/wezterm
-ls -la ~/.config/nvim
-```
+---
 
 ## File Locations
 
-### Configuration Files
-- **Dotfiles repo**: `~/dotfiles/`
-- **Symlinked configs**: `~/.config/`
-- **Environment vars**: `~/.dotfiles_env`
-- **Shell config**: `~/.zshrc` or `~/.bashrc`
+### Configurations
+- OpenCode: `~/.config/opencode/` → `~/dotfiles/opencode/`
+- WezTerm: `~/.config/wezterm/` → `~/dotfiles/wezterm/`
+- Neovim: `~/.config/nvim/` → `~/dotfiles/neovim/`
+- Tmux: `~/.tmux.conf` → `~/dotfiles/tmux/.tmux.conf`
+
+### Environment
+- `~/.dotfiles_env` - Environment variables
+- `~/.zshrc` - Shell configuration
 
 ### Ansible
-- **Playbook**: `~/dotfiles/ansible/setup.yml`
-- **Package lists**: `~/dotfiles/ansible/group_vars/all.yml`
-- **Roles**: `~/dotfiles/ansible/roles/`
+- `~/dotfiles/ansible/group_vars/all.yml` - Package lists
+- `~/dotfiles/ansible/setup.yml` - Main playbook
 
-### Scripts
-- **Bootstrap**: `~/dotfiles/bootstrap.sh`
-- **Environment**: `~/dotfiles/scripts/env-setup.sh`
-- **SSH**: `~/dotfiles/scripts/ssh-setup.sh`
-- **Validation**: `~/dotfiles/scripts/validate.sh`
-
-## Customization
-
-### Add Packages
-Edit `ansible/group_vars/all.yml`:
-```yaml
-packages:
-  core:
-    - your-package
-```
-
-Run:
-```bash
-cd ansible
-ansible-playbook setup.yml --tags packages
-```
-
-### Change Node Version
-Edit `ansible/group_vars/all.yml`:
-```yaml
-languages:
-  node_version: "18"  # Change to desired version
-```
-
-Run:
-```bash
-cd ansible
-ansible-playbook setup.yml --tags languages
-```
-
-### Add GUI Apps (macOS)
-Edit `ansible/group_vars/all.yml`:
-```yaml
-applications:
-  apps:
-    - your-app
-```
-
-Run:
-```bash
-cd ansible
-ansible-playbook setup.yml --tags applications
-```
-
-## Environment Variables
-
-### Required
-```bash
-export REF_API_KEY="your-key"
-export CONTEXT7_API_KEY="your-key"
-```
-
-### Optional
-```bash
-export EDITOR="nvim"
-export FZF_DEFAULT_COMMAND='fd --type f'
-```
-
-### Setup
-1. Edit `~/.dotfiles_env`
-2. Add to `~/.zshrc`: `source ~/.dotfiles_env`
-3. Reload: `source ~/.zshrc`
+---
 
 ## Troubleshooting
 
-### Command Not Found
+### Check Installation
 ```bash
-# Reload environment
-source ~/.dotfiles_env
-source ~/.zshrc
-
-# Check PATH
-echo $PATH
-
-# Restart terminal
+./scripts/validate.sh
 ```
 
-### Ansible Errors
+### Fix Tmux Colors
 ```bash
-# Install/update Ansible
-brew install ansible  # macOS
-sudo apt install ansible  # Linux
+# 1. Verify truecolor config is loaded
+tmux show-options -g -s | grep terminal
 
-# Check Ansible
-ansible --version
+# 2. Restart tmux completely
+tmux kill-server && tmux
+
+# 3. Test colors
+echo $TERM        # Should be: tmux-256color
+echo $COLORTERM   # Should be: truecolor
 ```
 
-### Docker Issues
+### Check Symlinks
 ```bash
-# macOS: Start Docker Desktop
-open -a Docker
-
-# Linux: Add user to group
-sudo usermod -aG docker $USER
-newgrp docker
-```
-
-### Symlink Issues
-```bash
-# Remove and recreate
-./uninstall.sh
-./install.sh
-
-# Check if symlink exists
 ls -la ~/.config/opencode
+ls -la ~/.config/wezterm
+ls -la ~/.config/nvim
+ls -la ~/.tmux.conf
 ```
 
-## Package Managers
-
-### Homebrew (macOS)
+### Reload Shell
 ```bash
-# Update
-brew update
-
-# Upgrade packages
-brew upgrade
-
-# Search
-brew search package-name
-
-# Install
-brew install package-name
+source ~/.zshrc
+# or
+exec zsh
 ```
 
-### mise (Version Manager)
+---
+
+## Useful Checks
+
+### Verify Truecolor Support
 ```bash
-# Install language
-mise use -g node@20
-
-# List installed
-mise list
-
-# Update mise
-mise self-update
+# Test color gradient
+awk 'BEGIN{
+    s="/\\/\\/\\/\\/\\"; s=s s s s s s s s;
+    for (colnum = 0; colnum<77; colnum++) {
+        r = 255-(colnum*255/76);
+        g = (colnum*510/76);
+        b = (colnum*255/76);
+        if (g>255) g = 510-g;
+        printf "\033[48;2;%d;%d;%dm", r,g,b;
+        printf "\033[38;2;%d;%d;%dm", 255-r,255-g,255-b;
+        printf "%s\033[0m", substr(s,colnum+1,1);
+    }
+    printf "\n";
+}'
 ```
 
-### Bun
+### Check Installed Packages
 ```bash
-# Update Bun
-bun upgrade
-
-# Install package globally
-bun add -g package-name
+which git node bun docker opencode nvim
+brew list            # macOS
+apt list --installed # Linux
 ```
+
+### Check Environment Variables
+```bash
+env | grep -E "(API|KEY|PATH)"
+```
+
+---
+
+## Quick Edits
+
+### Edit Dotfiles
+```bash
+# Edit in VS Code
+code ~/dotfiles
+
+# Edit specific configs
+nvim ~/dotfiles/opencode/opencode.json
+nvim ~/dotfiles/tmux/.tmux.conf
+nvim ~/.dotfiles_env
+```
+
+### Update Package Lists
+```bash
+nvim ~/dotfiles/ansible/group_vars/all.yml
+cd ~/dotfiles/ansible
+ansible-playbook setup.yml
+```
+
+---
 
 ## Git Workflow
 
 ### Update Dotfiles
 ```bash
 cd ~/dotfiles
-git status
+git pull
+./install.sh  # Re-symlink if needed
+```
+
+### Commit Changes
+```bash
+cd ~/dotfiles
 git add .
-git commit -m "Update configs"
+git commit -m "Update configuration"
 git push
 ```
 
-### Pull Changes
-```bash
-cd ~/dotfiles
-git pull
-# Changes apply immediately (symlinks!)
-```
-
-### New Machine
-```bash
-git clone git@github.com:yourusername/dotfiles.git ~/dotfiles
-cd ~/dotfiles
-./bootstrap.sh
-```
-
-## Useful Aliases
-
-Add to `~/.zshrc`:
-```bash
-# Dotfiles shortcuts
-alias dotfiles='cd ~/dotfiles'
-alias dots='cd ~/dotfiles'
-alias dotsync='cd ~/dotfiles && git pull'
-alias dotupdate='cd ~/dotfiles/ansible && ansible-playbook setup.yml'
-
-# Quick edit
-alias editdots='code ~/dotfiles'
-alias editenv='nvim ~/.dotfiles_env'
-alias editzsh='nvim ~/.zshrc'
-
-# Validation
-alias checksetup='~/dotfiles/scripts/validate.sh'
-```
-
-## Next Steps After Setup
-
-1. ✅ Restart terminal
-2. ✅ Edit `~/.dotfiles_env` with real API keys
-3. ✅ Run `./scripts/validate.sh`
-4. ✅ Setup SSH: `./scripts/ssh-setup.sh`
-5. ✅ Clone work repositories
-6. ✅ Sign into applications (Chrome, VS Code, etc.)
-7. ✅ Configure system preferences
-8. ✅ Install any additional tools specific to your workflow
+---
 
 ## Resources
 
-- Main README: `~/dotfiles/README.md`
-- Setup Guide: `~/dotfiles/docs/SETUP.md`
-- Package Config: `~/dotfiles/ansible/group_vars/all.yml`
-- Environment: `~/.dotfiles_env`
+- [Main README](../README.md)
+- [Setup Guide](SETUP.md)
+- [OpenCode Tmux Fix](OPENCODE_TMUX_FIX.md)
+- [OpenCode Docs](https://opencode.ai/docs)
+- [Tmux Guide](https://github.com/tmux/tmux/wiki)

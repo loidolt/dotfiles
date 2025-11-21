@@ -45,6 +45,10 @@ echo ""
 remove_symlink "$USER_HOME/.config/opencode" "OpenCode configuration"
 echo ""
 
+# Remove Ghostty configuration
+remove_symlink "$USER_HOME/.config/ghostty/config" "Ghostty configuration"
+echo ""
+
 # Remove WezTerm configuration
 remove_symlink "$USER_HOME/.config/wezterm" "WezTerm configuration"
 echo ""

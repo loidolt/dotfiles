@@ -104,6 +104,15 @@ if [ -d "$DOTFILES_DIR/opencode" ]; then
     echo ""
 fi
 
+# Install Ghostty configuration
+if [ -d "$DOTFILES_DIR/ghostty" ]; then
+    create_symlink \
+        "$DOTFILES_DIR/ghostty/config" \
+        "$USER_HOME/.config/ghostty/config" \
+        "Ghostty configuration"
+    echo ""
+fi
+
 # Install WezTerm configuration
 if [ -d "$DOTFILES_DIR/wezterm" ]; then
     create_symlink \
@@ -122,12 +131,22 @@ if [ -d "$DOTFILES_DIR/neovim" ]; then
     echo ""
 fi
 
+# Install Tmux configuration
+if [ -f "$DOTFILES_DIR/tmux/.tmux.conf" ]; then
+    create_symlink \
+        "$DOTFILES_DIR/tmux/.tmux.conf" \
+        "$USER_HOME/.tmux.conf" \
+        "Tmux configuration"
+    echo ""
+fi
+
 echo -e "${GREEN}=== Installation Complete ===${NC}"
 echo ""
 echo -e "${BLUE}Notes:${NC}"
 echo -e "  - Your original configs have been backed up with timestamp"
 echo -e "  - Restart your applications for changes to take effect"
 echo -e "  - For Neovim, plugins will be installed automatically on first launch"
+echo -e "  - For Tmux, restart your tmux sessions or run: tmux source ~/.tmux.conf"
 echo ""
 echo -e "${BLUE}OpenCode Agents:${NC}"
 echo -e "  - Agents are available at: ~/.config/opencode/agent/"
