@@ -1,7 +1,7 @@
 ---
 description: Writes and maintains clear, comprehensive project documentation
 mode: subagent
-model: anthropic/claude-sonnet-4-20250514
+model: anthropic/claude-sonnet-4-5-20250929
 temperature: 0.3
 tools:
   write: true

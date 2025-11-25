@@ -1,7 +1,7 @@
 ---
 description: Writes comprehensive tests for existing code
 mode: subagent
-model: anthropic/claude-sonnet-4-20250514
+model: anthropic/claude-sonnet-4-5-20250929
 temperature: 0.2
 tools:
   write: true

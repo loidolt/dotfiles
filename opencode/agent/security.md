@@ -1,7 +1,7 @@
 ---
 description: Security vulnerability analysis and recommendations
 mode: subagent
-model: anthropic/claude-sonnet-4-20250514
+model: anthropic/claude-opus-4-5-20251101
 temperature: 0.1
 tools:
   write: false
