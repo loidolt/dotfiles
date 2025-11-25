@@ -49,10 +49,6 @@ echo ""
 remove_symlink "$USER_HOME/.config/ghostty/config" "Ghostty configuration"
 echo ""
 
-# Remove WezTerm configuration
-remove_symlink "$USER_HOME/.config/wezterm" "WezTerm configuration"
-echo ""
-
 # Remove Neovim configuration
 remove_symlink "$USER_HOME/.config/nvim" "Neovim configuration"
 echo ""

@@ -8,7 +8,6 @@ This repository provides a **full-stack development environment setup** that inc
 
 ### Configuration Files (Dotfiles)
 - **OpenCode** - AI-powered code editor CLI
-- **WezTerm** - GPU-accelerated terminal emulator
 - **Neovim** - Modern text editor based on kickstart.nvim
 - **Tmux** - Terminal multiplexer with truecolor support
 
@@ -48,9 +47,6 @@ dotfiles/
 │
 ├── opencode/           # OpenCode configuration
 │   ├── opencode.json  # Main config with MCP servers
-│   └── README.md
-├── wezterm/            # WezTerm configuration
-│   ├── wezterm.lua    # Terminal config
 │   └── README.md
 ├── neovim/             # Neovim configuration
 │   ├── init.lua       # Main init file
@@ -110,7 +106,7 @@ cd ~/dotfiles
 ```
 
 This will:
-- Create symbolic links for OpenCode, WezTerm, and Neovim configs
+- Create symbolic links for OpenCode, and Neovim configs
 - Backup any existing configurations with timestamps
 - Set up all configurations automatically
 
@@ -241,7 +237,6 @@ If you prefer manual installation:
 
 ```bash
 ln -s ~/dotfiles/opencode ~/.config/opencode
-ln -s ~/dotfiles/wezterm ~/.config/wezterm
 ln -s ~/dotfiles/neovim ~/.config/nvim
 ```
 
@@ -252,12 +247,6 @@ ln -s ~/dotfiles/neovim ~/.config/nvim
 - Theme: Catppuccin
 - **Note**: For themes to work in tmux, see [docs/OPENCODE_TMUX_FIX.md](docs/OPENCODE_TMUX_FIX.md)
 - See `opencode/README.md` for more details
-
-### WezTerm
-- Color scheme: Catppuccin Mocha
-- Font size: 10
-- Window size: 120x28
-- See `wezterm/README.md` for more details
 
 ### Neovim
 - Based on kickstart.nvim
@@ -272,7 +261,6 @@ ln -s ~/dotfiles/neovim ~/.config/nvim
 - **[ansible/group_vars/all.yml](ansible/group_vars/all.yml)** - Package configuration
 - **Individual tool docs:**
   - [opencode/README.md](opencode/README.md) - OpenCode configuration
-  - [wezterm/README.md](wezterm/README.md) - WezTerm configuration
   - [neovim/README.md](neovim/README.md) - Neovim configuration
   - [tmux/README.md](tmux/README.md) - Tmux configuration
 - **[docs/OPENCODE_TMUX_FIX.md](docs/OPENCODE_TMUX_FIX.md)** - Fix for OpenCode themes in tmux
@@ -295,7 +283,6 @@ ln -s ~/dotfiles/neovim ~/.config/nvim
 
 Your configurations are **symlinked** from this repository to their destination:
 - `~/dotfiles/opencode` → `~/.config/opencode` (symlink)
-- `~/dotfiles/wezterm` → `~/.config/wezterm` (symlink)
 - `~/dotfiles/neovim` → `~/.config/nvim` (symlink)
 
 **This means:**

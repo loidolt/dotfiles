@@ -113,15 +113,6 @@ if [ -d "$DOTFILES_DIR/ghostty" ]; then
     echo ""
 fi
 
-# Install WezTerm configuration
-if [ -d "$DOTFILES_DIR/wezterm" ]; then
-    create_symlink \
-        "$DOTFILES_DIR/wezterm" \
-        "$USER_HOME/.config/wezterm" \
-        "WezTerm configuration"
-    echo ""
-fi
-
 # Install Neovim configuration
 if [ -d "$DOTFILES_DIR/neovim" ]; then
     create_symlink \

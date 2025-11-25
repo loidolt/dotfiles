@@ -198,7 +198,6 @@ dotfiles/
 │   └── validate.sh      # Post-install validation
 │
 ├── opencode/            # Your existing configs
-├── wezterm/             # Your existing configs
 ├── neovim/              # Your existing configs
 │
 └── docs/                # Documentation
@@ -410,6 +409,5 @@ After setup:
 2. Add your favorite VS Code extensions
 3. Configure Git globally (`git config --global user.name "..."`)
 4. Explore Neovim plugins
-5. Customize WezTerm appearance
 
 Enjoy your new development environment! 🚀

@@ -3,6 +3,7 @@
 ## OpenCode Theme Not Working in Tmux
 
 **Quick Fix:**
+
 ```bash
 # Kill and restart tmux
 tmux kill-server
@@ -18,6 +19,7 @@ tmux
 ## Common Commands
 
 ### Bootstrap
+
 ```bash
 ./bootstrap.sh              # Interactive setup
 ./bootstrap.sh --full       # Install everything
@@ -26,17 +28,20 @@ tmux
 ```
 
 ### Dotfiles
+
 ```bash
 ./install.sh                # Install dotfiles
 ./uninstall.sh              # Remove symlinks
 ```
 
 ### Validation
+
 ```bash
 ./scripts/validate.sh       # Check installation
 ```
 
 ### Ansible
+
 ```bash
 cd ansible
 ansible-playbook setup.yml              # Run all
@@ -45,6 +50,7 @@ ansible-playbook setup.yml --check --diff    # Dry run
 ```
 
 ### Tmux
+
 ```bash
 tmux source ~/.tmux.conf    # Reload config
 tmux kill-server            # Restart tmux server
@@ -53,6 +59,7 @@ tmux attach -t myname       # Attach to session
 ```
 
 ### Environment
+
 ```bash
 source ~/.dotfiles_env      # Load environment variables
 echo $OPENCODE_API_KEY      # Check API key
@@ -63,16 +70,18 @@ echo $OPENCODE_API_KEY      # Check API key
 ## File Locations
 
 ### Configurations
+
 - OpenCode: `~/.config/opencode/` → `~/dotfiles/opencode/`
-- WezTerm: `~/.config/wezterm/` → `~/dotfiles/wezterm/`
 - Neovim: `~/.config/nvim/` → `~/dotfiles/neovim/`
 - Tmux: `~/.tmux.conf` → `~/dotfiles/tmux/.tmux.conf`
 
 ### Environment
+
 - `~/.dotfiles_env` - Environment variables
 - `~/.zshrc` - Shell configuration
 
 ### Ansible
+
 - `~/dotfiles/ansible/group_vars/all.yml` - Package lists
 - `~/dotfiles/ansible/setup.yml` - Main playbook
 
@@ -81,11 +90,13 @@ echo $OPENCODE_API_KEY      # Check API key
 ## Troubleshooting
 
 ### Check Installation
+
 ```bash
 ./scripts/validate.sh
 ```
 
 ### Fix Tmux Colors
+
 ```bash
 # 1. Verify truecolor config is loaded
 tmux show-options -g -s | grep terminal
@@ -99,14 +110,15 @@ echo $COLORTERM   # Should be: truecolor
 ```
 
 ### Check Symlinks
+
 ```bash
 ls -la ~/.config/opencode
-ls -la ~/.config/wezterm
 ls -la ~/.config/nvim
 ls -la ~/.tmux.conf
 ```
 
 ### Reload Shell
+
 ```bash
 source ~/.zshrc
 # or
@@ -118,6 +130,7 @@ exec zsh
 ## Useful Checks
 
 ### Verify Truecolor Support
+
 ```bash
 # Test color gradient
 awk 'BEGIN{
@@ -136,6 +149,7 @@ awk 'BEGIN{
 ```
 
 ### Check Installed Packages
+
 ```bash
 which git node bun docker opencode nvim
 brew list            # macOS
@@ -143,6 +157,7 @@ apt list --installed # Linux
 ```
 
 ### Check Environment Variables
+
 ```bash
 env | grep -E "(API|KEY|PATH)"
 ```
@@ -152,6 +167,7 @@ env | grep -E "(API|KEY|PATH)"
 ## Quick Edits
 
 ### Edit Dotfiles
+
 ```bash
 # Edit in VS Code
 code ~/dotfiles
@@ -163,6 +179,7 @@ nvim ~/.dotfiles_env
 ```
 
 ### Update Package Lists
+
 ```bash
 nvim ~/dotfiles/ansible/group_vars/all.yml
 cd ~/dotfiles/ansible
@@ -174,6 +191,7 @@ ansible-playbook setup.yml
 ## Git Workflow
 
 ### Update Dotfiles
+
 ```bash
 cd ~/dotfiles
 git pull
@@ -181,6 +199,7 @@ git pull
 ```
 
 ### Commit Changes
+
 ```bash
 cd ~/dotfiles
 git add .

@@ -69,7 +69,6 @@ check_warn "VS Code" "command -v code"
 echo ""
 info "Checking dotfiles..."
 check "OpenCode config" "[ -d ~/.config/opencode ]"
-check "WezTerm config" "[ -d ~/.config/wezterm ]"
 check "Neovim config" "[ -d ~/.config/nvim ]"
 
 echo ""

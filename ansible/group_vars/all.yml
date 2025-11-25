@@ -70,7 +70,6 @@ applications:
     - discord
     - 1password
     - rectangle  # Window management
-    # wezterm is already in your dotfiles
 
 # Node global packages
 node_global_packages:
