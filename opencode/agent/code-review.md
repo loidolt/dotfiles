@@ -1,7 +1,7 @@
 ---
 description: Primary agent for thorough code reviews - analyzes without modifying
 mode: primary
-model: anthropic/claude-opus-4-5-20251101
+model: anthropic/claude-opus-4-5
 temperature: 0.1
 tools:
   write: false

@@ -1,7 +1,7 @@
 ---
 description: Refactors code to improve structure, readability, and maintainability
 mode: subagent
-model: anthropic/claude-opus-4-5-20251101
+model: anthropic/claude-opus-4-5
 temperature: 0.2
 tools:
   write: true

@@ -1,7 +1,7 @@
 ---
 description: Investigates and fixes bugs with minimal scope changes
 mode: subagent
-model: anthropic/claude-opus-4-5-20251101
+model: anthropic/claude-opus-4-5
 temperature: 0.1
 tools:
   write: true

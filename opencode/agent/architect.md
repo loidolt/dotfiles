@@ -1,7 +1,7 @@
 ---
 description: Primary agent for system design, architecture decisions, and technical planning
 mode: primary
-model: anthropic/claude-opus-4-5-20251101
+model: anthropic/claude-opus-4-5
 temperature: 0.3
 tools:
   write: false
