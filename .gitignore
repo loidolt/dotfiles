@@ -13,11 +13,13 @@ Thumbs.db
 *~
 .vscode/
 .idea/
+*.code-workspace
 
 # Nix build artifacts
 result
 result-*
 .direnv/
+.envrc
 
 # Home Manager backups
 *.backup
@@ -31,6 +33,14 @@ result-*
 # Node modules (in configs that have them)
 node_modules/
 bun.lock
+package-lock.json
+yarn.lock
 
 # Claude/AI tool configs (local only)
 .claude/
+
+# Personal notes/scratchpad (if you create these)
+notes/
+scratchpad/
+TODO.md
+NOTES.md
