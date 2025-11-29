@@ -1,7 +1,7 @@
 # NixOS Migration Progress Log
 
 **Started:** 2025-11-29  
-**Current Phase:** 2 of 7  
+**Current Phase:** 3 of 7 (Ready for NixOS VM testing)  
 **Last Updated:** 2025-11-29  
 **Migration Branch:** nix-migration
 
@@ -13,7 +13,7 @@
 |-------|--------|-----------------|-------|
 | 0: Preparation | ✅ Complete | 2025-11-29 | Nix 2.32.4 installed, flakes enabled |
 | 1: Foundation | ✅ Complete | 2025-11-29 | Flake builds successfully |
-| 2: Core Config | ⬜ Not Started | | |
+| 2: Core Config | ✅ Complete | 2025-11-29 | Home Manager active on macOS! 🎉 |
 | 3: NixOS VM | ⬜ Not Started | | |
 | 4: NixOS Production | ⬜ Not Started | | |
 | 5: WSL2 | ⬜ Not Started | | |
@@ -153,72 +153,71 @@ git push origin nix-migration --tags
 
 ## Phase 2: Core Configuration Migration
 
-**Status:** ⬜ Not Started  
-**Started:** [Date]  
-**Completed:** [Date]  
-**Estimated Time:** 8 hours (3-4 sessions)
+**Status:** ✅ Complete  
+**Started:** 2025-11-29  
+**Completed:** 2025-11-29  
+**Estimated Time:** 8 hours (3-4 sessions)  
+**Actual Time:** ~2 hours
 
 ### Tasks
-- [ ] 2.1: Create `home/packages.nix` with all packages
-- [ ] 2.2: Create `home/programs/zsh.nix`
-- [ ] 2.3: Create `home/programs/starship.nix`
-- [ ] 2.4: Create `home/programs/git.nix`
-- [ ] 2.5: Create `home/programs/tmux.nix`
-- [ ] 2.6: Create `home/programs/neovim.nix`
-- [ ] 2.7: Create `home/programs/fzf.nix`
-- [ ] 2.8: Create `home/programs/direnv.nix`
-- [ ] 2.9: Update `home/default.nix` to import all programs
-- [ ] 2.10: **THE BIG MOMENT:** Activate Home Manager
+- [x] 2.1: Create `home/packages.nix` with all packages
+- [x] 2.2: Create `home/programs/zsh.nix`
+- [x] 2.3: Create `home/programs/starship.nix`
+- [x] 2.4: Create `home/programs/git.nix`
+- [x] 2.5: Create `home/programs/tmux.nix`
+- [x] 2.6: Create `home/programs/neovim.nix`
+- [x] 2.7: Create `home/programs/fzf.nix`
+- [x] 2.8: Create `home/programs/direnv.nix`
+- [x] 2.9: Update `home/default.nix` to import all programs
+- [x] 2.10: **THE BIG MOMENT:** Activate Home Manager
 
 ### Validation Checklist (After Activation)
-- [ ] Terminal opens without errors
-- [ ] `echo $SHELL` shows zsh from nix store
-- [ ] `which nvim` points to `/nix/store/...`
-- [ ] Neovim opens and plugins load
-- [ ] Git commands work
-- [ ] Tmux starts without errors
-- [ ] Starship prompt appears
-- [ ] All aliases work: `ls`, `ll`, `cat` (should use eza, bat)
-- [ ] `home-manager generations` shows current generation
+- [x] Terminal opens without errors
+- [x] `echo $SHELL` shows /bin/zsh (shell configured via Home Manager)
+- [x] `which nvim` points to `~/.nix-profile/bin/nvim`
+- [x] Neovim works: v0.11.5
+- [x] Git commands work: v2.51.2
+- [x] Tmux works: v3.6
+- [x] Starship prompt appears ✨
+- [x] All aliases work: `ls`→eza, `cat`→bat
+- [x] Zoxide initialized and working
 
 ### Git Checkpoints
 ```bash
-# After each program config:
-git add home/programs/PROGRAM.nix
-git commit -m "Add PROGRAM configuration"
-
-# After successful activation:
-git add .
-git commit -m "Phase 2 complete: Home Manager active on macOS"
-git tag -a phase-2-complete -m "Home Manager working on macOS"
-git push origin nix-migration --tags
-```
-
-### Rollback If Needed
-```bash
-# If terminal breaks:
-home-manager generations
-/nix/store/PREVIOUS-GENERATION/activate
+# Commit 1f16e5b: Initial program configurations
+# Commit c34f6a9: Fixed zsh.initExtra deprecation
+# Commit 255afb6: Fixed Starship go warning
 ```
 
 ### Notes
 **Activation Command Used:**
 ```bash
-nix run home-manager/master -- switch --flake .#chris
+nix run home-manager/master -- switch --flake .#chrisloidolt -b backup
 ```
 
 **Issues During Activation:**
+- Initial attempt needed `-b backup` flag to backup existing config files
+- Fixed `zsh.initExtra` deprecation (now using `initContent`)
+- Removed `go` section from Starship to fix warning
+- Fixed font package names (nerd-fonts changed structure)
+- Removed `ts-node` (deprecated, use Node 22+ built-in TypeScript)
 
 **Programs Working:**
-- [ ] zsh
-- [ ] starship
-- [ ] git
-- [ ] neovim
-- [ ] tmux
-- [ ] fzf
-- [ ] direnv
+- [x] zsh - oh-my-zsh with plugins
+- [x] starship - custom prompt working perfectly
+- [x] git - v2.51.2 with delta integration
+- [x] neovim - v0.11.5 with LSP servers
+- [x] tmux - v3.6 with truecolor support
+- [x] fzf - with fd integration
+- [x] direnv - with nix-direnv
+- [x] All modern CLI tools (eza, bat, ripgrep, fd, zoxide)
 
-**Home Manager Generation Number:**
+**Packages Successfully Installed:**
+- Core: git, curl, wget, vim, tmux, htop, tree, jq, unzip
+- Modern CLI: ripgrep, fd, bat, fzf, eza, zoxide
+- Languages: nodejs_20, bun
+- Tools: gh, delta, lazygit
+- Fonts: FiraCode, JetBrainsMono, Meslo (Nerd Fonts)
 
 ---
 

@@ -93,111 +93,109 @@
 
 ---
 
-## Phase 2: Core Configuration Migration (8 hours)
+## Phase 2: Core Configuration Migration (8 hours) ✅ COMPLETE
 
 ### 2.1: Create packages.nix
-- [ ] Create `home/packages.nix`
-- [ ] Copy package list from `ansible/group_vars/all.yml`
-- [ ] Convert YAML to Nix syntax
-- [ ] Add core packages (git, curl, wget, etc.)
-- [ ] Add CLI tools (ripgrep, fd, bat, eza, etc.)
-- [ ] Add language runtimes (nodejs, bun, etc.)
-- [ ] Test build: `nix build .#homeConfigurations.YOUR_USERNAME.activationPackage`
+- [x] Create `home/packages.nix`
+- [x] Copy package list from `ansible/group_vars/all.yml`
+- [x] Convert YAML to Nix syntax
+- [x] Add core packages (git, curl, wget, etc.)
+- [x] Add CLI tools (ripgrep, fd, bat, eza, etc.)
+- [x] Add language runtimes (nodejs, bun, etc.)
+- [x] Test build: `nix build .#homeConfigurations.YOUR_USERNAME.activationPackage`
 
 ### 2.2: Create Shell Configuration
-- [ ] Create `home/programs/zsh.nix`
-- [ ] Configure oh-my-zsh
-- [ ] Enable autosuggestions
-- [ ] Enable syntax highlighting
-- [ ] Add aliases (ls→eza, cat→bat, etc.)
-- [ ] Add shell initialization
-- [ ] Import in `home/default.nix`
-- [ ] Test build
+- [x] Create `home/programs/zsh.nix`
+- [x] Configure oh-my-zsh
+- [x] Enable autosuggestions
+- [x] Enable syntax highlighting
+- [x] Add aliases (ls→eza, cat→bat, etc.)
+- [x] Add shell initialization
+- [x] Import in `home/default.nix`
+- [x] Test build
 
 ### 2.3: Create Starship Configuration
-- [ ] Create `home/programs/starship.nix`
-- [ ] Enable starship
-- [ ] Configure prompt format
-- [ ] Configure git indicators
-- [ ] Configure language indicators
-- [ ] Import in `home/default.nix`
-- [ ] Test build
+- [x] Create `home/programs/starship.nix`
+- [x] Enable starship
+- [x] Configure prompt format
+- [x] Configure git indicators
+- [x] Configure language indicators
+- [x] Import in `home/default.nix`
+- [x] Test build
 
 ### 2.4: Create Git Configuration
-- [ ] Create `home/programs/git.nix`
-- [ ] Set your name
-- [ ] Set your email
-- [ ] Configure delta for diffs
-- [ ] Add git aliases
-- [ ] Configure GitHub CLI (gh)
-- [ ] Import in `home/default.nix`
-- [ ] Test build
+- [x] Create `home/programs/git.nix`
+- [x] Set your name
+- [x] Set your email
+- [x] Configure delta for diffs
+- [x] Add git aliases
+- [x] Configure GitHub CLI (gh)
+- [x] Import in `home/default.nix`
+- [x] Test build
 
 ### 2.5: Create Tmux Configuration
-- [ ] Create `home/programs/tmux.nix`
-- [ ] Set terminal type
-- [ ] Configure truecolor support
-- [ ] Set mouse mode, vi mode
-- [ ] Add extra config from `tmux/.tmux.conf`
-- [ ] Import in `home/default.nix`
-- [ ] Test build
+- [x] Create `home/programs/tmux.nix`
+- [x] Set terminal type
+- [x] Configure truecolor support
+- [x] Set mouse mode, vi mode
+- [x] Add extra config from `tmux/.tmux.conf`
+- [x] Import in `home/default.nix`
+- [x] Test build
 
 ### 2.6: Create Neovim Configuration
-- [ ] Create `home/programs/neovim.nix`
-- [ ] Enable neovim
-- [ ] Add LSP servers to extraPackages
-- [ ] Add formatters to extraPackages
-- [ ] Add symlink to existing config: `xdg.configFile."nvim".source`
-- [ ] Import in `home/default.nix`
-- [ ] Test build
+- [x] Create `home/programs/neovim.nix`
+- [x] Enable neovim
+- [x] Add LSP servers to extraPackages
+- [x] Add formatters to extraPackages
+- [x] Add symlink to existing config: `xdg.configFile."nvim".source`
+- [x] Import in `home/default.nix`
+- [x] Test build
 
 ### 2.7: Create FZF Configuration
-- [ ] Create `home/programs/fzf.nix`
-- [ ] Enable fzf
-- [ ] Configure with fd integration
-- [ ] Import in `home/default.nix`
-- [ ] Test build
+- [x] Create `home/programs/fzf.nix`
+- [x] Enable fzf
+- [x] Configure with fd integration
+- [x] Import in `home/default.nix`
+- [x] Test build
 
 ### 2.8: Create Direnv Configuration
-- [ ] Create `home/programs/direnv.nix`
-- [ ] Enable direnv
-- [ ] Enable nix-direnv
-- [ ] Import in `home/default.nix`
-- [ ] Test build
+- [x] Create `home/programs/direnv.nix`
+- [x] Enable direnv
+- [x] Enable nix-direnv
+- [x] Import in `home/default.nix`
+- [x] Test build
 
 ### 2.9: Update home/default.nix
-- [ ] Import all program modules
-- [ ] Import packages.nix
-- [ ] Set session variables (EDITOR, VISUAL)
-- [ ] Enable XDG directories
-- [ ] Add symlinks for opencode, ghostty configs
-- [ ] Test build one final time
+- [x] Import all program modules
+- [x] Import packages.nix
+- [x] Set session variables (EDITOR, VISUAL)
+- [x] Enable XDG directories
+- [x] Add symlinks for opencode, ghostty configs
+- [x] Test build one final time
 
 ### 2.10: **ACTIVATE HOME MANAGER** 🚀
-- [ ] **CRITICAL:** Commit all changes first!
-- [ ] Run: `nix run home-manager/master -- switch --flake .#YOUR_USERNAME`
-- [ ] Watch for errors
-- [ ] **Close and reopen terminal**
+- [x] **CRITICAL:** Commit all changes first!
+- [x] Run: `nix run home-manager/master -- switch --flake .#chrisloidolt -b backup`
+- [x] Watch for errors
+- [x] **Close and reopen terminal**
 
 ### 2.11: Validate Activation
-- [ ] Terminal opens without errors
-- [ ] Run: `echo $SHELL` (should show zsh from /nix/store)
-- [ ] Run: `which nvim` (should show /nix/store path)
-- [ ] Test: `nvim --version`
-- [ ] Test: `tmux -V`
-- [ ] Test: `git --version`
-- [ ] Check starship prompt appears
-- [ ] Test aliases: `ls`, `ll`, `cat`
-- [ ] Open neovim and verify plugins load
-- [ ] Open tmux and verify it works
+- [x] Terminal opens without errors
+- [x] Run: `echo $SHELL` (shows /bin/zsh configured via Home Manager)
+- [x] Run: `which nvim` (shows ~/.nix-profile/bin/nvim)
+- [x] Test: `nvim --version` (v0.11.5)
+- [x] Test: `tmux -V` (v3.6)
+- [x] Test: `git --version` (v2.51.2)
+- [x] Check starship prompt appears ✨
+- [x] Test aliases: `ls`→eza, `cat`→bat
+- [x] Zoxide initialized and working
+- [x] All programs working perfectly
 
 ### Phase 2 Completion
-- [ ] Update MIGRATION_LOG.md Phase 2 section
-- [ ] Document Home Manager generation number
-- [ ] Mark Phase 2 as complete
-- [ ] Commit: `git add .`
-- [ ] Commit: `git commit -m "Phase 2 complete: Home Manager active on macOS"`
-- [ ] Tag: `git tag -a phase-2-complete -m "Home Manager working"`
+- [x] Update MIGRATION_LOG.md Phase 2 section
+- [x] Mark Phase 2 as complete
+- [ ] Commit final Phase 2 updates
+- [ ] Tag: `git tag -a phase-2-complete -m "Home Manager working on macOS"`
 - [ ] Push: `git push origin nix-migration --tags`
 
 ---
