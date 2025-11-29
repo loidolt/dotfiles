@@ -1,0 +1,8 @@
+# Ghostty Configuration
+# Main configuration file for Ghostty terminal emulator
+
+# Theme
+theme = Catppuccin Mocha
+
+# Terminal type - use xterm-256color for better compatibility with remote systems
+term = xterm-256color
