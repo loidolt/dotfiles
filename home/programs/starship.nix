@@ -52,11 +52,6 @@
         format = "via [$symbol($version )]($style)";
       };
       
-      go = {
-        symbol = " ";
-        format = "via [$symbol($version )]($style)";
-      };
-      
       # Docker
       docker_context = {
         symbol = " ";

@@ -1,5 +1,1 @@
--- Navigation Plugins
--- Removed IDE-style navigation tools
--- Telescope handles file/text navigation (configured in init.lua)
-
-return {}
+/nix/store/6dp4ddfmnb51h8gbi2dlj6h63yj8rmb5-home-manager-files/.config/nvim/lua/plugins/navigation.lua

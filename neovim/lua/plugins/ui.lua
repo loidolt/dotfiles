@@ -1,5 +1,1 @@
--- UI Enhancement Plugins
--- Removed heavy UI plugins (Neo-tree, Bufferline, Dashboard, Noice, Notify)
--- Keeping it simple - mini.statusline is configured in init.lua
-
-return {}
+/nix/store/6dp4ddfmnb51h8gbi2dlj6h63yj8rmb5-home-manager-files/.config/nvim/lua/plugins/ui.lua

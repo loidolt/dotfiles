@@ -1,6 +1,1 @@
--- Git Integration
--- Basic git status indicators in the gutter
--- Note: Gitsigns is already configured in init.lua
--- This file is kept for potential future git-related plugins
-
-return {}
+/nix/store/6dp4ddfmnb51h8gbi2dlj6h63yj8rmb5-home-manager-files/.config/nvim/lua/plugins/git.lua
