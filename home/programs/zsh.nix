@@ -58,8 +58,8 @@
       theme = "";  # We use starship instead
     };
     
-    # Additional initialization
-    initExtra = ''
+    # Additional initialization (using new initContent)
+    initContent = ''
       # Initialize zoxide (smart cd)
       eval "$(zoxide init zsh)"
       
