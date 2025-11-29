@@ -14,11 +14,23 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Backup files
+# Nix build artifacts
+result
+result-*
+.direnv/
+
+# Home Manager backups
+*.backup
 *.backup.*
 *.bak
 
 # Temporary files
 *.tmp
 *.log
-result
+
+# Node modules (in configs that have them)
+node_modules/
+bun.lock
+
+# Claude/AI tool configs (local only)
+.claude/
