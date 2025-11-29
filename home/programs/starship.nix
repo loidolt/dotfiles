@@ -8,6 +8,9 @@
       # Prompt format
       format = "$all";
       
+      # Increase command timeout to avoid warnings
+      command_timeout = 1000;  # 1 second (default is 500ms)
+      
       # Character configuration
       character = {
         success_symbol = "[➜](bold green)";
@@ -50,6 +53,11 @@
       rust = {
         symbol = " ";
         format = "via [$symbol($version )]($style)";
+      };
+      
+      # Bun - disable to avoid timeout warnings
+      bun = {
+        disabled = true;
       };
       
       # Docker
