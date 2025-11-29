@@ -1,394 +1,388 @@
 # Dotfiles
 
-A complete development machine bootstrap system with automated package installation and configuration management.
+> **⚠️ Currently migrating from Ansible to Nix!** See [MIGRATION_README.md](MIGRATION_README.md) for details.
+
+Declarative, reproducible development environment managed with **Nix** and **Home Manager**.
 
 ## Overview
 
-This repository provides a **full-stack development environment setup** that includes:
+This repository provides a **declarative development environment** that includes:
 
-### Configuration Files (Dotfiles)
-- **OpenCode** - AI-powered code editor CLI
-- **Neovim** - Modern text editor based on kickstart.nvim
+### Managed with Nix + Home Manager ✨
+- **Declarative configuration** - One source of truth for all settings
+- **Reproducible** - Same config works on macOS, NixOS, and WSL2
+- **Atomic updates** - All-or-nothing changes
+- **Rollback support** - Return to any previous state
+- **Cross-platform** - Same dotfiles on all systems
+
+### Programs Configured
+- **Neovim** (v0.11.5) - Modern text editor with LSP support
+- **Zsh** - Shell with oh-my-zsh, autosuggestions, and syntax highlighting
+- **Starship** - Modern, fast prompt with git integration
+- **Git** - Version control with delta for beautiful diffs
 - **Tmux** - Terminal multiplexer with truecolor support
+- **Modern CLI tools** - eza, bat, ripgrep, fd, fzf, zoxide, and more
+- **OpenCode** - AI-powered code editor CLI
+- **Ghostty** - GPU-accelerated terminal emulator
 
-### Automated Installation (New!)
-- **Ansible automation** - Installs packages, languages, and tools
-- **Bootstrap script** - One-command setup for new machines
-- **Environment management** - Centralized configuration
-- **Validation** - Post-install verification
+### Legacy System (Being Phased Out)
+- **Ansible automation** - In `legacy/` directory (archived)
+- Use Nix instead for new installations
 
 ## Repository Structure
 
 ```
 dotfiles/
-├── bootstrap.sh         # 🎬 Main entry point - run this first!
-├── install.sh           # Dotfiles symlink script
-├── uninstall.sh         # Remove symlinks
+├── flake.nix            # 🎯 Nix flake - main entry point
+├── flake.lock           # Locked dependency versions
 │
-├── ansible/             # 📦 Automated installation
-│   ├── setup.yml       # Main playbook
-│   ├── ansible.cfg     # Ansible configuration
-│   ├── inventory.yml   # Localhost inventory
-│   ├── group_vars/     # Package lists and settings
-│   │   └── all.yml    # Customize what gets installed
-│   └── roles/          # Installation roles
-│       ├── packages/   # Core packages & CLI tools
-│       ├── languages/  # Node, Python, Go, etc.
-│       ├── docker/     # Docker setup
-│       ├── shell/      # ZSH plugins & prompt
-│       └── applications/ # GUI apps (macOS)
+├── home/                # 🏠 Home Manager configuration
+│   ├── default.nix     # Main home configuration
+│   ├── packages.nix    # Package list
+│   └── programs/       # Program-specific configs
+│       ├── zsh.nix
+│       ├── starship.nix
+│       ├── git.nix
+│       ├── tmux.nix
+│       ├── neovim.nix
+│       ├── fzf.nix
+│       └── direnv.nix
+│
+├── configs/            # 📝 Configuration files
+│   ├── neovim/        # Neovim config (synced from separate repo)
+│   ├── opencode/      # OpenCode AI editor config
+│   ├── ghostty/       # Ghostty terminal config
+│   └── tmux/          # Tmux config
+│
+├── hosts/              # 💻 Host-specific configs (future use)
+│   ├── darwin/        # macOS configurations
+│   ├── nixos-desktop/ # NixOS desktop
+│   └── wsl/           # WSL2 configuration
 │
 ├── scripts/            # 🔧 Helper scripts
-│   ├── lib/
-│   │   └── utils.sh   # Shared utilities
-│   ├── env-setup.sh   # Environment variables
-│   ├── ssh-setup.sh   # SSH configuration
-│   └── validate.sh    # Post-install checks
+│   └── validate-nix.sh # Validation script
 │
-├── opencode/           # OpenCode configuration
-│   ├── opencode.json  # Main config with MCP servers
-│   └── README.md
-├── neovim/             # Neovim configuration
-│   ├── init.lua       # Main init file
-│   └── lua/           # Lua modules
-├── tmux/               # Tmux configuration
-│   ├── .tmux.conf     # Main config with truecolor
-│   └── README.md
+├── docs/               # 📚 Documentation
+│   ├── NIX_MIGRATION_GUIDE.md
+│   ├── EMERGENCY_PROCEDURES.md
+│   └── QUICK_REFERENCE.md
 │
-└── docs/               # 📚 Documentation
-    └── SETUP.md       # Detailed setup guide
+├── ansible/            # 🗄️ Legacy - being phased out
+└── MIGRATION_README.md # Migration guide
 ```
 
 ## Quick Start
 
-### 🚀 New Machine Setup (Recommended)
+### 🚀 macOS Setup (Home Manager)
 
-**One command to set up everything:**
-
-```bash
-git clone https://github.com/yourusername/dotfiles.git ~/dotfiles
-cd ~/dotfiles
-./bootstrap.sh
-```
-
-This will:
-1. ✅ Install Homebrew/apt package manager
-2. ✅ Install Ansible for automation
-3. ✅ Install packages (git, curl, ripgrep, etc.)
-4. ✅ Install languages (Node.js, Bun, etc.)
-5. ✅ Setup Docker
-6. ✅ Install shell enhancements (oh-my-zsh, starship)
-7. ✅ Install GUI applications (optional)
-8. ✅ Symlink dotfiles configurations
-9. ✅ Setup environment variables
-10. ✅ Validate installation
-
-**Interactive mode** - Choose what to install:
-```bash
-./bootstrap.sh
-```
-
-**Quick options:**
-```bash
-./bootstrap.sh --full           # Install everything
-./bootstrap.sh --minimal        # Core packages + dotfiles only
-./bootstrap.sh --dotfiles-only  # Just symlink configs
-./bootstrap.sh --dry-run        # See what would be installed
-```
-
-### 📋 Dotfiles Only (Existing System)
-
-If you already have packages installed and just want the configurations:
+**Current Status:** ✅ Home Manager is working on macOS!
 
 ```bash
-cd ~/dotfiles
-./install.sh
+# Clone the repo
+git clone https://github.com/loidolt/dotfiles.git ~/Documents/GitHub/dotfiles
+cd ~/Documents/GitHub/dotfiles
+
+# Install Nix (if not already installed)
+sh <(curl -L https://nixos.org/nix/install) --daemon
+
+# Enable flakes
+mkdir -p ~/.config/nix
+echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+
+# Activate Home Manager
+nix run home-manager/master -- switch --flake .#chrisloidolt -b backup
+
+# Close and reopen your terminal
 ```
 
-This will:
-- Create symbolic links for OpenCode, and Neovim configs
-- Backup any existing configurations with timestamps
-- Set up all configurations automatically
+This will install and configure:
+- ✅ All packages (git, curl, neovim, tmux, etc.)
+- ✅ Zsh with oh-my-zsh and plugins
+- ✅ Starship prompt
+- ✅ Modern CLI tools (eza, bat, ripgrep, fd, fzf, zoxide)
+- ✅ Neovim with LSP servers
+- ✅ Git with delta
+- ✅ Tmux with truecolor
+- ✅ All program configurations
 
-### 🧹 Uninstallation
+### 🔄 Making Changes
 
-To remove the symlinks:
+After editing configuration files:
+
 ```bash
-./uninstall.sh
+# Rebuild and activate
+home-manager switch --flake .#chrisloidolt
+
+# Or with uncommitted changes
+home-manager switch --flake .#chrisloidolt --impure
 ```
 
-## What Gets Installed
+### 📦 Adding Packages
+
+Edit `home/packages.nix` and add your package:
+
+```nix
+home.packages = with pkgs; [
+  # ... existing packages ...
+  your-new-package
+];
+```
+
+Then rebuild:
+```bash
+home-manager switch --flake .#chrisloidolt
+```
+
+### ↩️ Rollback
+
+If something breaks, you can rollback:
+
+```bash
+# List previous generations
+home-manager generations
+
+# Activate a previous generation
+/nix/store/HASH-home-manager-generation/activate
+```
+
+## What's Installed
 
 ### Core Packages
-- git, curl, wget, vim, tmux, htop, tree, jq
+- git, curl, wget, vim, tmux, htop, tree, jq, unzip
 
 ### Modern CLI Tools
-- **ripgrep** - Fast search
-- **fd** - Fast find
-- **bat** - Better cat
+- **ripgrep** - Fast grep alternative
+- **fd** - Fast find alternative
+- **bat** - Cat with syntax highlighting
 - **fzf** - Fuzzy finder
-- **eza** - Modern ls
-- **zoxide** - Smart cd
+- **eza** - Modern ls with icons
+- **zoxide** - Smart cd command
+- **delta** - Better git diffs
+- **lazygit** - Terminal UI for git
 
 ### Languages & Runtimes
-- **mise** - Universal version manager
 - **Node.js 20** (LTS)
 - **Bun** - Fast JavaScript runtime
-- Python, Go, Rust (optional)
+- **TypeScript**, **Prettier**, **ESLint**
 
-### Development Tools
-- **Docker** & Docker Desktop
-- **oh-my-zsh** with plugins
-- **Starship** prompt
+### Programs
+- **Neovim** v0.11.5 with LSP servers (Lua, Nix, TypeScript, etc.)
+- **Git** v2.51.2 with delta integration
+- **Tmux** v3.6 with truecolor support
+- **Zsh** with oh-my-zsh, autosuggestions, syntax highlighting
+- **Starship** - Modern prompt
+- **FZF** - Fuzzy finder with fd integration
+- **Direnv** - Per-directory environments with nix-direnv
 
-### GUI Apps (macOS)
-- VS Code, Chrome, Slack, 1Password, Rectangle
+### Fonts
+- **FiraCode Nerd Font**
+- **JetBrainsMono Nerd Font**
+- **Meslo Nerd Font**
 
-See [`ansible/group_vars/all.yml`](ansible/group_vars/all.yml) for the complete list.
+See [`home/packages.nix`](home/packages.nix) for the complete list.
 
 ## Customization
 
-### Change What Gets Installed
+### Adding Packages
 
-Edit [`ansible/group_vars/all.yml`](ansible/group_vars/all.yml):
+Edit `home/packages.nix`:
 
-```yaml
-packages:
-  core:
-    - git
-    - your-package-here
-  
-languages:
-  install_node: true
-  node_version: "20"
-  
-applications:
-  apps:
-    - visual-studio-code
-    - your-app
+```nix
+home.packages = with pkgs; [
+  # Add your packages here
+  ripgrep
+  fd
+  your-new-package
+];
 ```
 
-Then re-run:
+### Modifying Program Configs
+
+Program configurations are in `home/programs/`:
+- `zsh.nix` - Shell configuration
+- `git.nix` - Git settings
+- `neovim.nix` - Editor setup
+- `tmux.nix` - Terminal multiplexer
+- etc.
+
+After making changes, rebuild:
 ```bash
-cd ansible
-ansible-playbook setup.yml --tags packages
+home-manager switch --flake .#chrisloidolt
 ```
 
-## Post-Installation
+## Migration Status
 
-### 1. Configure API Keys
+- ✅ **Phase 0**: Nix installation complete
+- ✅ **Phase 1**: Flake structure created
+- ✅ **Phase 2**: Home Manager active on macOS
+- ⬜ **Phase 3**: NixOS VM testing (next)
+- ⬜ **Phase 4**: NixOS production installation
+- ⬜ **Phase 5**: WSL2 configuration
+- ⬜ **Phase 6**: Validation & cleanup
+- ⬜ **Phase 7**: Documentation & polish
 
-Edit `~/.dotfiles_env` and add your actual API keys:
-```bash
-nvim ~/.dotfiles_env
-```
-
-### 2. Restart Terminal
-
-```bash
-source ~/.zshrc
-# Or restart your terminal
-```
-
-### 3. Validate Installation
-
-```bash
-./scripts/validate.sh
-```
-
-### 4. Setup SSH (Optional)
-
-```bash
-./scripts/ssh-setup.sh
-```
+See [MIGRATION_README.md](MIGRATION_README.md) for full details.
 
 ## Advanced Usage
 
-### Run Specific Installation Tasks
+### Update All Packages
 
 ```bash
-cd ansible
+cd ~/Documents/GitHub/dotfiles
 
-# Install only packages
-ansible-playbook setup.yml --tags packages
+# Update flake.lock to latest package versions
+nix flake update
 
-# Install only languages  
-ansible-playbook setup.yml --tags languages
-
-# Install Docker
-ansible-playbook setup.yml --tags docker
-
-# Dry run (see what would change)
-ansible-playbook setup.yml --check --diff
+# Rebuild with new packages
+home-manager switch --flake .#chrisloidolt
 ```
 
-### Update Packages
+### Clean Old Generations
 
 ```bash
-cd ~/dotfiles
-git pull
-cd ansible
-ansible-playbook setup.yml
+# List all generations
+home-manager generations
+
+# Delete generations older than 30 days
+nix-collect-garbage --delete-older-than 30d
+
+# Optimize Nix store (deduplicate)
+nix-store --optimise
 ```
 
-### Manual Symlinks
-
-If you prefer manual installation:
+### Search for Packages
 
 ```bash
-ln -s ~/dotfiles/opencode ~/.config/opencode
-ln -s ~/dotfiles/neovim ~/.config/nvim
+# Search nixpkgs
+nix search nixpkgs ripgrep
+nix search nixpkgs nodejs
+
+# Or use the website
+# https://search.nixos.org/packages
 ```
 
 ## Configuration Details
 
-### OpenCode
-- MCP servers configured: context7, sequentialthinking, memory, playwright, github
-- Theme: Catppuccin
-- **Note**: For themes to work in tmux, see [docs/OPENCODE_TMUX_FIX.md](docs/OPENCODE_TMUX_FIX.md)
-- See `opencode/README.md` for more details
+### Programs
+- **Neovim** - Based on LazyVim, LSP servers managed by Nix
+- **OpenCode** - AI editor with MCP servers (context7, sequentialthinking, etc.)
+- **Git** - Delta integration for beautiful diffs
+- **Tmux** - Truecolor support, vi-mode, custom keybindings
+- **Zsh** - oh-my-zsh with autosuggestions and syntax highlighting
+- **Starship** - Fast, customizable prompt
 
-### Neovim
-- Based on kickstart.nvim
-- Plugin manager: lazy.nvim
-- Includes LSP, Treesitter, and more
-- See `neovim/README.md` for more details
+### Documentation
 
-## Documentation
-
-- **[README.md](README.md)** - This file (overview and quick start)
-- **[docs/SETUP.md](docs/SETUP.md)** - Detailed setup guide
-- **[ansible/group_vars/all.yml](ansible/group_vars/all.yml)** - Package configuration
-- **Individual tool docs:**
-  - [opencode/README.md](opencode/README.md) - OpenCode configuration
-  - [neovim/README.md](neovim/README.md) - Neovim configuration
-  - [tmux/README.md](tmux/README.md) - Tmux configuration
-- **[docs/OPENCODE_TMUX_FIX.md](docs/OPENCODE_TMUX_FIX.md)** - Fix for OpenCode themes in tmux
-
-## Best Practices
-
-- **Security**: Avoid committing sensitive data like API keys
-  - Use environment variables when possible
-  - Add sensitive files to `.gitignore`
-  
-- **Backups**: The install script automatically backs up existing configs
-
-- **Testing**: Test on a fresh system or VM before relying on these configs
-
-- **Documentation**: Keep README files updated when making changes
+- **[MIGRATION_README.md](MIGRATION_README.md)** - Migration guide and overview
+- **[docs/NIX_MIGRATION_GUIDE.md](docs/NIX_MIGRATION_GUIDE.md)** - Detailed Nix setup
+- **[docs/EMERGENCY_PROCEDURES.md](docs/EMERGENCY_PROCEDURES.md)** - Troubleshooting
+- **[docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md)** - Command reference
+- **Config READMEs:**
+  - [configs/opencode/README.md](configs/opencode/README.md)
+  - [configs/neovim/README.md](configs/neovim/README.md)
+  - [configs/tmux/README.md](configs/tmux/README.md)
 
 ## How It Works
 
-### Symlinks (Not Copies!)
+### Declarative Configuration
 
-Your configurations are **symlinked** from this repository to their destination:
-- `~/dotfiles/opencode` → `~/.config/opencode` (symlink)
-- `~/dotfiles/neovim` → `~/.config/nvim` (symlink)
+Everything is defined in `.nix` files:
+- `flake.nix` - Entry point, defines inputs and outputs
+- `home/default.nix` - Main home configuration
+- `home/packages.nix` - Package list
+- `home/programs/*.nix` - Individual program configs
 
-**This means:**
-- ✅ Edit files in `~/dotfiles/` and changes apply immediately
-- ✅ Open `~/dotfiles` in VS Code to manage all configs
-- ✅ `git pull` updates your live configs instantly
-- ✅ Changes in `~/.config/` are changes in the repo
+### Home Manager
+
+Home Manager creates symlinks from the Nix store to your home directory:
+- Configs in `configs/` → Nix store → `~/.config/`
+- Programs installed to `/nix/store/` → Available in `~/.nix-profile/bin/`
+
+**Benefits:**
+- ✅ Declarative - describe what you want, not how to get it
+- ✅ Reproducible - same config = same result
+- ✅ Atomic - all-or-nothing updates
+- ✅ Rollback - return to any previous generation
 
 ### Architecture
 
 ```
-bootstrap.sh (orchestrator)
+flake.nix
     ↓
-Install Homebrew/apt
+home-manager (reads home/default.nix)
     ↓
-Install Ansible
+Imports: packages.nix, programs/*.nix
     ↓
-Run Ansible Playbook (packages, languages, docker, shell, apps)
+Builds derivations in /nix/store
     ↓
-Run install.sh (symlink dotfiles)
+Creates symlinks: ~/.config, ~/.nix-profile, etc.
     ↓
-Run env-setup.sh (environment variables)
-    ↓
-Run validate.sh (verify installation)
+Activation: sets up shell, PATH, environment
 ```
-
-### Technologies Used
-
-- **Bash** - Orchestration and glue scripts
-- **Ansible** - Declarative package management
-- **Symlinks** - Config file management
-- **mise** - Language version management
-- **Homebrew/apt** - Package installation
 
 ## Troubleshooting
 
-### Run Validation First
+### Build Fails
+
 ```bash
-./scripts/validate.sh
+# Check for syntax errors
+nix flake check
+
+# Build with full trace
+nix build .#homeConfigurations.chrisloidolt.activationPackage --show-trace
 ```
 
-### Common Issues
+### Terminal Doesn't Start
 
-**Homebrew not found (macOS ARM)**
 ```bash
-eval "$(/opt/homebrew/bin/brew shellenv)"
+# Rollback to previous generation
+home-manager generations
+/nix/store/PREVIOUS-HASH-home-manager-generation/activate
 ```
 
-**Ansible fails on macOS**
+### Programs Not Found
+
 ```bash
-xcode-select --install
+# Check if in PATH
+echo $PATH | grep nix-profile
+
+# Rebuild
+home-manager switch --flake .#chrisloidolt
 ```
 
-**Node/Bun not found**
+### Config Changes Not Applied
+
 ```bash
-source ~/.dotfiles_env
-# Or restart terminal
+# Make sure files are tracked by git
+git status
+
+# Rebuild
+home-manager switch --flake .#chrisloidolt
 ```
 
-**Docker permission denied (Linux)**
-```bash
-newgrp docker  # Or log out/in
-```
-
-**Symlinks not working**
-```bash
-chmod +x install.sh
-ls -la ~/.config/opencode  # Check symlink
-```
-
-**OpenCode theme not working in tmux**
-```bash
-# See docs/OPENCODE_TMUX_FIX.md for detailed fix
-tmux kill-server  # Restart tmux
-tmux
-```
-
-**API keys not working**
-```bash
-nvim ~/.dotfiles_env  # Add actual keys
-source ~/.dotfiles_env
-```
-
-See [docs/SETUP.md](docs/SETUP.md) for detailed troubleshooting.
+See [docs/EMERGENCY_PROCEDURES.md](docs/EMERGENCY_PROCEDURES.md) for detailed troubleshooting.
 
 ## Features
 
-✨ **One-command setup** - Fresh machine to ready-to-code in minutes  
-🔧 **Idempotent** - Safe to run multiple times  
-🎯 **Customizable** - Easy to add/remove packages  
-🔄 **Cross-platform** - macOS and Linux support  
-📦 **Modern tools** - Latest CLIs and dev tools  
-🔒 **Secure** - API keys in environment, not committed  
-📝 **Well-documented** - Comprehensive guides  
-✅ **Validated** - Post-install verification  
+✨ **Declarative** - One source of truth for all configuration  
+🔄 **Reproducible** - Same config works everywhere  
+⚛️ **Atomic** - All-or-nothing updates  
+↩️ **Rollback** - Return to any previous state  
+🌍 **Cross-platform** - macOS, NixOS, WSL2  
+📦 **Modern tools** - Latest packages from nixpkgs  
+🔒 **Immutable** - Packages can't be accidentally broken  
+📝 **Well-documented** - Comprehensive migration guides  
 
 ## Philosophy
 
 This dotfiles system follows these principles:
 
-1. **Transparency** - Symlinks, not copies. See exactly what's happening.
-2. **Simplicity** - Bash + Ansible. Standard, proven tools.
-3. **Modularity** - Each component independent and reusable.
-4. **Flexibility** - Run full setup or specific parts.
-5. **Documentation** - Every script, every role, documented.
-6. **Safety** - Backups, validation, dry-run support.
+1. **Declarative** - Describe what you want, not how to get it
+2. **Reproducible** - Same inputs = same outputs, always
+3. **Atomic** - Changes are all-or-nothing, no partial states
+4. **Rollback** - Can revert to any previous generation
+5. **Transparent** - All configs in version control
+6. **Safe** - Test changes before applying
 
 ## Contributing
 
