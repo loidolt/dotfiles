@@ -215,10 +215,10 @@ home-manager switch --flake .#chrisloidolt
 - ✅ **Phase 0**: Nix installation complete
 - ✅ **Phase 1**: Flake structure created
 - ✅ **Phase 2**: Home Manager active on macOS
-- ⬜ **Phase 3**: NixOS VM testing (next)
-- ⬜ **Phase 4**: NixOS production installation
-- ⬜ **Phase 5**: WSL2 configuration
-- ⬜ **Phase 6**: Validation & cleanup
+- ✅ **Phase 3**: NixOS VM testing complete
+- ⏭️ **Phase 4**: NixOS production (skipped)
+- ⏭️ **Phase 5**: WSL2 configuration (skipped)
+- 🔄 **Phase 6**: Validation & cleanup (in progress)
 - ⬜ **Phase 7**: Documentation & polish
 
 See [MIGRATION_README.md](MIGRATION_README.md) for full details.
