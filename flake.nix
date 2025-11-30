@@ -23,6 +23,9 @@
   outputs = { self, nixpkgs, home-manager, nix-darwin, nixos-wsl, ... }@inputs:
     let
       username = "chrisloidolt";
+      
+      # Note: VM uses username "loidolt" instead of "chrisloidolt"
+      vmUsername = "loidolt";
     in
     {
       # Home Manager standalone (for macOS ARM)
@@ -34,6 +37,31 @@
         };
       };
       
-      # We'll add NixOS and Darwin configurations later
+      # NixOS configurations
+      nixosConfigurations = {
+        # NixOS VM (Parallels ARM64)
+        nixos-desktop = nixpkgs.lib.nixosSystem {
+          system = "aarch64-linux";
+          specialArgs = { 
+            inherit inputs;
+            username = vmUsername;  # VM uses "loidolt" not "chrisloidolt"
+          };
+          modules = [
+            ./hosts/nixos-desktop
+            home-manager.nixosModules.home-manager
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.users.${vmUsername} = import ./home;
+              home-manager.extraSpecialArgs = { 
+                inherit inputs;
+                username = vmUsername;
+              };
+            }
+          ];
+        };
+      };
+      
+      # We'll add Darwin and WSL configurations later
     };
 }
