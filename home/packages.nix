@@ -42,6 +42,9 @@
     delta        # Better git diffs
     lazygit      # Terminal UI for git
     
+    # Editors and IDEs
+    vscode       # Visual Studio Code
+    
     # Fonts (Nerd Fonts for icons in terminal)
     nerd-fonts.fira-code
     nerd-fonts.jetbrains-mono
