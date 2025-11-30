@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 {
   programs.neovim = {
@@ -31,9 +31,17 @@
     ];
   };
   
-  # Symlink to existing neovim config
-  xdg.configFile."nvim" = {
-    source = ../../configs/neovim;
-    recursive = true;
-  };
+  # Symlink individual files, excluding lazy-lock.json
+  # This allows lazy.nvim to manage its lockfile while keeping config in sync
+  xdg.configFile."nvim/init.lua".source = ../../configs/neovim/init.lua;
+  xdg.configFile."nvim/lua".source = ../../configs/neovim/lua;
+  
+  # Create an empty lazy-lock.json that can be written to
+  # Don't manage it with Home Manager so lazy.nvim can update it
+  home.activation.createNvimLockfile = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    mkdir -p $HOME/.config/nvim
+    if [ ! -f $HOME/.config/nvim/lazy-lock.json ]; then
+      touch $HOME/.config/nvim/lazy-lock.json
+    fi
+  '';
 }

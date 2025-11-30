@@ -106,6 +106,12 @@
     git
     firefox
     kdePackages.konsole
+    
+    # Build tools needed for compiling software (including neovim plugins)
+    gcc
+    gnumake
+    cmake
+    pkg-config
   ];
 
   # Enable Docker
