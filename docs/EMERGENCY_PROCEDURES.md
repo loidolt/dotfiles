@@ -480,55 +480,42 @@ git checkout nix-migration
 
 ## Complete System Restore
 
-### Return to Ansible (Pre-Migration)
+### Complete Nix Uninstall
 
-If you need to completely abandon the Nix migration:
+If you need to completely uninstall Nix:
 
 ```bash
-# 1. Switch to backup branch
-cd ~/dotfiles
-git checkout ansible-backup
+# 1. Uninstall Home Manager
+home-manager uninstall
 
-# 2. Verify Ansible files exist
-ls -la ansible/
-
-# 3. Run Ansible setup
-./bootstrap.sh
-
-# 4. Restore old dotfiles
-./install.sh
-
-# 5. Manually uninstall Nix (if desired)
-# macOS:
+# 2. Remove Nix (macOS)
 sudo rm -rf /nix
 sudo rm /etc/bashrc.backup-before-nix
 sudo rm /etc/zshrc.backup-before-nix
 
 # Edit /etc/zshrc and /etc/bashrc to remove Nix sections
 
+# 3. Remove Nix configuration
+rm -rf ~/.config/nix
+rm -rf ~/.nix-*
+
 # Linux:
 sudo rm -rf /nix
 # Remove Nix from /etc/profile or similar
 ```
 
-### Partial Rollback (Keep Nix, Revert Config)
+### Partial Rollback (Keep Nix, Revert to Manual Config)
 
 ```bash
-# Keep Nix installed but revert to manual setup
-cd ~/dotfiles
+# Keep Nix installed but manually manage configs
+cd ~/Documents/GitHub/dotfiles
 
-# Remove Nix configs but keep existing tools
-rm -rf ~/.config/nvim  # Remove symlinks
-rm -rf ~/.config/opencode
-rm -rf ~/.tmux.conf
-
-# Copy original configs back
-cp -r ~/dotfiles/neovim ~/.config/nvim
-cp -r ~/dotfiles/opencode ~/.config/opencode
-cp ~/dotfiles/tmux/.tmux.conf ~/.tmux.conf
-
-# Uninstall Home Manager (if installed)
+# Uninstall Home Manager
 home-manager uninstall
+
+# Manually link configs if needed
+ln -s ~/Documents/GitHub/dotfiles/configs/neovim ~/.config/nvim
+ln -s ~/Documents/GitHub/dotfiles/configs/opencode ~/.config/opencode
 ```
 
 ---

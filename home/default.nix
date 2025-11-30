@@ -37,8 +37,9 @@
   
   # Nix configuration
   nix = {
-    # Use the Nix package from nixpkgs
-    package = pkgs.nix;
+    # Use the Nix package from nixpkgs (only on standalone home-manager, not on NixOS)
+    # On NixOS, the system manages the Nix package, so we don't set it here
+    package = lib.mkIf (!pkgs.stdenv.isLinux) pkgs.nix;
     
     # Enable automatic garbage collection
     gc = {

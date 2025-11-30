@@ -1,68 +1,101 @@
 # Quick Reference Guide
 
-## OpenCode Theme Not Working in Tmux
-
-**Quick Fix:**
-
-```bash
-# Kill and restart tmux
-tmux kill-server
-tmux
-```
-
-**Why?** Tmux needs 24-bit truecolor support for OpenCode themes. The fix has been applied to your `.tmux.conf`.
-
-**Details:** See [OPENCODE_TMUX_FIX.md](OPENCODE_TMUX_FIX.md)
-
----
-
 ## Common Commands
 
-### Bootstrap
+### Home Manager
 
 ```bash
-./bootstrap.sh              # Interactive setup
-./bootstrap.sh --full       # Install everything
-./bootstrap.sh --minimal    # Core packages only
-./bootstrap.sh --dry-run    # Preview changes
+# Rebuild and switch
+home-manager switch --flake ~/Documents/GitHub/dotfiles#chrisloidolt
+
+# Rebuild with uncommitted changes
+home-manager switch --flake ~/Documents/GitHub/dotfiles#chrisloidolt --impure
+
+# List all generations
+home-manager generations
+
+# Rollback to previous generation
+/nix/store/HASH-home-manager-generation/activate
 ```
 
-### Dotfiles
+### Nix Package Management
 
 ```bash
-./install.sh                # Install dotfiles
-./uninstall.sh              # Remove symlinks
-```
+# Update all packages
+cd ~/Documents/GitHub/dotfiles
+nix flake update
+home-manager switch --flake .#chrisloidolt
 
-### Validation
+# Search for packages
+nix search nixpkgs <package-name>
 
-```bash
-./scripts/validate.sh       # Check installation
-```
+# Check flake configuration
+nix flake show
+nix flake check
 
-### Ansible
+# Clean old generations
+nix-collect-garbage --delete-older-than 30d
 
-```bash
-cd ansible
-ansible-playbook setup.yml              # Run all
-ansible-playbook setup.yml --tags packages   # Packages only
-ansible-playbook setup.yml --check --diff    # Dry run
+# Optimize Nix store
+nix-store --optimise
 ```
 
 ### Tmux
 
 ```bash
-tmux source ~/.tmux.conf    # Reload config
-tmux kill-server            # Restart tmux server
-tmux new -s myname          # New named session
-tmux attach -t myname       # Attach to session
+# Reload config
+tmux source ~/.tmux.conf
+
+# Restart tmux server
+tmux kill-server
+
+# New named session
+tmux new -s myname
+
+# Attach to session
+tmux attach -t myname
+
+# List sessions
+tmux ls
 ```
 
-### Environment
+### Git
 
 ```bash
-source ~/.dotfiles_env      # Load environment variables
-echo $OPENCODE_API_KEY      # Check API key
+# Common shortcuts (from zsh aliases)
+gs      # git status
+ga      # git add
+gc      # git commit
+gp      # git push
+gl      # git pull
+gd      # git diff
+lg      # lazygit
+```
+
+### Modern CLI Tools
+
+```bash
+# eza (better ls)
+ls      # eza --icons
+ll      # eza -la --icons
+la      # eza -a --icons
+lt      # eza --tree --icons
+
+# bat (better cat)
+cat <file>  # Uses bat with syntax highlighting
+
+# ripgrep (better grep)
+rg <pattern>
+
+# fd (better find)
+fd <pattern>
+
+# zoxide (smart cd)
+z <directory-name>
+
+# fzf (fuzzy finder)
+Ctrl-R  # Search command history
+Ctrl-T  # Search files
 ```
 
 ---
@@ -71,19 +104,18 @@ echo $OPENCODE_API_KEY      # Check API key
 
 ### Configurations
 
-- OpenCode: `~/.config/opencode/` → `~/dotfiles/opencode/`
-- Neovim: `~/.config/nvim/` → `~/dotfiles/neovim/`
-- Tmux: `~/.tmux.conf` → `~/dotfiles/tmux/.tmux.conf`
+- Dotfiles repo: `~/Documents/GitHub/dotfiles`
+- Neovim: `~/.config/nvim/` → symlinked to `~/Documents/GitHub/dotfiles/configs/neovim/`
+- OpenCode: `~/.config/opencode/` → symlinked to `~/Documents/GitHub/dotfiles/configs/opencode/`
+- Tmux: `~/.tmux.conf` (managed by Home Manager)
+- Zsh: `~/.zshrc` (managed by Home Manager)
 
-### Environment
+### Nix Files
 
-- `~/.dotfiles_env` - Environment variables
-- `~/.zshrc` - Shell configuration
-
-### Ansible
-
-- `~/dotfiles/ansible/group_vars/all.yml` - Package lists
-- `~/dotfiles/ansible/setup.yml` - Main playbook
+- Home Manager config: `~/Documents/GitHub/dotfiles/home/`
+- Flake: `~/Documents/GitHub/dotfiles/flake.nix`
+- Packages: `~/Documents/GitHub/dotfiles/home/packages.nix`
+- Program configs: `~/Documents/GitHub/dotfiles/home/programs/`
 
 ---
 
@@ -92,29 +124,32 @@ echo $OPENCODE_API_KEY      # Check API key
 ### Check Installation
 
 ```bash
-./scripts/validate.sh
+# Verify programs are from Nix
+which nvim
+which tmux
+which git
+# All should show /nix/store/... paths
+
+# Check Home Manager generation
+home-manager generations
 ```
 
 ### Fix Tmux Colors
 
 ```bash
-# 1. Verify truecolor config is loaded
+# Verify truecolor config is loaded
 tmux show-options -g -s | grep terminal
 
-# 2. Restart tmux completely
+# Should see:
+# terminal-features* "...:RGB"
+# terminal-overrides* "...:Tc"
+
+# Restart tmux completely
 tmux kill-server && tmux
 
-# 3. Test colors
+# Test colors
 echo $TERM        # Should be: tmux-256color
 echo $COLORTERM   # Should be: truecolor
-```
-
-### Check Symlinks
-
-```bash
-ls -la ~/.config/opencode
-ls -la ~/.config/nvim
-ls -la ~/.tmux.conf
 ```
 
 ### Reload Shell
@@ -132,7 +167,7 @@ exec zsh
 ### Verify Truecolor Support
 
 ```bash
-# Test color gradient
+# Test color gradient (should show smooth colors)
 awk 'BEGIN{
     s="/\\/\\/\\/\\/\\"; s=s s s s s s s s;
     for (colnum = 0; colnum<77; colnum++) {
@@ -151,15 +186,13 @@ awk 'BEGIN{
 ### Check Installed Packages
 
 ```bash
-which git node bun docker opencode nvim
-brew list            # macOS
-apt list --installed # Linux
-```
+# List all Nix packages
+nix-env -q
 
-### Check Environment Variables
-
-```bash
-env | grep -E "(API|KEY|PATH)"
+# Check specific program version
+nvim --version
+tmux -V
+git --version
 ```
 
 ---
@@ -169,21 +202,23 @@ env | grep -E "(API|KEY|PATH)"
 ### Edit Dotfiles
 
 ```bash
-# Edit in VS Code
-code ~/dotfiles
+# Open in editor
+nvim ~/Documents/GitHub/dotfiles
 
 # Edit specific configs
-nvim ~/dotfiles/opencode/opencode.json
-nvim ~/dotfiles/tmux/.tmux.conf
-nvim ~/.dotfiles_env
+nvim ~/Documents/GitHub/dotfiles/home/packages.nix
+nvim ~/Documents/GitHub/dotfiles/home/programs/zsh.nix
+nvim ~/Documents/GitHub/dotfiles/configs/opencode/opencode.json
 ```
 
 ### Update Package Lists
 
 ```bash
-nvim ~/dotfiles/ansible/group_vars/all.yml
-cd ~/dotfiles/ansible
-ansible-playbook setup.yml
+# Edit package list
+nvim ~/Documents/GitHub/dotfiles/home/packages.nix
+
+# Rebuild
+home-manager switch --flake ~/Documents/GitHub/dotfiles#chrisloidolt
 ```
 
 ---
@@ -193,15 +228,15 @@ ansible-playbook setup.yml
 ### Update Dotfiles
 
 ```bash
-cd ~/dotfiles
+cd ~/Documents/GitHub/dotfiles
 git pull
-./install.sh  # Re-symlink if needed
+home-manager switch --flake .#chrisloidolt
 ```
 
 ### Commit Changes
 
 ```bash
-cd ~/dotfiles
+cd ~/Documents/GitHub/dotfiles
 git add .
 git commit -m "Update configuration"
 git push
@@ -209,10 +244,33 @@ git push
 
 ---
 
+## Keyboard Shortcuts
+
+### Tmux
+
+- `Ctrl-b %` - Split pane vertically
+- `Ctrl-b "` - Split pane horizontally
+- `Ctrl-b o` - Switch to next pane
+- `Ctrl-b c` - Create new window
+- `Ctrl-b n` - Next window
+- `Ctrl-b p` - Previous window
+- `Ctrl-b d` - Detach from session
+
+### Zsh
+
+- `Ctrl-R` - Search command history (with fzf)
+- `Ctrl-T` - Search files (with fzf)
+- `Alt-C` - Change directory (with fzf)
+
+---
+
 ## Resources
 
 - [Main README](../README.md)
 - [Setup Guide](SETUP.md)
+- [Nix Architecture](NIX_ARCHITECTURE.md)
+- [Emergency Procedures](EMERGENCY_PROCEDURES.md)
+- [Troubleshooting](TROUBLESHOOTING.md)
 - [OpenCode Tmux Fix](OPENCODE_TMUX_FIX.md)
-- [OpenCode Docs](https://opencode.ai/docs)
-- [Tmux Guide](https://github.com/tmux/tmux/wiki)
+- [Home Manager Manual](https://nix-community.github.io/home-manager/)
+- [Nix Package Search](https://search.nixos.org/packages)

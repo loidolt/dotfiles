@@ -2,249 +2,160 @@
 
 ## Philosophy: Global vs Project-Specific
 
-This guide outlines our approach to package management across Nix and Homebrew, following the principle: **Keep your global environment minimal, make projects self-contained.**
-
-## Current State Analysis
-
-### Homebrew Audit Results
-
-Based on our audit of `brew list`, we have **40+ formula packages** and **9 cask applications**.
+This guide outlines the approach to package management with Nix, following the principle: **Keep your global environment minimal, make projects self-contained.**
 
 ## Package Categories
 
 ### ✅ Global Tools (Managed by Nix)
 
-These are core utilities you use across all projects, regardless of tech stack.
+These are core utilities you use across all projects, regardless of tech stack. These are configured in `home/packages.nix`:
 
-#### Already Configured in Nix
 - `gh` - GitHub CLI
 - `lazygit` - Git TUI
 - `tmux` - Terminal multiplexer
 - `neovim` - Text editor
-- `wget` - File downloader
-- `watch` - Command monitor
-- `tree` - Directory visualizer
-- `curl` - HTTP client
-- `jq` - JSON processor
-- Modern CLI tools: `ripgrep`, `fd`, `bat`, `fzf`, `eza`, `zoxide`
+- `wget`, `curl` - File/HTTP downloaders
+- `tree`, `htop`, `btop` - System utilities
+- `jq`, `yq` - JSON/YAML processors
+- Modern CLI tools: `ripgrep`, `fd`, `bat`, `fzf`, `eza`, `zoxide`, `delta`
+- Development tools: `git`, `delta`, `lazygit`
 
-#### Recommended Additions to Nix
-- `btop` - System monitor (better than htop)
-- `mosh` - Mobile shell for unstable connections
-- `p7zip` - 7-Zip archive utility
-- `pandoc` - Universal document converter
-- `lazydocker` - Docker TUI (complements lazygit)
+### 🚫 Project-Specific Tools (Use Devbox or Nix Shell)
 
-### 🚫 Project-Specific Tools (Remove from Global)
-
-These should be managed per-project using **devbox**:
+These should be managed per-project using **devbox** or project-specific `shell.nix` files:
 
 #### Language Runtimes & Version Managers
-- ❌ `go` - Use per-project version
-- ❌ `deno` - Use per-project
-- ❌ `node@18`, `node@22`, `nvm` - Use per-project (keep nodejs_20 global)
-- ❌ `php` - Use per-project
-- ❌ `ruby` - Use per-project
-- ❌ `openjdk` - Use per-project
-- ❌ `python@3.10`, `python@3.12` - Use per-project (keep one global)
+- Different versions of Go, Python, Node.js, Ruby, etc.
+- Language-specific package managers (pnpm, poetry, etc.)
+- Build tools specific to a language/framework
 
-#### Kubernetes & Infrastructure
-- ❌ `kubernetes-cli` (kubectl)
-- ❌ `k9s`
-- ❌ `argocd`
-- ❌ `grpcurl`
-- ❌ `ansible`
-- ❌ `ansible-lint`
+#### Project-Specific Infrastructure Tools
+- Kubernetes tools (kubectl, k9s, helm)
+- Cloud provider CLIs (aws-cli, gcloud, azure-cli)
+- Infrastructure as Code tools (terraform, ansible, pulumi)
+- Container orchestration tools
 
-#### Language-Specific Package Managers & Tools
-- ❌ `pnpm` - Node package manager
-- ❌ `cocoapods` - iOS dependencies
-- ❌ `pipx` - Python app installer
-- ❌ `mypy` - Python type checker
-- ❌ `pytest` - Python testing
-- ❌ `yamllint` - YAML linter
+#### Language-Specific Development Tools
+- Linters, formatters, type checkers
+- Testing frameworks
+- Language servers (if not needed globally)
 
-### 🔧 Specialized Tools (Keep in Homebrew)
+### 📦 GUI Applications (macOS)
 
-Some tools are difficult to package in Nix or vendor-specific:
+On macOS, GUI applications can be managed with:
+- **Homebrew Casks** - Traditional method, good for proprietary apps
+- **Nix Darwin** - Declarative management (advanced setup)
 
-#### Microsoft SQL Server Tools
-- `msodbcsql` / `msodbcsql17`
-- `mssql-tools`
+Common GUI applications:
+- Docker Desktop
+- Terminal emulators (Ghostty, Warp, etc.)
+- Browsers
+- Development tools (VS Code, etc.)
 
-**Reason**: Vendor-specific, frequently updated, complex licensing
+## Adding Global Packages
 
-#### Specialized Utilities
-- `wireshark` - Network protocol analyzer (complex GUI)
-- `putty` - SSH/telnet tools
-- `sshpass` - SSH password automation (security risk - consider removing)
-- `wakeonlan` - Wake-on-LAN utility
-- `cmatrix` - Terminal eye candy 😎
+### Step 1: Edit Package List
 
-### 📦 GUI Applications (Keep as Homebrew Casks)
-
-Casks are the best way to manage GUI applications on macOS:
-
-- `docker` / `docker-desktop`
-- `ghostty` (also managed in Nix for config)
-- `warp`
-- `flutter`
-- `godot`
-- `android-platform-tools`
-- `nrfutil`
-- `disk-inventory-x`
-
-## Implementation Plan
-
-### Step 1: Enhance Nix Global Packages
-
-The following packages have been added to `home/packages.nix`:
+Edit `home/packages.nix`:
 
 ```nix
-# System monitoring and management
-btop         # Better system monitor
-
-# Network and remote access
-mosh         # Mobile shell
-
-# Archive utilities
-p7zip        # 7-Zip support
-
-# Document processing
-pandoc       # Universal document converter
-
-# Development tools
-devbox       # Project-specific dev environments
-lazydocker   # Docker TUI
+home.packages = with pkgs; [
+  # Add your new package here
+  your-package-name
+];
 ```
 
-Apply changes:
+### Step 2: Rebuild
+
 ```bash
-home-manager switch --flake ~/.config/home-manager
+home-manager switch --flake ~/Documents/GitHub/dotfiles#chrisloidolt
 ```
 
-### Step 2: Use Devbox for Project Environments
+### Step 3: Verify
 
-We use **[devbox](https://www.jetify.com/devbox)** for project-specific environments. Devbox is a user-friendly wrapper around Nix that provides:
+```bash
+which your-package-name
+# Should show /nix/store/... path
+```
 
-- Simple JSON configuration instead of complex Nix syntax
+## Project-Specific Environments
+
+### Option 1: Devbox (Recommended for Most Projects)
+
+**[Devbox](https://www.jetify.com/devbox)** is a user-friendly wrapper around Nix:
+
+- Simple JSON configuration
 - Automatic shell integration
 - Built-in scripts support
-- Cross-platform compatibility
-- Easy package search and management
+- Easy to use and share
 
-#### Available Templates
+### Option 2: Nix Shell (Advanced)
 
-Pre-configured templates are available in `project-templates/`:
+For more control, use `shell.nix` or `flake.nix` directly:
 
-1. **kubernetes/** - Kubernetes development (kubectl, helm, k9s, argocd)
-2. **golang/** - Go development (go, gopls, golangci-lint, delve)
-3. **python/** - Python development (python, poetry, ruff, mypy, pytest)
-4. **nodejs/** - Node.js development (node, pnpm, typescript)
-5. **infrastructure/** - Infrastructure as Code (ansible, terraform, packer)
+```nix
+# shell.nix
+{ pkgs ? import <nixpkgs> {} }:
 
-#### Example: Kubernetes Template
+pkgs.mkShell {
+  packages = with pkgs; [
+    nodejs_20
+    typescript
+    # ... other packages
+  ];
+}
+```
 
-**File**: `devbox.json`
+Then run: `nix-shell`
+
+#### Devbox Example
+
+Create `devbox.json` in your project:
+
 ```json
 {
   "packages": [
     "kubectl@latest",
     "kubernetes-helm@latest",
-    "k9s@latest",
-    "argocd@latest",
-    "grpcurl@latest"
+    "k9s@latest"
   ],
   "shell": {
     "init_hook": [
-      "echo '🚀 Kubernetes development environment loaded'",
-      "kubectl version --client 2>/dev/null || echo 'kubectl: ready'"
-    ],
-    "scripts": {
-      "check-cluster": ["kubectl cluster-info"],
-      "dashboard": ["k9s"]
-    }
+      "echo 'Dev environment loaded'"
+    ]
   }
 }
 ```
 
-**Usage:**
+Then:
 ```bash
-# Enter the environment
-devbox shell
-
-# Run scripts
-devbox run check-cluster
-devbox run dashboard
+devbox shell  # Enter environment
+# All tools available here
 ```
 
-See individual template READMEs for detailed usage instructions.
+## Using Direnv for Automatic Environment Loading
 
-### Step 3: Clean Up Homebrew
+With direnv configured in your dotfiles, project environments can load automatically.
 
-A cleanup script has been created at `scripts/cleanup-brew.sh` to remove project-specific packages.
+### Setup with Devbox
 
-**Run the script:**
 ```bash
-./scripts/cleanup-brew.sh
+cd your-project
+devbox init
+# Edit devbox.json as needed
+echo "use devbox" > .envrc
+direnv allow
 ```
 
-This will uninstall:
-- Language runtimes (go, deno, node versions, php, ruby, python versions, openjdk)
-- Kubernetes tools (kubectl, k9s, argocd, grpcurl)
-- Infrastructure tools (ansible, ansible-lint)
-- Language-specific tools (pnpm, cocoapods, pipx, mypy, pytest, yamllint)
+Now the environment loads automatically when you `cd` into the directory!
 
-### Step 4: Migration Workflow
-
-For each existing project:
-
-1. **Copy appropriate template** from `project-templates/`:
-   ```bash
-   # Example: Kubernetes project
-   cp ~/Documents/GitHub/dotfiles/project-templates/kubernetes/devbox.json .
-   ```
-
-2. **Enter the environment:**
-   ```bash
-   devbox shell
-   ```
-
-3. **Test** that all tools are available:
-   ```bash
-   kubectl version --client
-   helm version
-   ```
-
-4. **Add to `.gitignore`**:
-   ```
-   .devbox/
-   devbox.lock
-   ```
-
-5. **Commit `devbox.json`** to version control:
-   ```bash
-   git add devbox.json
-   git commit -m "Add devbox configuration for reproducible dev environment"
-   ```
-
-#### Quick Copy Commands
+### Setup with Nix Shell
 
 ```bash
-# Kubernetes project
-cp ~/Documents/GitHub/dotfiles/project-templates/kubernetes/devbox.json .
-
-# Go project
-cp ~/Documents/GitHub/dotfiles/project-templates/golang/devbox.json .
-
-# Python project
-cp ~/Documents/GitHub/dotfiles/project-templates/python/devbox.json .
-
-# Node.js project
-cp ~/Documents/GitHub/dotfiles/project-templates/nodejs/devbox.json .
-
-# Infrastructure project
-cp ~/Documents/GitHub/dotfiles/project-templates/infrastructure/devbox.json .
+cd your-project
+# Create shell.nix
+echo "use nix" > .envrc
+direnv allow
 ```
 
 ## Benefits of This Approach
@@ -283,11 +194,9 @@ Ask yourself:
 
 ```bash
 # Update Nix packages
-nix flake update ~/.config/home-manager
-home-manager switch --flake ~/.config/home-manager
-
-# Update Homebrew (for casks and specialized tools)
-brew update && brew upgrade
+cd ~/Documents/GitHub/dotfiles
+nix flake update
+home-manager switch --flake .#chrisloidolt
 ```
 
 ### Updating Project Tools
@@ -303,20 +212,14 @@ devbox update kubectl  # Update specific package
 ### Check What's Installed Where
 
 ```bash
-# Nix packages (global)
-nix-env -q
-
-# Homebrew formulas
-brew list --formula
-
-# Homebrew casks
-brew list --cask
-
-# Devbox packages in current project
-devbox list
+# Nix packages (from Home Manager)
+home-manager packages
 
 # Active commands in shell
 which <command>
+
+# Devbox packages in current project (if using devbox)
+devbox list
 ```
 
 ### Common Devbox Commands
@@ -363,12 +266,7 @@ devbox info           # Show environment info
 devbox list           # List installed packages
 ```
 
-#### Homebrew conflicts
 
-```bash
-brew doctor           # Check for issues
-brew cleanup          # Remove old versions
-```
 
 #### Reset devbox environment
 
@@ -377,18 +275,11 @@ rm -rf .devbox        # Remove cached environment
 devbox shell          # Rebuild from scratch
 ```
 
-## Future Enhancements
 
-- [ ] Create script to bootstrap new projects from templates
-- [ ] Add pre-commit hooks to validate devbox.json
-- [ ] Create custom devbox plugins for common workflows
-- [ ] Document common package names (Homebrew vs Nix)
-- [ ] Add cloud-specific templates (AWS, GCP, Azure)
 
 ## Resources
 
-- [Devbox Documentation](https://www.jetify.com/devbox/docs/)
-- [Devbox Examples](https://www.jetify.com/devbox/docs/examples/)
 - [Nix Package Search](https://search.nixos.org/packages)
 - [Home Manager Options](https://nix-community.github.io/home-manager/options.html)
-- [Project Templates](../project-templates/)
+- [Devbox Documentation](https://www.jetify.com/devbox/docs/)
+- [Nix Pills](https://nixos.org/guides/nix-pills/) - Learn Nix in depth

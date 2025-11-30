@@ -24,11 +24,7 @@ We've added a tmux configuration file (`.tmux.conf`) that enables truecolor supp
    - Adds focus events and other modern terminal features
    - Includes quality-of-life improvements for terminal usage
 
-2. **Updated Install Script**:
-   - Automatically symlinks `.tmux.conf` to `~/.tmux.conf`
-   - Provides instructions for reloading tmux configuration
-
-3. **Documentation**:
+2. **Documentation**:
    - Added `tmux/README.md` with detailed configuration explanation
    - Included troubleshooting steps and testing procedures
 
@@ -187,11 +183,11 @@ This tmux configuration also improves:
 - **Terminal UI apps** - Better rendering for any app using truecolor
 - **General terminal experience** - Focus events, mouse support, etc.
 
-## Files Changed
+## Files Involved
 
-- `tmux/.tmux.conf` - New tmux configuration file
-- `tmux/README.md` - Documentation for tmux configuration
-- `install.sh` - Updated to install tmux configuration
+- `configs/tmux/.tmux.conf` - Tmux configuration file (managed by Home Manager)
+- `configs/tmux/README.md` - Documentation for tmux configuration
+- `home/programs/tmux.nix` - Home Manager tmux configuration
 - `docs/OPENCODE_TMUX_FIX.md` - This document
 
 ## Resources

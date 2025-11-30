@@ -43,11 +43,14 @@ dotfiles/
 │   ├── update.sh               # Update flake inputs
 │   └── validate-nix.sh         # Validate setup
 │
-└── docs/                        # Documentation
+└── docs/               # Documentation
+    ├── SETUP.md                # Setup guide
     ├── NIX_ARCHITECTURE.md     # This file
-    ├── NIX_MIGRATION_GUIDE.md  # Migration guide
     ├── EMERGENCY_PROCEDURES.md # Troubleshooting
-    └── QUICK_REFERENCE.md      # Quick command reference
+    ├── TROUBLESHOOTING.md      # Common issues
+    ├── PACKAGE_MANAGEMENT_GUIDE.md
+    ├── QUICK_REFERENCE.md      # Quick command reference
+    └── OPENCODE_TMUX_FIX.md    # Tmux truecolor fix
 ```
 
 ## How It Works
@@ -378,9 +381,4 @@ sudo nixos-rebuild switch --rollback
 - [Nix Package Search](https://search.nixos.org/)
 - [NixOS Wiki](https://nixos.wiki/)
 
-## Migration Notes
 
-This repository was migrated from Ansible. See:
-- `MIGRATION_README.md` - Migration overview
-- `MIGRATION_LOG.md` - Detailed migration progress
-- `legacy/` - Old Ansible configuration (archived)

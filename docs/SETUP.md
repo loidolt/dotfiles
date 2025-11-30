@@ -1,25 +1,36 @@
 # Development Machine Setup Guide
 
-Complete guide for setting up a new development machine using these dotfiles.
+Complete guide for setting up a new development machine using these dotfiles with Nix and Home Manager.
 
 ## Quick Start
 
+### macOS Setup
+
 ```bash
 # Clone this repository
-git clone https://github.com/yourusername/dotfiles.git ~/dotfiles
-cd ~/dotfiles
+git clone https://github.com/loidolt/dotfiles.git ~/Documents/GitHub/dotfiles
+cd ~/Documents/GitHub/dotfiles
 
-# Run the bootstrap script
-./bootstrap.sh
+# Install Nix (if not already installed)
+sh <(curl -L https://nixos.org/nix/install) --daemon
+
+# Enable flakes
+mkdir -p ~/.config/nix
+echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+
+# Restart your terminal, then activate Home Manager
+nix run home-manager/master -- switch --flake .#chrisloidolt -b backup
+
+# Close and reopen your terminal
 ```
 
-That's it! The script will guide you through the setup process.
+That's it! Everything is now configured.
 
 ## What Gets Installed
 
 ### Core Packages
 - **git, curl, wget** - Essential utilities
-- **vim, tmux** - Terminal tools
+- **vim, neovim, tmux** - Terminal tools
 - **htop, tree, jq** - System utilities
 
 ### Modern CLI Tools
@@ -29,79 +40,33 @@ That's it! The script will guide you through the setup process.
 - **fzf** - Fuzzy finder
 - **eza** - Modern ls replacement
 - **zoxide** - Smart directory jumping
+- **delta** - Better git diffs
+- **lazygit** - Terminal UI for git
 
-### Programming Languages & Runtimes
-- **mise** - Version manager (replaces nvm, rbenv, etc.)
-- **Node.js 20** (LTS) via mise
+### Languages & Runtimes
+- **Node.js 20** (LTS)
 - **Bun** - Fast JavaScript runtime
-- **Python, Go, Rust** (optional)
+- **TypeScript**, **Prettier**, **ESLint**
 
-### Development Tools
-- **Docker** & Docker Desktop (macOS)
-- **GitHub CLI (gh)** - GitHub from terminal
-- **Starship** - Beautiful shell prompt
-
-### Shell Enhancements
-- **oh-my-zsh** - ZSH framework
-- **zsh-autosuggestions** - Command suggestions
-- **zsh-syntax-highlighting** - Syntax highlighting
-
-### GUI Applications (macOS)
-- **VS Code** - Code editor
-- **Chrome/Firefox** - Browsers
-- **Slack/Discord** - Communication
-- **1Password** - Password manager
-- **Rectangle** - Window management
+### Programs
+- **Neovim** v0.11.5 with LSP servers (Lua, Nix, TypeScript, etc.)
+- **Git** v2.51.2 with delta integration
+- **Tmux** v3.6 with truecolor support
+- **Zsh** with oh-my-zsh, autosuggestions, syntax highlighting
+- **Starship** - Modern prompt
+- **FZF** - Fuzzy finder with fd integration
+- **Direnv** - Per-directory environments with nix-direnv
 
 ### Fonts
-- **Nerd Fonts** - Fonts with icons for terminal
+- **FiraCode Nerd Font**
+- **JetBrainsMono Nerd Font**
+- **Meslo Nerd Font**
 
-## Installation Options
-
-### Full Setup
-```bash
-./bootstrap.sh --full
-```
-Installs everything: packages, languages, Docker, GUI apps, dotfiles.
-
-### Minimal Setup
-```bash
-./bootstrap.sh --minimal
-```
-Installs only core packages and dotfiles. No languages, Docker, or GUI apps.
-
-### Dotfiles Only
-```bash
-./bootstrap.sh --dotfiles-only
-```
-Only creates symlinks for configuration files.
-
-### Dry Run
-```bash
-./bootstrap.sh --dry-run
-```
-Shows what would be installed without making changes.
-
-### Interactive
-```bash
-./bootstrap.sh
-```
-Presents a menu to choose what to install.
+See [`home/packages.nix`](../home/packages.nix) for the complete list.
 
 ## Post-Installation Steps
 
-### 1. Configure API Keys
-
-Edit the environment file:
-```bash
-nvim ~/.dotfiles_env
-```
-
-Replace placeholder values with your actual API keys:
-- `REF_API_KEY` - Get from https://ref.tools
-- `CONTEXT7_API_KEY` - Get from https://context7.com
-
-### 2. Restart Terminal
+### 1. Restart Terminal
 
 ```bash
 # Reload shell configuration
@@ -110,304 +75,261 @@ source ~/.zshrc
 # Or restart your terminal app
 ```
 
-### 3. Verify Installation
+### 2. Verify Installation
+
+Check that everything works:
 
 ```bash
-./scripts/validate.sh
+# Check programs point to Nix store
+which nvim
+which tmux
+which git
+# All should show /nix/store/... paths
+
+# Test programs
+nvim --version
+tmux -V
+git --version
+
+# Test modern CLI tools
+ls   # Should use eza with icons
+bat README.md   # Should show syntax highlighting
 ```
 
-This checks that everything is installed correctly.
+### 3. Configure Git (if needed)
+
+```bash
+# Edit git config
+nvim ~/Documents/GitHub/dotfiles/home/programs/git.nix
+
+# Update userName and userEmail, then rebuild
+home-manager switch --flake ~/Documents/GitHub/dotfiles#chrisloidolt
+```
 
 ### 4. Setup SSH Keys (Optional)
 
 ```bash
-./scripts/ssh-setup.sh
-```
+# Generate SSH key
+ssh-keygen -t ed25519 -C "your-email@example.com"
 
-Generates SSH keys and configures them for GitHub.
+# Add to ssh-agent
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_ed25519
+
+# Add public key to GitHub
+cat ~/.ssh/id_ed25519.pub
+# Copy and paste to https://github.com/settings/keys
+```
 
 ## Customization
 
 ### Change Installed Packages
 
-Edit `ansible/group_vars/all.yml`:
+Edit `home/packages.nix`:
 
-```yaml
-packages:
-  core:
-    - git
-    - your-package-here
-  
-  cli_tools:
-    - ripgrep
-    - your-cli-tool
+```nix
+home.packages = with pkgs; [
+  git
+  your-new-package  # Add here
+];
 ```
 
-Then re-run:
+Then rebuild:
 ```bash
-cd ~/dotfiles/ansible
-ansible-playbook setup.yml --tags packages
+home-manager switch --flake ~/Documents/GitHub/dotfiles#chrisloidolt
 ```
 
-### Add New Language Versions
+### Modify Program Configs
 
-```yaml
-languages:
-  install_node: true
-  node_version: "20"  # Change version
-  
-  install_python: true  # Enable Python
-  python_version: "3.11"
-```
+Program configurations are in `home/programs/`:
+- `zsh.nix` - Shell configuration
+- `git.nix` - Git settings
+- `neovim.nix` - Editor setup
+- `tmux.nix` - Terminal multiplexer
+- etc.
 
-### Install Additional GUI Apps
-
-```yaml
-applications:
-  apps:
-    - visual-studio-code
-    - your-app-here
+After making changes:
+```bash
+home-manager switch --flake ~/Documents/GitHub/dotfiles#chrisloidolt
 ```
 
 ## Directory Structure
 
 ```
 dotfiles/
-├── bootstrap.sh           # Main entry point
-├── install.sh             # Dotfiles symlink script
-├── uninstall.sh           # Remove symlinks
+├── flake.nix            # Main entry point
+├── flake.lock           # Locked dependency versions
 │
-├── ansible/               # Automation
-│   ├── setup.yml         # Main playbook
-│   ├── ansible.cfg       # Ansible config
-│   ├── inventory.yml     # Localhost inventory
-│   ├── group_vars/       # Variables
-│   │   └── all.yml      # Package lists
-│   └── roles/            # Ansible roles
-│       ├── packages/    # System packages
-│       ├── languages/   # Node, Python, etc.
-│       ├── docker/      # Docker setup
-│       ├── shell/       # Shell tools
-│       └── applications/ # GUI apps
+├── home/                # Home Manager configuration
+│   ├── default.nix     # Main home configuration
+│   ├── packages.nix    # Package list
+│   └── programs/       # Program-specific configs
+│       ├── zsh.nix
+│       ├── starship.nix
+│       ├── git.nix
+│       ├── tmux.nix
+│       ├── neovim.nix
+│       ├── fzf.nix
+│       └── direnv.nix
 │
-├── scripts/              # Helper scripts
-│   ├── lib/
-│   │   └── utils.sh     # Shared functions
-│   ├── env-setup.sh     # Environment variables
-│   ├── ssh-setup.sh     # SSH configuration
-│   └── validate.sh      # Post-install validation
+├── configs/            # Configuration files
+│   ├── neovim/        # Neovim config
+│   ├── opencode/      # OpenCode AI editor config
+│   ├── ghostty/       # Ghostty terminal config
+│   └── tmux/          # Tmux config
 │
-├── opencode/            # Your existing configs
-├── neovim/              # Your existing configs
+├── hosts/              # Host-specific configs
+│   └── nixos-desktop/ # NixOS configuration
 │
-└── docs/                # Documentation
-    └── SETUP.md         # This file
+├── scripts/            # Helper scripts
+│   ├── rebuild.sh     # Smart rebuild script
+│   ├── update.sh      # Update flake inputs
+│   └── validate-nix.sh # Validation script
+│
+└── docs/               # Documentation
+    ├── SETUP.md        # This file
+    ├── NIX_ARCHITECTURE.md
+    ├── EMERGENCY_PROCEDURES.md
+    ├── TROUBLESHOOTING.md
+    └── QUICK_REFERENCE.md
 ```
 
-## Running Specific Tasks
+## Common Operations
 
-### Install Only Packages
+### Update All Packages
+
 ```bash
-cd ansible
-ansible-playbook setup.yml --tags packages
+cd ~/Documents/GitHub/dotfiles
+
+# Update flake.lock to latest package versions
+nix flake update
+
+# Rebuild with new packages
+home-manager switch --flake .#chrisloidolt
 ```
 
-### Install Only Languages
+### Rollback to Previous Generation
+
+If something breaks:
+
 ```bash
-cd ansible
-ansible-playbook setup.yml --tags languages
+# List all generations
+home-manager generations
+
+# Activate a previous generation
+/nix/store/HASH-home-manager-generation/activate
 ```
 
-### Install Docker
+### Clean Old Generations
+
 ```bash
-cd ansible
-ansible-playbook setup.yml --tags docker
+# Delete generations older than 30 days
+nix-collect-garbage --delete-older-than 30d
+
+# Optimize Nix store (deduplicate)
+nix-store --optimise
 ```
 
-### Update Dotfiles
+### Search for Packages
+
 ```bash
-cd ~/dotfiles
-git pull
-./install.sh
+# Search nixpkgs
+nix search nixpkgs ripgrep
+nix search nixpkgs nodejs
+
+# Or use the website
+# https://search.nixos.org/packages
 ```
 
 ## Troubleshooting
 
-### Homebrew Not Found (macOS ARM)
-
-If running on Apple Silicon and Homebrew isn't found:
-```bash
-eval "$(/opt/homebrew/bin/brew shellenv)"
-```
-
-Then add to your `~/.zshrc`:
-```bash
-eval "$(/opt/homebrew/bin/brew shellenv)"
-```
-
-### Ansible Fails on macOS
-
-Make sure Xcode Command Line Tools are installed:
-```bash
-xcode-select --install
-```
-
-### Permission Errors on Linux
-
-Some tasks require sudo. The script will prompt when needed:
-```bash
-sudo ./bootstrap.sh
-```
-
-### Node/Bun Not Found After Install
-
-The environment needs to be reloaded:
-```bash
-source ~/.dotfiles_env
-# Or restart terminal
-```
-
-### Docker Permission Denied (Linux)
-
-After Docker installation, log out and back in for group changes to take effect:
-```bash
-newgrp docker
-```
-
-Or restart your session.
-
-## Manual Installation Steps
-
-Some things must be done manually:
-
-### System Preferences (macOS)
-- Keyboard repeat rate: System Preferences → Keyboard → Delay/Repeat
-- Trackpad gestures: System Preferences → Trackpad
-- Hot corners: System Preferences → Desktop & Screen Saver
-
-### Application Logins
-- Sign into Chrome/Firefox (sync bookmarks)
-- Sign into VS Code (sync settings)
-- Sign into Slack workspaces
-- Configure 1Password
-
-### Project Repositories
-```bash
-# Clone your work projects
-cd ~/Projects
-git clone git@github.com:org/repo.git
-```
-
-## Advanced Usage
-
-### Running Ansible Directly
-
-You can run Ansible playbooks directly for more control:
+### Build Fails
 
 ```bash
-cd ~/dotfiles/ansible
+# Check for syntax errors
+nix flake check
 
-# Check mode (dry run)
-ansible-playbook setup.yml --check --diff
-
-# Run specific role
-ansible-playbook setup.yml --tags packages
-
-# Skip specific role
-ansible-playbook setup.yml --skip-tags applications
-
-# Verbose output
-ansible-playbook setup.yml -v
+# Build with full trace
+nix build .#homeConfigurations.chrisloidolt.activationPackage --show-trace
 ```
 
-### Updating Packages
+### Terminal Doesn't Start
 
-To update all installed packages:
-
-**macOS:**
 ```bash
-brew update && brew upgrade
+# Rollback to previous generation
+home-manager generations
+/nix/store/PREVIOUS-HASH-home-manager-generation/activate
 ```
 
-**Linux:**
+### Programs Not Found
+
 ```bash
-sudo apt update && sudo apt upgrade
+# Check if in PATH
+echo $PATH | grep nix-profile
+
+# Rebuild
+home-manager switch --flake ~/Documents/GitHub/dotfiles#chrisloidolt
 ```
 
-### Adding Your Own Scripts
+### Config Changes Not Applied
 
-1. Create script in `scripts/`:
 ```bash
-touch scripts/my-setup.sh
-chmod +x scripts/my-setup.sh
+# Make sure files are tracked by git
+git status
+
+# Rebuild (use --impure if you have uncommitted changes)
+home-manager switch --flake ~/Documents/GitHub/dotfiles#chrisloidolt --impure
 ```
 
-2. Source utilities:
-```bash
-#!/usr/bin/env bash
-source "$(dirname "$0")/lib/utils.sh"
-
-section "My Setup"
-info "Doing something..."
-success "Done!"
-```
-
-3. Call from `bootstrap.sh` if needed.
+See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for more detailed troubleshooting steps.
 
 ## Keeping Dotfiles Updated
 
 ### Pull Latest Changes
+
 ```bash
-cd ~/dotfiles
+cd ~/Documents/GitHub/dotfiles
 git pull
 ```
 
-### Update Packages
+### Rebuild After Pull
+
 ```bash
-cd ~/dotfiles/ansible
-ansible-playbook setup.yml --tags packages
+home-manager switch --flake ~/Documents/GitHub/dotfiles#chrisloidolt
 ```
 
-### Re-run Full Setup
-```bash
-cd ~/dotfiles
-./bootstrap.sh --full
-```
-
-The scripts are idempotent - safe to run multiple times!
-
-## Backing Up Your Configuration
+### Backup Your Configuration
 
 Before major changes:
 ```bash
-cd ~/dotfiles
+cd ~/Documents/GitHub/dotfiles
 git status          # Check what's changed
 git add .
 git commit -m "Backup before changes"
 git push
 ```
 
-## Getting Help
-
-- Check `README.md` for overview
-- Check this file for detailed setup
-- Check `ansible/group_vars/all.yml` for configuration options
-- Run `./scripts/validate.sh` to diagnose issues
-- Check individual script files for inline documentation
-
 ## Security Notes
 
-- Never commit real API keys to git
-- Use `~/.dotfiles_env` for secrets (not tracked)
+- Never commit API keys or secrets to git
+- Use environment variables for sensitive data
 - SSH private keys stay local (never copy between machines)
 - Use password manager for sensitive credentials
 
 ## Next Steps
 
 After setup:
-1. Customize shell prompt (edit Starship config)
-2. Add your favorite VS Code extensions
-3. Configure Git globally (`git config --global user.name "..."`)
-4. Explore Neovim plugins
+1. Customize shell prompt (edit Starship config in `home/programs/starship.nix`)
+2. Configure Git globally (edit `home/programs/git.nix`)
+3. Explore Neovim plugins (`configs/neovim/`)
+4. Set up project-specific environments with direnv
+
+## Getting Help
+
+- Check [README.md](../README.md) for overview
+- Check [NIX_ARCHITECTURE.md](NIX_ARCHITECTURE.md) for how it works
+- Check [EMERGENCY_PROCEDURES.md](EMERGENCY_PROCEDURES.md) for recovery
+- Check [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for common issues
+- Check [QUICK_REFERENCE.md](QUICK_REFERENCE.md) for command reference
 
 Enjoy your new development environment! 🚀

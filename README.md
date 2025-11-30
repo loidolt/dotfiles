@@ -1,7 +1,5 @@
 # Dotfiles
 
-> **⚠️ Currently migrating from Ansible to Nix!** See [MIGRATION_README.md](MIGRATION_README.md) for details.
-
 Declarative, reproducible development environment managed with **Nix** and **Home Manager**.
 
 ## Overview
@@ -25,9 +23,7 @@ This repository provides a **declarative development environment** that includes
 - **OpenCode** - AI-powered code editor CLI
 - **Ghostty** - GPU-accelerated terminal emulator
 
-### Legacy System (Being Phased Out)
-- **Ansible automation** - In `legacy/` directory (archived)
-- Use Nix instead for new installations
+
 
 ## Repository Structure
 
@@ -62,13 +58,14 @@ dotfiles/
 ├── scripts/            # 🔧 Helper scripts
 │   └── validate-nix.sh # Validation script
 │
-├── docs/               # 📚 Documentation
-│   ├── NIX_MIGRATION_GUIDE.md
-│   ├── EMERGENCY_PROCEDURES.md
-│   └── QUICK_REFERENCE.md
-│
-├── ansible/            # 🗄️ Legacy - being phased out
-└── MIGRATION_README.md # Migration guide
+└── docs/               # 📚 Documentation
+    ├── SETUP.md           # Setup guide
+    ├── NIX_ARCHITECTURE.md
+    ├── EMERGENCY_PROCEDURES.md
+    ├── PACKAGE_MANAGEMENT_GUIDE.md
+    ├── TROUBLESHOOTING.md
+    ├── QUICK_REFERENCE.md
+    └── OPENCODE_TMUX_FIX.md
 ```
 
 ## Quick Start
@@ -210,18 +207,7 @@ After making changes, rebuild:
 home-manager switch --flake .#chrisloidolt
 ```
 
-## Migration Status
 
-- ✅ **Phase 0**: Nix installation complete
-- ✅ **Phase 1**: Flake structure created
-- ✅ **Phase 2**: Home Manager active on macOS
-- ✅ **Phase 3**: NixOS VM testing complete
-- ⏭️ **Phase 4**: NixOS production (skipped)
-- ⏭️ **Phase 5**: WSL2 configuration (skipped)
-- 🔄 **Phase 6**: Validation & cleanup (in progress)
-- ⬜ **Phase 7**: Documentation & polish
-
-See [MIGRATION_README.md](MIGRATION_README.md) for full details.
 
 ## Advanced Usage
 
@@ -273,14 +259,17 @@ nix search nixpkgs nodejs
 
 ### Documentation
 
-- **[MIGRATION_README.md](MIGRATION_README.md)** - Migration guide and overview
-- **[docs/NIX_MIGRATION_GUIDE.md](docs/NIX_MIGRATION_GUIDE.md)** - Detailed Nix setup
-- **[docs/EMERGENCY_PROCEDURES.md](docs/EMERGENCY_PROCEDURES.md)** - Troubleshooting
+- **[docs/SETUP.md](docs/SETUP.md)** - Complete setup guide
+- **[docs/NIX_ARCHITECTURE.md](docs/NIX_ARCHITECTURE.md)** - How Nix configuration works
+- **[docs/EMERGENCY_PROCEDURES.md](docs/EMERGENCY_PROCEDURES.md)** - Recovery and troubleshooting
+- **[docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** - Common issues and solutions
 - **[docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md)** - Command reference
+- **[docs/PACKAGE_MANAGEMENT_GUIDE.md](docs/PACKAGE_MANAGEMENT_GUIDE.md)** - Managing packages with Nix
 - **Config READMEs:**
   - [configs/opencode/README.md](configs/opencode/README.md)
   - [configs/neovim/README.md](configs/neovim/README.md)
   - [configs/tmux/README.md](configs/tmux/README.md)
+  - [configs/ghostty/README.md](configs/ghostty/README.md)
 
 ## How It Works
 
