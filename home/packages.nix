@@ -30,6 +30,7 @@
     # Development tools
     nodejs_20    # Node.js LTS
     bun          # Fast JavaScript runtime
+    devbox       # Project-specific dev environments
     
     # Node global packages (we'll manage these with Nix instead)
     nodePackages.typescript
@@ -41,6 +42,21 @@
     gh           # GitHub CLI
     delta        # Better git diffs
     lazygit      # Terminal UI for git
+    
+    # System monitoring and management
+    btop         # Better system monitor
+    
+    # Network and remote access
+    mosh         # Mobile shell for unstable connections
+    
+    # Archive utilities
+    p7zip        # 7-Zip archive support
+    
+    # Document processing
+    pandoc       # Universal document converter
+    
+    # Container management
+    lazydocker   # Docker TUI
     
     # Editors and IDEs
     vscode       # Visual Studio Code

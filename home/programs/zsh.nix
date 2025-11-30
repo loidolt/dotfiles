@@ -30,6 +30,10 @@
       tl = "tmux ls";
       tn = "tmux new -s";
       
+      # Home Manager aliases
+      hm = "home-manager switch --flake ~/Documents/GitHub/dotfiles#chrisloidolt";
+      hms = "home-manager switch --flake ~/Documents/GitHub/dotfiles#chrisloidolt";
+      
       # Convenience
       ".." = "cd ..";
       "..." = "cd ../..";

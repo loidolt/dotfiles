@@ -1,0 +1,40 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/main/.schema/devbox.schema.json",
+  "packages": [
+    "go@1.22",
+    "gopls@latest",
+    "gotools@latest",
+    "golangci-lint@latest",
+    "delve@latest"
+  ],
+  "shell": {
+    "init_hook": [
+      "echo '🐹 Go development environment loaded'",
+      "echo ''",
+      "go version",
+      "echo ''",
+      "echo 'Available tools: go, gopls (LSP), golangci-lint, dlv (debugger)'"
+    ],
+    "scripts": {
+      "test": [
+        "go test ./..."
+      ],
+      "build": [
+        "go build -v ./..."
+      ],
+      "lint": [
+        "golangci-lint run"
+      ],
+      "fmt": [
+        "go fmt ./..."
+      ],
+      "tidy": [
+        "go mod tidy"
+      ]
+    }
+  },
+  "env": {
+    "GOPATH": "$PWD/.devbox/go",
+    "GO111MODULE": "on"
+  }
+}

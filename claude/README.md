@@ -23,8 +23,7 @@ Sync servers to `~/.claude.json` for personal use across all projects (requires 
 
 | Server | Type | Description | Requirements |
 |--------|------|-------------|--------------|
-| **ref** | stdio | Documentation and reference search | `REF_API_KEY` env var |
-| **sequentialthinking** | stdio/docker | Advanced reasoning capabilities | Docker installed |
+| **sequentialthinking** | docker | Advanced reasoning capabilities | Docker installed |
 | **playwright** | stdio | Browser automation and testing | None (npx) |
 | **cloudflare** | remote | Cloudflare documentation access | None (via mcp-remote) |
 | **mui** | stdio | Material-UI documentation | None (npx) |
@@ -37,18 +36,11 @@ Sync servers to `~/.claude.json` for personal use across all projects (requires 
 ### Quick Start
 
 ```bash
-# 1. Set up environment variables in ~/.zshrc
-echo 'export REF_API_KEY="your_key_here"' >> ~/.zshrc
-source ~/.zshrc
-
-# 2. Generate .mcp.json in your project
+# 1. Generate .mcp.json in your project
 cd ~/path/to/project
 node ~/Documents/GitHub/dotfiles/claude/generate-project-mcp.js
 
-# 3. Launch Claude Code from terminal (to inherit env vars)
-open -a Claude
-
-# 4. Restart Claude Code and approve MCP servers
+# 2. Restart Claude Code and approve MCP servers
 ```
 
 ## Usage
@@ -146,15 +138,15 @@ MCP servers often require API keys or other environment variables. Claude Code s
 
 **Recommended approach:**
 
-1. **Use environment variable expansion in `mcp-servers.json`**:
+1. **Use environment variable expansion in `mcp-servers.json`** when needed:
    ```json
    {
      "mcpServers": {
-       "ref": {
+       "your-server": {
          "command": "npx",
-         "args": ["-y", "@ref-tools/mcp-server"],
+         "args": ["-y", "@your/mcp-server"],
          "env": {
-           "REF_API_KEY": "${REF_API_KEY}"
+           "YOUR_API_KEY": "${YOUR_API_KEY}"
          }
        }
      }
@@ -163,7 +155,7 @@ MCP servers often require API keys or other environment variables. Claude Code s
 
 2. **Set actual values in your shell profile** (`~/.zshrc`, `~/.bashrc`, etc.):
    ```bash
-   export REF_API_KEY="your_actual_key_here"
+   export YOUR_API_KEY="your_actual_key_here"
    ```
 
 3. **Restart your terminal** and launch Claude Code from the terminal to inherit env vars
@@ -175,7 +167,7 @@ MCP servers often require API keys or other environment variables. Claude Code s
 - ✅ Follows Claude Code's documented best practices
 
 **Alternative (not recommended for committed configs):**
-- Put the actual API key directly in the config: `"REF_API_KEY": "actual_key_123"`
+- Put the actual API key directly in the config: `"YOUR_API_KEY": "actual_key_123"`
 - Only use this for local-only configurations
 
 ## Per-Project MCP Servers
@@ -262,14 +254,13 @@ The project-scoped `.mcp.json` approach is better because:
 
 1. **Check if env vars are set**:
    ```bash
-   echo $REF_API_KEY
+   echo $YOUR_API_KEY
    # Should show your key, not empty
    ```
 
 2. **Ensure variables are exported in your shell profile** (`~/.zshrc` for zsh):
    ```bash
-   export REF_API_KEY="your_key_here"
-   export CONTEXT7_API_KEY="your_key_here"
+   export YOUR_API_KEY="your_key_here"
    ```
 
 3. **Restart your terminal** to reload the profile:
@@ -286,9 +277,9 @@ The project-scoped `.mcp.json` approach is better because:
 5. **Verify the config syntax** in `.mcp.json`:
    ```json
    "env": {
-     "REF_API_KEY": "${REF_API_KEY}"  // ✅ Correct
-     // NOT: "REF_API_KEY": ""         // ❌ Won't expand
-     // NOT: "REF_API_KEY": "{env:...}" // ❌ Wrong syntax
+     "YOUR_API_KEY": "${YOUR_API_KEY}"  // ✅ Correct
+     // NOT: "YOUR_API_KEY": ""         // ❌ Won't expand
+     // NOT: "YOUR_API_KEY": "{env:...}" // ❌ Wrong syntax
    }
    ```
 

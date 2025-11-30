@@ -1,0 +1,44 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/main/.schema/devbox.schema.json",
+  "packages": [
+    "ansible@latest",
+    "ansible-lint@latest",
+    "yamllint@latest",
+    "terraform@latest",
+    "packer@latest",
+    "jq@latest"
+  ],
+  "shell": {
+    "init_hook": [
+      "echo '🏗️  Infrastructure development environment loaded'",
+      "echo ''",
+      "ansible --version | head -n 1",
+      "terraform version | head -n 1",
+      "echo ''",
+      "echo 'Available tools: ansible, ansible-lint, yamllint, terraform, packer, jq'"
+    ],
+    "scripts": {
+      "ansible-check": [
+        "ansible-playbook --syntax-check playbook.yml"
+      ],
+      "ansible-lint": [
+        "ansible-lint"
+      ],
+      "yaml-lint": [
+        "yamllint ."
+      ],
+      "tf-init": [
+        "terraform init"
+      ],
+      "tf-plan": [
+        "terraform plan"
+      ],
+      "tf-fmt": [
+        "terraform fmt -recursive"
+      ],
+      "tf-validate": [
+        "terraform validate"
+      ]
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/main/.schema/devbox.schema.json",
+  "packages": [
+    "nodejs_22@latest",
+    "pnpm@latest",
+    "nodePackages.typescript@latest",
+    "nodePackages.typescript-language-server@latest"
+  ],
+  "shell": {
+    "init_hook": [
+      "echo '⚡ Node.js development environment loaded'",
+      "echo ''",
+      "node --version",
+      "pnpm --version",
+      "echo ''",
+      "echo 'Available tools: node, pnpm, typescript, tsserver (LSP)'"
+    ],
+    "scripts": {
+      "install": [
+        "pnpm install"
+      ],
+      "dev": [
+        "pnpm dev"
+      ],
+      "build": [
+        "pnpm build"
+      ],
+      "test": [
+        "pnpm test"
+      ],
+      "lint": [
+        "pnpm lint"
+      ],
+      "format": [
+        "pnpm format"
+      ]
+    }
+  }
+}

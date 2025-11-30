@@ -37,10 +37,12 @@
   
   # Nix configuration
   nix = {
+    # Use the Nix package from nixpkgs
+    package = pkgs.nix;
+    
     # Enable automatic garbage collection
     gc = {
       automatic = true;
-      frequency = "weekly";
       options = "--delete-older-than 30d";
     };
     

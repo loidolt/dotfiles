@@ -1,0 +1,51 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/main/.schema/devbox.schema.json",
+  "packages": [
+    "python312@latest",
+    "poetry@latest",
+    "python312Packages.pip@latest",
+    "python312Packages.virtualenv@latest",
+    "ruff@latest",
+    "mypy@latest",
+    "pytest@latest"
+  ],
+  "shell": {
+    "init_hook": [
+      "echo '🐍 Python development environment loaded'",
+      "echo ''",
+      "python --version",
+      "poetry --version 2>/dev/null || echo 'Poetry: ready'",
+      "echo ''",
+      "# Create virtual environment if it doesn't exist",
+      "if [ ! -d .venv ]; then",
+      "  echo 'Creating virtual environment...'",
+      "  python -m venv .venv",
+      "fi",
+      "# Activate virtual environment",
+      "source .venv/bin/activate",
+      "echo 'Virtual environment activated'",
+      "echo ''",
+      "echo 'Available tools: python, poetry, pip, ruff (linter), mypy (type checker), pytest'"
+    ],
+    "scripts": {
+      "test": [
+        "source .venv/bin/activate && pytest"
+      ],
+      "lint": [
+        "ruff check ."
+      ],
+      "format": [
+        "ruff format ."
+      ],
+      "typecheck": [
+        "mypy ."
+      ],
+      "install": [
+        "source .venv/bin/activate && poetry install"
+      ],
+      "install-pip": [
+        "source .venv/bin/activate && pip install -r requirements.txt"
+      ]
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/main/.schema/devbox.schema.json",
+  "packages": [
+    "kubectl@latest",
+    "kubernetes-helm@latest",
+    "k9s@latest",
+    "argocd@latest",
+    "grpcurl@latest"
+  ],
+  "shell": {
+    "init_hook": [
+      "echo '🚀 Kubernetes development environment loaded'",
+      "echo ''",
+      "kubectl version --client 2>/dev/null || echo 'kubectl: ready'",
+      "echo 'Available tools: kubectl, helm, k9s, argocd, grpcurl'"
+    ],
+    "scripts": {
+      "check-cluster": [
+        "kubectl cluster-info"
+      ],
+      "dashboard": [
+        "k9s"
+      ]
+    }
+  }
+}

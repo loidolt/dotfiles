@@ -31,7 +31,10 @@
       # Home Manager standalone (for macOS ARM)
       homeConfigurations = {
         "${username}" = home-manager.lib.homeManagerConfiguration {
-          pkgs = nixpkgs.legacyPackages.aarch64-darwin;
+          pkgs = import nixpkgs {
+            system = "aarch64-darwin";
+            config.allowUnfree = true;
+          };
           extraSpecialArgs = { inherit inputs username; };
           modules = [ ./home ];
         };
