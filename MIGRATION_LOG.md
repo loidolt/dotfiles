@@ -1,7 +1,7 @@
 # NixOS Migration Progress Log
 
 **Started:** 2025-11-29  
-**Current Phase:** 3 of 7 (Ready for NixOS VM testing)  
+**Current Phase:** 4 of 7 (Phase 3 complete - NixOS VM tested successfully!)  
 **Last Updated:** 2025-11-29  
 **Migration Branch:** nix-migration
 
@@ -14,7 +14,7 @@
 | 0: Preparation | ✅ Complete | 2025-11-29 | Nix 2.32.4 installed, flakes enabled |
 | 1: Foundation | ✅ Complete | 2025-11-29 | Flake builds successfully |
 | 2: Core Config | ✅ Complete | 2025-11-29 | Home Manager active on macOS! 🎉 |
-| 3: NixOS VM | ⬜ Not Started | | |
+| 3: NixOS VM | ✅ Complete | 2025-11-29 | Parallels ARM64 VM, all packages working 🚀 |
 | 4: NixOS Production | ⬜ Not Started | | |
 | 5: WSL2 | ⬜ Not Started | | |
 | 6: Validation | ⬜ Not Started | | |
@@ -223,55 +223,86 @@ nix run home-manager/master -- switch --flake .#chrisloidolt -b backup
 
 ## Phase 3: NixOS Test Environment (VM)
 
-**Status:** ⬜ Not Started  
-**Started:** [Date]  
-**Completed:** [Date]  
-**Estimated Time:** 6 hours (2-3 sessions)
+**Status:** ✅ Complete  
+**Started:** 2025-11-29  
+**Completed:** 2025-11-29  
+**Estimated Time:** 6 hours (completed in ~2 hours - VM was pre-installed)
 
 ### Tasks
-- [ ] 3.1: Download NixOS ISO
-- [ ] 3.2: Create VM (VirtualBox/UTM)
-- [ ] 3.3: Install NixOS manually in VM
-- [ ] 3.4: Clone dotfiles and test NixOS config
-- [ ] 3.5: Activate NixOS config in VM
-- [ ] 3.6: Test KDE Plasma desktop
+- [x] 3.1: Used existing Parallels VM (NixOS already installed)
+- [x] 3.2: Connected to VM at 10.211.55.8
+- [x] 3.3: Verified NixOS 25.05 installation
+- [x] 3.4: Cloned dotfiles from GitHub (nix-migration branch)
+- [x] 3.5: Created and activated NixOS config in VM
+- [x] 3.6: Tested all components and packages
 
 ### Validation Checklist (In VM)
-- [ ] VM boots to KDE login
-- [ ] Can log in with user account
-- [ ] Konsole terminal opens
-- [ ] Zsh with starship prompt
-- [ ] Neovim works
-- [ ] Tmux works
-- [ ] Docker installed: `docker --version`
-- [ ] All packages available
-- [ ] KDE Plasma 6 running
-- [ ] Can browse web (Firefox)
+- [x] VM boots with KDE Plasma 6
+- [x] Can log in with user account (loidolt)
+- [x] Konsole terminal available
+- [x] Zsh with starship prompt v1.24.1
+- [x] Neovim v0.11.5 works
+- [x] Tmux v3.6 works
+- [x] Docker v28.5.1 installed and working
+- [x] All packages verified: eza, bat, rg, fd, zoxide
+- [x] KDE Plasma 6 running smoothly
+- [x] Firefox available
+- [x] Home Manager active and managing user environment
 
 ### Git Checkpoints
 ```bash
-# After VM success:
+# Commands executed:
 git add hosts/nixos-desktop/
-git commit -m "Phase 3 complete: NixOS config tested in VM"
-git tag -a phase-3-complete -m "NixOS working in VM"
+git commit -m "Phase 3: Add NixOS configuration for VM"
+git push origin nix-migration
+git tag -a phase-3-complete -m "Phase 3: NixOS VM testing complete"
 git push origin nix-migration --tags
 ```
 
 ### VM Configuration
-**VM Software:** VirtualBox / UTM  
-**RAM:** 4GB / 8GB  
-**Disk:** 30GB  
-**ISO Version:**  
-**VM Disk Device:** /dev/sda or /dev/vda
+**VM Software:** Parallels Desktop (macOS ARM)  
+**Platform:** aarch64-linux  
+**RAM:** Configured in Parallels  
+**NixOS Version:** 25.05.813095.1c8ba8d3f763 (Warbler)  
+**Kernel:** Linux 6.12.58 #1-NixOS  
+**IP Address:** 10.211.55.8  
+**Username:** loidolt (different from macOS username)  
+**Disk:** Managed by Parallels  
+
+### Configuration Files Created
+- `hosts/nixos-desktop/default.nix` - Main NixOS configuration
+- `hosts/nixos-desktop/hardware-configuration.nix` - Hardware-specific config
+- Updated `flake.nix` to include NixOS configuration with Home Manager integration
 
 ### Notes
-**Installation Commands:**
-[Document exact partition commands used]
+**Quick Setup Process:**
+1. Connected to existing Parallels VM via SSH
+2. Enabled flakes in temporary /etc/nixos/configuration.nix
+3. Cloned dotfiles repository to VM
+4. Created NixOS configuration files locally
+5. Fixed package references (konsole → kdePackages.konsole)
+6. Successfully built and switched to new configuration
+7. All packages and Home Manager working perfectly
 
 **Hardware Config Location:**
-`hosts/nixos-desktop/hardware-configuration.nix` (from VM)
+`hosts/nixos-desktop/hardware-configuration.nix` (from VM, Parallels-specific)
 
-**KDE Working:** Yes/No
+**Key Settings:**
+- Parallels Tools enabled
+- Username in VM: "loidolt" (vs macOS "chrisloidolt")
+- Timezone: America/Denver
+- Desktop: KDE Plasma 6
+- Services: Docker, SSH, NetworkManager, PipeWire
+
+**Flake Configuration:**
+The flake uses a separate `vmUsername = "loidolt"` variable to handle the different username in the VM while keeping the macOS username as `chrisloidolt`.
+
+**All Tests Passed:**
+✅ Build successful  
+✅ System switch successful  
+✅ All programs working  
+✅ Home Manager active  
+✅ Can rebuild with: `sudo nixos-rebuild switch --flake ~/dotfiles#nixos-desktop`
 
 ---
 
