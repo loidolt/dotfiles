@@ -12,9 +12,11 @@ This repository uses **Nix Flakes** and **Home Manager** to provide a declarativ
 dotfiles/
 ├── flake.nix                    # Entry point - defines all inputs and outputs
 ├── flake.lock                   # Locked versions of all dependencies
+├── user.nix                     # User-specific values (username, git, timezone)
 │
 ├── home/                        # Home Manager user environment
 │   ├── default.nix             # Main home configuration
+│   ├── dotfiles.nix            # DOTFILES path configuration
 │   ├── packages.nix            # Package declarations
 │   └── programs/               # Program-specific configurations
 │       ├── zsh.nix
@@ -25,32 +27,44 @@ dotfiles/
 │       ├── fzf.nix
 │       └── direnv.nix
 │
-├── hosts/                       # System-level configurations
-│   ├── nixos-desktop/          # NixOS configuration
-│   │   ├── default.nix
-│   │   └── hardware-configuration.nix
-│   ├── darwin/                 # macOS (nix-darwin) - future
-│   └── wsl/                    # WSL2 configuration - future
+├── hosts/                       # Host-specific configurations
+│   ├── darwin/                 # macOS (nix-darwin)
+│   │   └── default.nix
+│   ├── nixos-desktop/          # NixOS ARM64 (Parallels, etc.)
+│   │   └── default.nix
+│   ├── nixos-desktop-x86/      # NixOS x86_64 (VMware, bare metal)
+│   │   └── default.nix
+│   ├── nixos-headless/         # NixOS headless server
+│   │   └── default.nix
+│   └── wsl/                    # WSL2 configuration
+│       └── default.nix
+│
+├── modules/                     # Shared configuration modules
+│   ├── shared/                 # Cross-platform modules
+│   │   ├── nix-settings.nix   # Nix daemon configuration
+│   │   └── fonts.nix          # Font packages
+│   └── nixos/                  # NixOS-specific modules
+│       ├── base.nix           # Common NixOS settings
+│       ├── graphical.nix      # Desktop environment
+│       └── headless.nix       # Server profile
 │
 ├── configs/                     # Raw configuration files
-│   ├── neovim/                 # Neovim config (LazyVim)
+│   ├── neovim/                 # Neovim config (Lua)
 │   ├── opencode/               # OpenCode AI editor config
-│   ├── ghostty/                # Ghostty terminal config
-│   └── tmux/                   # Tmux config
+│   └── ghostty/                # Ghostty terminal config
 │
 ├── scripts/                     # Helper scripts
 │   ├── rebuild.sh              # Smart rebuild (auto-detects platform)
 │   ├── update.sh               # Update flake inputs
 │   └── validate-nix.sh         # Validate setup
 │
-└── docs/               # Documentation
+└── docs/                        # Documentation
     ├── SETUP.md                # Setup guide
     ├── NIX_ARCHITECTURE.md     # This file
     ├── EMERGENCY_PROCEDURES.md # Troubleshooting
     ├── TROUBLESHOOTING.md      # Common issues
     ├── PACKAGE_MANAGEMENT_GUIDE.md
-    ├── QUICK_REFERENCE.md      # Quick command reference
-    └── OPENCODE_TMUX_FIX.md    # Tmux truecolor fix
+    └── QUICK_REFERENCE.md      # Quick command reference
 ```
 
 ## How It Works
@@ -59,31 +73,54 @@ dotfiles/
 
 The `flake.nix` file is the entry point for the entire configuration. It:
 
-- **Defines inputs**: External dependencies (nixpkgs, home-manager, etc.)
-- **Defines outputs**: What this flake provides (configurations for different platforms)
-- **Manages versions**: Via `flake.lock` for reproducibility
+- **Defines inputs**: External dependencies (nixpkgs, home-manager, nix-darwin, nixos-wsl)
+- **Defines outputs**: Configurations for different platforms
+- **Provides helper functions**: `mkNixosHost`, `mkDarwinHost`, `mkHomeConfig` to reduce boilerplate
+- **Imports user config**: From `user.nix` for personalization
 
 ```nix
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    home-manager = {
-      url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    home-manager.url = "github:nix-community/home-manager";
+    nix-darwin.url = "github:LnL7/nix-darwin";
+    nixos-wsl.url = "github:nix-community/NixOS-WSL";
   };
   
-  outputs = { nixpkgs, home-manager, ... }: {
-    # Home Manager for macOS
-    homeConfigurations.chrisloidolt = ...;
-    
-    # NixOS system configuration
-    nixosConfigurations.nixos-desktop = ...;
+  outputs = { ... }: {
+    # Helper functions reduce boilerplate
+    darwinConfigurations.darwin-arm64 = mkDarwinHost { ... };
+    nixosConfigurations.nixos-desktop = mkNixosHost { ... };
+    homeConfigurations.chrisloidolt = mkHomeConfig { ... };
   };
 }
 ```
 
-### 2. Home Manager (User Environment)
+### 2. User Configuration (`user.nix`)
+
+Centralized user-specific values that can be easily customized:
+
+```nix
+{
+  username = "chrisloidolt";
+  vmUsername = "loidolt";
+  git = {
+    name = "Chris Loidolt";
+    email = "477898+loidolt@users.noreply.github.com";
+  };
+  timezone = "America/Denver";
+  locale = "en_US.UTF-8";
+}
+```
+
+### 3. Shared Modules (`modules/shared/`)
+
+Cross-platform modules eliminate duplication:
+
+- **`nix-settings.nix`**: Flakes, caches, garbage collection (works on Darwin, NixOS, and Home Manager)
+- **`fonts.nix`**: Nerd Fonts configuration
+
+### 4. Home Manager (User Environment)
 
 Home Manager manages your user-level environment:
 
@@ -103,64 +140,40 @@ Nix builds all configurations
 Creates symlinks in ~/.config/, ~/.nix-profile/, etc.
 ```
 
-**What Home Manager Does:**
-- Installs packages to `/nix/store/`
-- Creates symlinks from Nix store to your home directory
-- Manages program configurations
-- Handles environment variables and shell setup
-- Can be rolled back to previous generations
+### 5. NixOS Configurations
 
-### 3. NixOS (System Configuration)
-
-For NixOS systems, the system-level configuration is in `hosts/nixos-desktop/`:
+NixOS hosts import hardware config from `/etc/nixos/` (not tracked in git):
 
 ```nix
-hosts/nixos-desktop/
-├── default.nix                 # System configuration
-└── hardware-configuration.nix  # Hardware-specific settings
+# hosts/nixos-desktop/default.nix
+{
+  imports = [
+    /etc/nixos/hardware-configuration.nix  # Machine-specific
+    ../../modules/shared/nix-settings.nix
+    ../../modules/nixos/base.nix
+    ../../modules/nixos/graphical.nix
+  ];
+}
 ```
 
-**NixOS Configuration Flow:**
-```
-flake.nix
-    ↓
-hosts/nixos-desktop/default.nix
-    ├── System packages
-    ├── Services (Docker, SSH, etc.)
-    ├── Desktop environment (KDE Plasma)
-    └── Home Manager integration
-        ↓
-    home/default.nix (user config)
-```
+**Important:** NixOS configurations require `--impure` flag because hardware config is external to the flake.
 
-### 4. Platform Detection
+### 6. Platform Support
 
-The repository supports multiple platforms:
-
-- **macOS**: Home Manager standalone
-- **NixOS**: NixOS system + Home Manager
-- **WSL2**: NixOS-WSL + Home Manager (future)
-
-The `scripts/rebuild.sh` script automatically detects your platform and runs the appropriate rebuild command.
+| Platform | Configuration | Command |
+|----------|--------------|---------|
+| macOS (Darwin) | `darwinConfigurations.darwin-arm64` | `darwin-rebuild switch --flake .#darwin-arm64` |
+| macOS (Home Manager only) | `homeConfigurations.chrisloidolt` | `home-manager switch --flake .#chrisloidolt` |
+| NixOS ARM64 | `nixosConfigurations.nixos-desktop` | `sudo nixos-rebuild switch --flake .#nixos-desktop --impure` |
+| NixOS x86_64 | `nixosConfigurations.nixos-desktop-x86` | `sudo nixos-rebuild switch --flake .#nixos-desktop-x86 --impure` |
+| NixOS Headless | `nixosConfigurations.nixos-headless` | `sudo nixos-rebuild switch --flake .#nixos-headless --impure` |
+| WSL2 | `nixosConfigurations.wsl` | `sudo nixos-rebuild switch --flake .#wsl` |
 
 ## Key Concepts
 
 ### Declarative Configuration
 
 Everything is declared in `.nix` files. You describe **what** you want, not **how** to get it.
-
-**Example:** Instead of:
-```bash
-brew install neovim
-brew install tmux
-# ... manual configuration ...
-```
-
-You write:
-```nix
-home.packages = [ pkgs.neovim pkgs.tmux ];
-programs.neovim.enable = true;
-```
 
 ### Reproducibility
 
@@ -188,93 +201,7 @@ home-manager generations        # macOS
 nixos-rebuild list-generations  # NixOS
 
 # Rollback to previous generation
-/nix/store/HASH-home-manager-generation/activate
 sudo nixos-rebuild switch --rollback
-```
-
-## Configuration Layers
-
-### Layer 1: Packages (`home/packages.nix`)
-
-Basic package installation:
-
-```nix
-home.packages = with pkgs; [
-  git
-  neovim
-  tmux
-  # ...
-];
-```
-
-### Layer 2: Program Configuration (`home/programs/`)
-
-Program-specific settings using Home Manager modules:
-
-```nix
-programs.git = {
-  enable = true;
-  userName = "Your Name";
-  userEmail = "you@example.com";
-  # ...
-};
-```
-
-### Layer 3: Raw Config Files (`configs/`)
-
-For programs not fully supported by Home Manager:
-
-```nix
-xdg.configFile."nvim" = {
-  source = ../configs/neovim;
-  recursive = true;
-};
-```
-
-### Layer 4: System Configuration (`hosts/`)
-
-NixOS-only system-level settings:
-
-```nix
-services.docker.enable = true;
-services.openssh.enable = true;
-# ...
-```
-
-## Build Process
-
-### macOS (Home Manager)
-
-```bash
-# User runs:
-home-manager switch --flake .#chrisloidolt
-
-# What happens:
-1. Nix evaluates flake.nix
-2. Reads home/default.nix and all imports
-3. Builds derivations in /nix/store/
-4. Creates generation number N
-5. Creates symlinks:
-   ~/.config/ → /nix/store/.../config/
-   ~/.nix-profile/ → /nix/store/.../profile/
-6. Runs activation scripts
-7. Updates shell environment
-```
-
-### NixOS
-
-```bash
-# User runs:
-sudo nixos-rebuild switch --flake .#nixos-desktop
-
-# What happens:
-1. Nix evaluates flake.nix
-2. Reads hosts/nixos-desktop/default.nix
-3. Integrates Home Manager configuration
-4. Builds system closure
-5. Creates generation number N
-6. Switches system to new generation
-7. Activates services, updates boot loader
 ```
 
 ## Common Operations
@@ -295,25 +222,20 @@ scripts/update.sh
 scripts/update.sh --input nixpkgs
 ```
 
-### Rolling Back
+### Customizing for Your Setup
 
-```bash
-# macOS
-home-manager generations
-/nix/store/PREVIOUS-HASH/activate
+1. Edit `user.nix` with your username, git config, timezone
+2. Rebuild
 
-# NixOS
-sudo nixos-rebuild switch --rollback
-```
+### Adding a New NixOS Host
 
-### Garbage Collection
-
-```bash
-# Delete old generations
-nix-collect-garbage --delete-older-than 30d
-
-# Optimize store (deduplicate)
-nix-store --optimise
+```nix
+# In flake.nix, add to nixosConfigurations:
+my-new-host = mkNixosHost {
+  system = "x86_64-linux";
+  hostPath = ./hosts/my-new-host;
+  hostUsername = vmUsername;
+};
 ```
 
 ## File Paths
@@ -323,6 +245,7 @@ nix-store --optimise
 - `/nix/store/` - All packages and configurations
 - `~/.nix-profile/` - Current user environment
 - `/run/current-system/` - Current NixOS system (NixOS only)
+- `/etc/nixos/hardware-configuration.nix` - Machine-specific hardware config (NixOS)
 
 ### User Configuration Paths
 
@@ -352,26 +275,24 @@ git status
 scripts/rebuild.sh
 ```
 
-### Rollback After Breaking Change
+### NixOS Hardware Config Issues
 
 ```bash
-# macOS
-home-manager generations
-# Copy the previous generation path
-/nix/store/HASH-home-manager-generation/activate
+# Regenerate hardware config on the target machine
+sudo nixos-generate-config
 
-# NixOS
-sudo nixos-rebuild switch --rollback
+# Then rebuild with --impure
+sudo nixos-rebuild switch --flake .#nixos-desktop --impure
 ```
 
 ## Best Practices
 
 1. **Commit before major changes** - Easy to revert via git
 2. **Test in VM first** - For NixOS system changes
-3. **Use `--impure` sparingly** - Breaks reproducibility
-4. **Pin versions** - Use flake.lock for reproducibility
-5. **Document changes** - Good commit messages
-6. **Keep it modular** - Separate concerns into different files
+3. **Edit `user.nix` for personalization** - Don't hardcode values
+4. **Use shared modules** - Avoid duplication
+5. **Keep hardware config local** - In `/etc/nixos/`, not in repo
+6. **Pin versions** - Use flake.lock for reproducibility
 
 ## References
 
@@ -380,5 +301,3 @@ sudo nixos-rebuild switch --rollback
 - [Home Manager Manual](https://nix-community.github.io/home-manager/)
 - [Nix Package Search](https://search.nixos.org/)
 - [NixOS Wiki](https://nixos.wiki/)
-
-

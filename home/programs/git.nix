@@ -1,45 +1,31 @@
-{ pkgs, username, ... }:
+{ pkgs, lib, username, userConfig, ... }:
 
 {
   programs.git = {
     enable = true;
-    
-    # Use new settings format
+
+    # Git settings using the new format
     settings = {
+      # User info from user.nix
       user = {
-        name = "Chris Loidolt";
-        email = "chrisloidolt@gmail.com";  # Update this with your actual email
+        name = lib.mkDefault userConfig.git.name;
+        email = lib.mkDefault userConfig.git.email;
       };
-      
-      init = {
-        defaultBranch = "main";
-      };
-      
+
+      init.defaultBranch = "main";
+
       core = {
         editor = "nvim";
         autocrlf = "input";
       };
-      
-      pull = {
-        rebase = false;
-      };
-      
-      push = {
-        autoSetupRemote = true;
-      };
-      
-      merge = {
-        conflictstyle = "diff3";
-      };
-      
-      diff = {
-        colorMoved = "default";
-      };
-      
-      color = {
-        ui = "auto";
-      };
-      
+
+      pull.rebase = false;
+      push.autoSetupRemote = true;
+
+      merge.conflictstyle = "diff3";
+      diff.colorMoved = "default";
+      color.ui = "auto";
+
       alias = {
         st = "status";
         ci = "commit";
@@ -51,7 +37,7 @@
         amend = "commit --amend --no-edit";
       };
     };
-    
+
     ignores = [
       ".DS_Store"
       "*.swp"
@@ -64,18 +50,17 @@
       ".env.local"
     ];
   };
-  
+
   # Delta for better diffs
   programs.delta = {
     enable = true;
-    enableGitIntegration = true;
     options = {
       navigate = true;
       line-numbers = true;
       syntax-theme = "Dracula";
     };
   };
-  
+
   # GitHub CLI
   programs.gh = {
     enable = true;

@@ -1,39 +1,18 @@
-{ config, pkgs, lib, username, ... }:
+# Darwin (macOS) Configuration
+#
+# System-level macOS configuration using nix-darwin.
+# Includes system defaults, fonts, and nix settings.
+
+{ config, pkgs, lib, username, userConfig, ... }:
 
 {
+  imports = [
+    ../../modules/shared/nix-settings.nix
+    ../../modules/shared/fonts.nix
+  ];
+
   # Set the primary user for per-user settings
   system.primaryUser = username;
-
-  # Nix configuration
-  nix = {
-    settings = {
-      experimental-features = [ "nix-command" "flakes" ];
-      
-      # Binary caches
-      substituters = [
-        "https://cache.nixos.org"
-        "https://nix-community.cachix.org"
-      ];
-      trusted-public-keys = [
-        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-        "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-      ];
-      
-      # Build settings
-      max-jobs = "auto";
-      cores = 0;
-    };
-    
-    # Automatic store optimization (replaces auto-optimise-store)
-    optimise.automatic = true;
-    
-    # Garbage collection
-    gc = {
-      automatic = true;
-      interval = { Weekday = 0; Hour = 0; Minute = 0; };
-      options = "--delete-older-than 30d";
-    };
-  };
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -45,7 +24,7 @@
   system = {
     # Set macOS version
     stateVersion = 5;
-    
+
     defaults = {
       # Dock settings
       dock = {
@@ -57,7 +36,7 @@
         orientation = "bottom";
         mru-spaces = false;
       };
-      
+
       # Finder settings
       finder = {
         AppleShowAllExtensions = true;
@@ -67,14 +46,14 @@
         ShowPathbar = true;
         ShowStatusBar = true;
       };
-      
+
       # Trackpad settings
       trackpad = {
         Clicking = true; # Tap to click
         TrackpadRightClick = true;
         TrackpadThreeFingerDrag = false;
       };
-      
+
       # NSGlobalDomain (general macOS settings)
       NSGlobalDomain = {
         AppleShowAllExtensions = true;
@@ -86,36 +65,27 @@
         NSAutomaticSpellingCorrectionEnabled = false;
         NSNavPanelExpandedStateForSaveMode = true;
         NSNavPanelExpandedStateForSaveMode2 = true;
-        
+
         # Keyboard settings
         KeyRepeat = 2;
         InitialKeyRepeat = 15;
-        
+
         # Enable full keyboard access for all controls
         AppleKeyboardUIMode = 3;
       };
-      
+
       # Screencapture settings
       screencapture = {
         location = "~/Pictures/Screenshots";
         type = "png";
       };
     };
-    
+
     # Keyboard settings
     keyboard = {
       enableKeyMapping = true;
       remapCapsLockToControl = true;
     };
-  };
-
-  # Fonts (using modern nerd-fonts syntax)
-  fonts = {
-    packages = with pkgs; [
-      nerd-fonts.fira-code
-      nerd-fonts.jetbrains-mono
-      nerd-fonts.meslo-lg
-    ];
   };
 
   # System packages (minimal, most should be in Home Manager)
@@ -131,6 +101,6 @@
     shell = pkgs.zsh;
   };
 
-  # Enable Touch ID for sudo (updated option name)
+  # Enable Touch ID for sudo
   security.pam.services.sudo_local.touchIdAuth = true;
 }

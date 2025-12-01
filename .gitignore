@@ -21,6 +21,13 @@ result-*
 .direnv/
 .envrc
 
+# Hardware configurations - these are machine-specific and should stay in /etc/nixos/
+# See hosts/*/default.nix for setup instructions
+**/hardware-configuration.nix
+
+# Neovim plugin lock file (generated at runtime)
+configs/neovim/lazy-lock.json
+
 # Home Manager backups
 *.backup
 *.backup.*

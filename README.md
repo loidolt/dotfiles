@@ -145,7 +145,7 @@ home-manager generations
 ## What's Installed
 
 ### Core Packages
-- git, curl, wget, vim, tmux, htop, tree, jq, unzip
+- git, curl, wget, vim, tmux, btop, tree, jq, unzip
 
 ### Modern CLI Tools
 - **ripgrep** - Fast grep alternative

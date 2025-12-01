@@ -1,5 +1,8 @@
 # Graphical NixOS profile
-# Desktop environment, sound, printing, fonts, and GUI applications
+# Desktop environment, sound, printing, and GUI applications
+#
+# Note: Fonts are now handled by the shared fonts module
+
 { config, pkgs, lib, username, ... }:
 
 {
@@ -18,7 +21,7 @@
   };
 
   # Enable CUPS for printing
-  services.printing.enable = true;
+  services.printing.enable = lib.mkDefault true;
 
   # Enable sound with pipewire
   services.pulseaudio.enable = false;
@@ -30,29 +33,11 @@
     pulse.enable = true;
   };
 
-  # Fonts
-  fonts = {
-    packages = with pkgs; [
-      nerd-fonts.fira-code
-      nerd-fonts.jetbrains-mono
-      nerd-fonts.meslo-lg
-    ];
-    
-    fontconfig = {
-      enable = true;
-      defaultFonts = {
-        monospace = [ "JetBrainsMono Nerd Font" ];
-        sansSerif = [ "DejaVu Sans" ];
-        serif = [ "DejaVu Serif" ];
-      };
-    };
-  };
-
   # Graphical system packages
   environment.systemPackages = with pkgs; [
     firefox
     kdePackages.konsole
-    
+
     # Build tools needed for compiling software (including neovim plugins)
     gcc
     gnumake
@@ -61,5 +46,5 @@
   ];
 
   # Enable Docker for development workstations
-  virtualisation.docker.enable = true;
+  virtualisation.docker.enable = lib.mkDefault true;
 }

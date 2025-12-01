@@ -15,7 +15,7 @@ These are core utilities you use across all projects, regardless of tech stack. 
 - `tmux` - Terminal multiplexer
 - `neovim` - Text editor
 - `wget`, `curl` - File/HTTP downloaders
-- `tree`, `htop`, `btop` - System utilities
+- `tree`, `btop`, `btop` - System utilities
 - `jq`, `yq` - JSON/YAML processors
 - Modern CLI tools: `ripgrep`, `fd`, `bat`, `fzf`, `eza`, `zoxide`, `delta`
 - Development tools: `git`, `delta`, `lazygit`

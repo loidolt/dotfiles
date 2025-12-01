@@ -3,17 +3,17 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    
+
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    
+
     nix-darwin = {
       url = "github:LnL7/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    
+
     nixos-wsl = {
       url = "github:nix-community/NixOS-WSL";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -22,141 +22,194 @@
 
   outputs = { self, nixpkgs, home-manager, nix-darwin, nixos-wsl, ... }@inputs:
     let
-      username = "chrisloidolt";
-      vmUsername = "loidolt";
-      
+      # Import user configuration
+      userConfig = import ./user.nix;
+      inherit (userConfig) username vmUsername timezone locale;
+
       # Supported systems
       systems = [
-        "aarch64-darwin"  # Apple Silicon
-        "x86_64-darwin"   # Intel Mac
-        "aarch64-linux"   # ARM64 Linux
-        "x86_64-linux"    # x86_64 Linux
+        "aarch64-darwin" # Apple Silicon
+        "x86_64-darwin"  # Intel Mac
+        "aarch64-linux"  # ARM64 Linux
+        "x86_64-linux"   # x86_64 Linux
       ];
-      
+
       # Helper to generate package sets for all systems
       forAllSystems = nixpkgs.lib.genAttrs systems;
-      
+
       # Helper function for system-specific package sets
       mkPkgs = system: import nixpkgs {
         inherit system;
         config.allowUnfree = true;
       };
+
+      # ============================================================
+      # Helper Functions - Reduce boilerplate for host configurations
+      # ============================================================
+
+      # Create a NixOS configuration
+      mkNixosHost = {
+        system,
+        hostPath,
+        hostUsername,
+        extraModules ? [ ],
+      }: nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = {
+          inherit inputs userConfig;
+          username = hostUsername;
+        };
+        modules = [
+          hostPath
+          home-manager.nixosModules.home-manager
+          {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              users.${hostUsername} = import ./home;
+              extraSpecialArgs = {
+                inherit inputs userConfig;
+                username = hostUsername;
+              };
+            };
+          }
+        ] ++ extraModules;
+      };
+
+      # Create a Darwin (macOS) configuration
+      mkDarwinHost = {
+        system,
+        hostUsername,
+        extraModules ? [ ],
+      }: nix-darwin.lib.darwinSystem {
+        inherit system;
+        specialArgs = {
+          inherit inputs userConfig;
+          username = hostUsername;
+        };
+        modules = [
+          ./hosts/darwin
+          home-manager.darwinModules.home-manager
+          {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              users.${hostUsername} = import ./home;
+              extraSpecialArgs = {
+                inherit inputs userConfig;
+                username = hostUsername;
+              };
+            };
+          }
+        ] ++ extraModules;
+      };
+
+      # Create a standalone Home Manager configuration
+      mkHomeConfig = {
+        system,
+        homeUsername,
+      }: home-manager.lib.homeManagerConfiguration {
+        pkgs = mkPkgs system;
+        extraSpecialArgs = {
+          inherit inputs userConfig;
+          username = homeUsername;
+        };
+        modules = [ ./home ];
+      };
+
     in
     {
-      # Development shells for all systems
+      # ============================================================
+      # Development Shells
+      # ============================================================
       devShells = forAllSystems (system: {
         default = (mkPkgs system).mkShell {
           buildInputs = with (mkPkgs system); [
-            nil           # Nix LSP
-            nixpkgs-fmt   # Nix formatter
-            statix        # Nix linter
+            nil         # Nix LSP
+            nixpkgs-fmt # Nix formatter
+            statix      # Nix linter
           ];
         };
       });
-      
+
       # Formatter for all systems
       formatter = forAllSystems (system: (mkPkgs system).nixpkgs-fmt);
-      
-      # Home Manager standalone (for existing macOS setup - keep for backward compatibility)
+
+      # ============================================================
+      # Home Manager Standalone Configurations
+      # For existing macOS setups or Linux without NixOS
+      # ============================================================
       homeConfigurations = {
-        "${username}" = home-manager.lib.homeManagerConfiguration {
-          pkgs = mkPkgs "aarch64-darwin";
-          extraSpecialArgs = { inherit inputs username; };
-          modules = [ ./home ];
-        };
-        
-        # Add x86_64 macOS support
-        "${username}-x86" = home-manager.lib.homeManagerConfiguration {
-          pkgs = mkPkgs "x86_64-darwin";
-          extraSpecialArgs = { inherit inputs username; };
-          modules = [ ./home ];
-        };
-      };
-      
-      # Darwin configurations (macOS with nix-darwin)
-      darwinConfigurations = {
-        # ARM64 Mac (Apple Silicon)
-        "darwin-arm64" = nix-darwin.lib.darwinSystem {
+        # ARM64 macOS (Apple Silicon)
+        "${username}" = mkHomeConfig {
           system = "aarch64-darwin";
-          specialArgs = { inherit inputs username; };
-          modules = [
-            ./hosts/darwin
-            home-manager.darwinModules.home-manager
-            {
-              home-manager = {
-                useGlobalPkgs = true;
-                useUserPackages = true;
-                users.${username} = import ./home;
-                extraSpecialArgs = { inherit inputs username; };
-              };
-            }
-          ];
+          homeUsername = username;
         };
-        
-        # Intel Mac (optional - for x86_64 Macs)
-        "darwin-x86" = nix-darwin.lib.darwinSystem {
+
+        # x86_64 macOS (Intel)
+        "${username}-x86" = mkHomeConfig {
           system = "x86_64-darwin";
-          specialArgs = { inherit inputs username; };
-          modules = [
-            ./hosts/darwin
-            home-manager.darwinModules.home-manager
-            {
-              home-manager = {
-                useGlobalPkgs = true;
-                useUserPackages = true;
-                users.${username} = import ./home;
-                extraSpecialArgs = { inherit inputs username; };
-              };
-            }
-          ];
+          homeUsername = username;
         };
       };
-      
-      # NixOS configurations
-      nixosConfigurations = {
-        # NixOS VM (Parallels ARM64)
-        nixos-desktop = nixpkgs.lib.nixosSystem {
-          system = "aarch64-linux";
-          specialArgs = { 
-            inherit inputs;
-            username = vmUsername;
-          };
-          modules = [
-            ./hosts/nixos-desktop
-            home-manager.nixosModules.home-manager
-            {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.users.${vmUsername} = import ./home;
-              home-manager.extraSpecialArgs = { 
-                inherit inputs;
-                username = vmUsername;
-              };
-            }
-          ];
+
+      # ============================================================
+      # Darwin (macOS) Configurations
+      # ============================================================
+      darwinConfigurations = {
+        # Apple Silicon Mac
+        "darwin-arm64" = mkDarwinHost {
+          system = "aarch64-darwin";
+          hostUsername = username;
         };
-        
-        # WSL2 configuration (typically x86_64)
-        wsl = nixpkgs.lib.nixosSystem {
+
+        # Intel Mac
+        "darwin-x86" = mkDarwinHost {
+          system = "x86_64-darwin";
+          hostUsername = username;
+        };
+      };
+
+      # ============================================================
+      # NixOS Configurations
+      #
+      # NOTE: All NixOS configurations require the --impure flag because
+      # they import hardware-configuration.nix from /etc/nixos/
+      #
+      # Usage: sudo nixos-rebuild switch --flake .#<config-name> --impure
+      # ============================================================
+      nixosConfigurations = {
+        # NixOS Desktop (ARM64) - Graphical with KDE Plasma
+        # Intended for: Parallels on Apple Silicon, ARM64 bare metal
+        nixos-desktop = mkNixosHost {
+          system = "aarch64-linux";
+          hostPath = ./hosts/nixos-desktop;
+          hostUsername = vmUsername;
+        };
+
+        # NixOS Desktop (x86_64) - Graphical with KDE Plasma
+        # Intended for: VMware, VirtualBox, x86_64 bare metal
+        nixos-desktop-x86 = mkNixosHost {
           system = "x86_64-linux";
-          specialArgs = { 
-            inherit inputs;
-            username = username;
-          };
-          modules = [
-            nixos-wsl.nixosModules.wsl
-            ./hosts/wsl
-            home-manager.nixosModules.home-manager
-            {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.users.${username} = import ./home;
-              home-manager.extraSpecialArgs = { 
-                inherit inputs;
-                username = username;
-              };
-            }
-          ];
+          hostPath = ./hosts/nixos-desktop-x86;
+          hostUsername = vmUsername;
+        };
+
+        # NixOS Headless (x86_64) - Minimal server configuration
+        # Intended for: Servers, VPS, headless VMs
+        nixos-headless = mkNixosHost {
+          system = "x86_64-linux";
+          hostPath = ./hosts/nixos-headless;
+          hostUsername = vmUsername;
+        };
+
+        # WSL2 Configuration (x86_64)
+        # Intended for: Windows Subsystem for Linux
+        wsl = mkNixosHost {
+          system = "x86_64-linux";
+          hostPath = ./hosts/wsl;
+          hostUsername = username;
+          extraModules = [ nixos-wsl.nixosModules.wsl ];
         };
       };
     };

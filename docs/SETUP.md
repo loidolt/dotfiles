@@ -31,7 +31,7 @@ That's it! Everything is now configured.
 ### Core Packages
 - **git, curl, wget** - Essential utilities
 - **vim, neovim, tmux** - Terminal tools
-- **htop, tree, jq** - System utilities
+- **btop, tree, jq** - System utilities
 
 ### Modern CLI Tools
 - **ripgrep (rg)** - Fast grep alternative

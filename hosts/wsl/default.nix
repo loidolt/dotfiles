@@ -1,12 +1,28 @@
-{ config, pkgs, lib, username, ... }:
+# WSL2 NixOS Configuration
+#
+# Windows Subsystem for Linux configuration.
+# This integrates with the base NixOS modules while adding WSL-specific settings.
+#
+# SETUP:
+#   1. Install NixOS-WSL following https://github.com/nix-community/NixOS-WSL
+#   2. Rebuild with: sudo nixos-rebuild switch --flake .#wsl
+
+{ lib, pkgs, username, userConfig, ... }:
 
 {
+  imports = [
+    ../../modules/shared/nix-settings.nix
+    ../../modules/shared/fonts.nix
+    # Note: We don't import base.nix here because WSL has different requirements
+    # (no bootloader, different networking, etc.)
+  ];
+
   # WSL-specific settings
   wsl = {
     enable = true;
     defaultUser = username;
     startMenuLaunchers = true;
-    
+
     # Enable integration with Windows
     wslConf = {
       automount.root = "/mnt";
@@ -15,15 +31,12 @@
     };
   };
 
-  # Networking
-  networking = {
-    hostName = "wsl-nixos";
-    # WSL handles networking, so disable networkmanager
-  };
+  # Networking - WSL handles most networking
+  networking.hostName = "wsl-nixos";
 
-  # Timezone and internationalization
-  time.timeZone = "America/Denver";
-  i18n.defaultLocale = "en_US.UTF-8";
+  # Timezone and internationalization (from user config)
+  time.timeZone = lib.mkDefault userConfig.timezone;
+  i18n.defaultLocale = lib.mkDefault userConfig.locale;
 
   # Define user account
   users.users.${username} = {
@@ -36,35 +49,6 @@
   # Enable zsh system-wide
   programs.zsh.enable = true;
 
-  # Nix configuration
-  nix = {
-    settings = {
-      experimental-features = [ "nix-command" "flakes" ];
-      auto-optimise-store = true;
-      
-      # Binary caches
-      substituters = [
-        "https://cache.nixos.org"
-        "https://nix-community.cachix.org"
-      ];
-      trusted-public-keys = [
-        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-        "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-      ];
-      
-      # Build settings
-      max-jobs = "auto";
-      cores = 0;
-    };
-    
-    # Garbage collection
-    gc = {
-      automatic = true;
-      dates = "weekly";
-      options = "--delete-older-than 30d";
-    };
-  };
-
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
@@ -74,34 +58,16 @@
     wget
     curl
     git
-    
+
     # Build tools
     gcc
     gnumake
     cmake
     pkg-config
-    
+
     # WSL utilities
     wslu
   ];
-
-  # Fonts (using modern nerd-fonts syntax)
-  fonts = {
-    packages = with pkgs; [
-      nerd-fonts.fira-code
-      nerd-fonts.jetbrains-mono
-      nerd-fonts.meslo-lg
-    ];
-    
-    fontconfig = {
-      enable = true;
-      defaultFonts = {
-        monospace = [ "JetBrainsMono Nerd Font" ];
-        sansSerif = [ "DejaVu Sans" ];
-        serif = [ "DejaVu Serif" ];
-      };
-    };
-  };
 
   # Enable Docker
   virtualisation.docker.enable = true;
@@ -111,10 +77,10 @@
     enable = true;
     settings = {
       PermitRootLogin = "no";
-      PasswordAuthentication = true;
+      PasswordAuthentication = lib.mkDefault true;
     };
   };
 
   # System state version
-  system.stateVersion = "24.05";
+  system.stateVersion = "25.05";
 }
