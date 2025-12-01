@@ -7,19 +7,22 @@
   programs.ssh = {
     enable = true;
 
-    # Add keys to agent automatically when used
-    addKeysToAgent = "yes";
-
     # GitHub configuration
     matchBlocks = {
+      # Default settings for all hosts
+      "*" = {
+        addKeysToAgent = "yes";
+      };
+
       "github.com" = {
         hostname = "github.com";
         user = "git";
         identityFile = "~/.ssh/id_ed25519_github";
+        addKeysToAgent = "yes";
       };
     };
 
-    # Extra config for all hosts
+    # Extra config for macOS
     extraConfig = lib.optionalString pkgs.stdenv.isDarwin ''
       # Use macOS Keychain
       UseKeychain yes
