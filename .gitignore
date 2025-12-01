@@ -21,9 +21,11 @@ result-*
 .direnv/
 .envrc
 
-# Hardware configurations - these are machine-specific and should stay in /etc/nixos/
-# See hosts/*/default.nix for setup instructions
-**/hardware-configuration.nix
+# Hardware configurations - tracked per-host for reproducibility
+# Each host's hardware-configuration.nix is generated with:
+#   sudo nixos-generate-config --show-hardware-config > hardware-configuration.nix
+# Then committed to the repo
+!hosts/*/hardware-configuration.nix
 
 # Neovim plugin lock file (generated at runtime)
 configs/neovim/lazy-lock.json
