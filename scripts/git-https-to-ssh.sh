@@ -36,9 +36,11 @@ convert_repo() {
         url=$(echo "$line" | awk '{print $2}')
 
         # Check if it's a GitHub HTTPS URL
-        if [[ "$url" =~ ^https://github\.com/(.+)/(.+?)(\.git)?$ ]]; then
+        if [[ "$url" =~ ^https://github\.com/(.+)/(.+)$ ]]; then
             local user="${BASH_REMATCH[1]}"
             local repo="${BASH_REMATCH[2]}"
+            # Remove .git suffix if present, then add it back (ensures exactly one .git)
+            repo="${repo%.git}"
             local ssh_url="git@github.com:${user}/${repo}.git"
 
             info "[$repo_name] Converting remote '$remote_name'"
