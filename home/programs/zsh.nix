@@ -50,8 +50,8 @@ in
 
     } // lib.optionalAttrs pkgs.stdenv.isLinux {
       # Linux-specific aliases
-      # NixOS rebuild (note: requires --impure for hardware config)
-      nrb = "sudo nixos-rebuild switch --flake $DOTFILES --impure";
+      # NixOS rebuild
+      nrb = "sudo nixos-rebuild switch --flake $DOTFILES";
     };
 
     # Environment variables specific to zsh

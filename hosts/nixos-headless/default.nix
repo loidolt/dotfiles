@@ -4,17 +4,16 @@
 # Intended for: Servers, VPS, headless VMs
 #
 # SETUP:
-#   1. Run 'sudo nixos-generate-config' on the target machine
-#   2. Rebuild with: sudo nixos-rebuild switch --flake .#nixos-headless --impure
-#
-# The --impure flag is required because we import hardware config from /etc/nixos/
+#   1. Generate hardware config on target: sudo nixos-generate-config --show-hardware-config > hardware-configuration.nix
+#   2. Copy to this directory and commit to repo
+#   3. Rebuild with: sudo nixos-rebuild switch --flake .#nixos-headless
 
 { lib, ... }:
 
 {
   imports = [
-    # Import machine-specific hardware config from standard NixOS location
-    /etc/nixos/hardware-configuration.nix
+    # Machine-specific hardware config (committed to repo for reproducibility)
+    ./hardware-configuration.nix
     ../../modules/shared/nix-settings.nix
     ../../modules/nixos/base.nix
     ../../modules/nixos/headless.nix

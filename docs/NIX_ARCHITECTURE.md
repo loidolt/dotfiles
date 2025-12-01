@@ -148,7 +148,7 @@ NixOS hosts import hardware config from `/etc/nixos/` (not tracked in git):
 # hosts/nixos-desktop/default.nix
 {
   imports = [
-    /etc/nixos/hardware-configuration.nix  # Machine-specific
+    ./hardware-configuration.nix  # Machine-specific (committed to repo)
     ../../modules/shared/nix-settings.nix
     ../../modules/nixos/base.nix
     ../../modules/nixos/graphical.nix
@@ -156,7 +156,7 @@ NixOS hosts import hardware config from `/etc/nixos/` (not tracked in git):
 }
 ```
 
-**Important:** NixOS configurations require `--impure` flag because hardware config is external to the flake.
+**Note:** Each NixOS host has a `hardware-configuration.nix` that must be generated on the target machine and committed to the repo for reproducibility.
 
 ### 6. Platform Support
 
@@ -164,9 +164,9 @@ NixOS hosts import hardware config from `/etc/nixos/` (not tracked in git):
 |----------|--------------|---------|
 | macOS (Darwin) | `darwinConfigurations.darwin-arm64` | `darwin-rebuild switch --flake .#darwin-arm64` |
 | macOS (Home Manager only) | `homeConfigurations.chrisloidolt` | `home-manager switch --flake .#chrisloidolt` |
-| NixOS ARM64 | `nixosConfigurations.nixos-desktop` | `sudo nixos-rebuild switch --flake .#nixos-desktop --impure` |
-| NixOS x86_64 | `nixosConfigurations.nixos-desktop-x86` | `sudo nixos-rebuild switch --flake .#nixos-desktop-x86 --impure` |
-| NixOS Headless | `nixosConfigurations.nixos-headless` | `sudo nixos-rebuild switch --flake .#nixos-headless --impure` |
+| NixOS ARM64 | `nixosConfigurations.nixos-desktop` | `sudo nixos-rebuild switch --flake .#nixos-desktop` |
+| NixOS x86_64 | `nixosConfigurations.nixos-desktop-x86` | `sudo nixos-rebuild switch --flake .#nixos-desktop-x86` |
+| NixOS Headless | `nixosConfigurations.nixos-headless` | `sudo nixos-rebuild switch --flake .#nixos-headless` |
 | WSL2 | `nixosConfigurations.wsl` | `sudo nixos-rebuild switch --flake .#wsl` |
 
 ## Key Concepts
@@ -279,10 +279,13 @@ scripts/rebuild.sh
 
 ```bash
 # Regenerate hardware config on the target machine
-sudo nixos-generate-config
+sudo nixos-generate-config --show-hardware-config > hardware-configuration.nix
 
-# Then rebuild with --impure
-sudo nixos-rebuild switch --flake .#nixos-desktop --impure
+# Copy to the appropriate host directory and commit
+cp hardware-configuration.nix ~/dotfiles/hosts/nixos-desktop-x86/
+
+# Then rebuild
+sudo nixos-rebuild switch --flake .#nixos-desktop-x86
 ```
 
 ## Best Practices
@@ -291,7 +294,7 @@ sudo nixos-rebuild switch --flake .#nixos-desktop --impure
 2. **Test in VM first** - For NixOS system changes
 3. **Edit `user.nix` for personalization** - Don't hardcode values
 4. **Use shared modules** - Avoid duplication
-5. **Keep hardware config local** - In `/etc/nixos/`, not in repo
+5. **Commit hardware configs** - In host directories for reproducibility
 6. **Pin versions** - Use flake.lock for reproducibility
 
 ## References

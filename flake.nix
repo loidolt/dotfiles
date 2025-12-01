@@ -173,10 +173,10 @@
       # ============================================================
       # NixOS Configurations
       #
-      # NOTE: All NixOS configurations require the --impure flag because
-      # they import hardware-configuration.nix from /etc/nixos/
+      # Each host directory contains a hardware-configuration.nix that must
+      # be generated on the target machine and committed to the repo.
       #
-      # Usage: sudo nixos-rebuild switch --flake .#<config-name> --impure
+      # Usage: sudo nixos-rebuild switch --flake .#<config-name>
       # ============================================================
       nixosConfigurations = {
         # NixOS Desktop (ARM64) - Graphical with KDE Plasma
