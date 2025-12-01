@@ -13,6 +13,17 @@
 
 {
   # ==========================================================================
+  # Bootloader - BIOS/Legacy boot (no EFI on this VM)
+  # ==========================================================================
+
+  boot.loader.systemd-boot.enable = false;
+  boot.loader.efi.canTouchEfiVariables = false;
+  boot.loader.grub = {
+    enable = true;
+    device = "/dev/sda";  # Adjust if your boot disk is different (check with lsblk)
+  };
+
+  # ==========================================================================
   # VM Guest Configuration
   # ==========================================================================
 
