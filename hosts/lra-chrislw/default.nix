@@ -1,12 +1,11 @@
-# NixOS Headless (x86_64) Configuration
+# lra-chrislw - NixOS Desktop (x86_64) on Proxmox VM
 #
-# Minimal server configuration without GUI.
-# Intended for: Servers, VPS, headless VMs
+# Graphical desktop with KDE Plasma for Proxmox virtual machine.
 #
 # SETUP:
 #   1. Generate hardware config on target: sudo nixos-generate-config --show-hardware-config > hardware-configuration.nix
 #   2. Copy to this directory and commit to repo
-#   3. Rebuild with: sudo nixos-rebuild switch --flake .#nixos-headless
+#   3. Rebuild with: sudo nixos-rebuild switch --flake .#lra-chrislw
 
 { lib, ... }:
 
@@ -18,16 +17,17 @@
     ./host.nix
     # Shared modules
     ../../modules/shared/nix-settings.nix
+    ../../modules/shared/fonts.nix
     ../../modules/nixos/base.nix
-    ../../modules/nixos/headless.nix
+    ../../modules/nixos/graphical.nix
   ];
 
   # Host-specific configuration
-  networking.hostName = "nixos-headless";
+  networking.hostName = "lra-chrislw";
 
-  # Ensure we're on x86_64
+  # x86_64 Linux
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
-  # Override state version for this specific host
+  # System state version
   system.stateVersion = "25.05";
 }

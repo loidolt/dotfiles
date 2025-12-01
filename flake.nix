@@ -187,11 +187,19 @@
           hostUsername = vmUsername;
         };
 
-        # NixOS Desktop (x86_64) - Graphical with KDE Plasma
-        # Intended for: VMware, VirtualBox, x86_64 bare metal
-        nixos-desktop-x86 = mkNixosHost {
+        # lra-chrislw - NixOS Desktop on Proxmox VM (x86_64)
+        # Graphical with KDE Plasma for virtualized environment
+        lra-chrislw = mkNixosHost {
           system = "x86_64-linux";
-          hostPath = ./hosts/nixos-desktop-x86;
+          hostPath = ./hosts/lra-chrislw;
+          hostUsername = vmUsername;
+        };
+
+        # epa-cloidoltlw - NixOS Desktop on Bare Metal (x86_64)
+        # Graphical with KDE Plasma for physical hardware
+        epa-cloidoltlw = mkNixosHost {
+          system = "x86_64-linux";
+          hostPath = ./hosts/epa-cloidoltlw;
           hostUsername = vmUsername;
         };
 

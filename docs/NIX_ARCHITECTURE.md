@@ -31,11 +31,21 @@ dotfiles/
 │   ├── darwin/                 # macOS (nix-darwin)
 │   │   └── default.nix
 │   ├── nixos-desktop/          # NixOS ARM64 (Parallels, etc.)
-│   │   └── default.nix
-│   ├── nixos-desktop-x86/      # NixOS x86_64 (VMware, bare metal)
-│   │   └── default.nix
+│   │   ├── default.nix
+│   │   ├── host.nix            # Host-specific customizations
+│   │   └── hardware-configuration.nix
+│   ├── lra-chrislw/            # NixOS x86_64 on Proxmox VM
+│   │   ├── default.nix
+│   │   ├── host.nix            # Host-specific customizations
+│   │   └── hardware-configuration.nix
+│   ├── epa-cloidoltlw/         # NixOS x86_64 on bare metal
+│   │   ├── default.nix
+│   │   ├── host.nix            # Host-specific customizations
+│   │   └── hardware-configuration.nix
 │   ├── nixos-headless/         # NixOS headless server
-│   │   └── default.nix
+│   │   ├── default.nix
+│   │   ├── host.nix            # Host-specific customizations
+│   │   └── hardware-configuration.nix
 │   └── wsl/                    # WSL2 configuration
 │       └── default.nix
 │
@@ -165,7 +175,8 @@ NixOS hosts import hardware config from `/etc/nixos/` (not tracked in git):
 | macOS (Darwin) | `darwinConfigurations.darwin-arm64` | `darwin-rebuild switch --flake .#darwin-arm64` |
 | macOS (Home Manager only) | `homeConfigurations.chrisloidolt` | `home-manager switch --flake .#chrisloidolt` |
 | NixOS ARM64 | `nixosConfigurations.nixos-desktop` | `sudo nixos-rebuild switch --flake .#nixos-desktop` |
-| NixOS x86_64 | `nixosConfigurations.nixos-desktop-x86` | `sudo nixos-rebuild switch --flake .#nixos-desktop-x86` |
+| NixOS Proxmox VM | `nixosConfigurations.lra-chrislw` | `sudo nixos-rebuild switch --flake .#lra-chrislw` |
+| NixOS Bare Metal | `nixosConfigurations.epa-cloidoltlw` | `sudo nixos-rebuild switch --flake .#epa-cloidoltlw` |
 | NixOS Headless | `nixosConfigurations.nixos-headless` | `sudo nixos-rebuild switch --flake .#nixos-headless` |
 | WSL2 | `nixosConfigurations.wsl` | `sudo nixos-rebuild switch --flake .#wsl` |
 
@@ -238,6 +249,40 @@ my-new-host = mkNixosHost {
 };
 ```
 
+Then create the host directory with:
+- `default.nix` - Main config importing modules
+- `host.nix` - Host-specific customizations
+- `hardware-configuration.nix` - Generated hardware config
+
+### Host-Specific Customizations
+
+Each NixOS host has a `host.nix` file for machine-specific settings:
+
+```nix
+# hosts/my-host/host.nix
+{ config, pkgs, lib, ... }:
+
+{
+  # Add host-specific packages
+  environment.systemPackages = with pkgs; [
+    some-special-tool
+  ];
+
+  # Override shared module defaults
+  services.printing.enable = false;
+
+  # Hardware-specific settings
+  hardware.nvidia.enable = true;
+}
+```
+
+Common customizations:
+- **VM hosts**: Guest tools, spice agent, disable firmware updates
+- **Bare metal**: GPU drivers, CPU microcode, sensors, power management
+- **Servers**: Security hardening, specific services, firewall rules
+
+The `host.nix` is imported before shared modules, so you can use `lib.mkForce` to override defaults set with `lib.mkDefault`.
+
 ## File Paths
 
 ### Important Nix Paths
@@ -282,10 +327,10 @@ scripts/rebuild.sh
 sudo nixos-generate-config --show-hardware-config > hardware-configuration.nix
 
 # Copy to the appropriate host directory and commit
-cp hardware-configuration.nix ~/dotfiles/hosts/nixos-desktop-x86/
+cp hardware-configuration.nix ~/dotfiles/hosts/lra-chrislw/
 
 # Then rebuild
-sudo nixos-rebuild switch --flake .#nixos-desktop-x86
+sudo nixos-rebuild switch --flake .#lra-chrislw
 ```
 
 ## Best Practices

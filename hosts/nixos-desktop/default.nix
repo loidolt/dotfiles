@@ -14,6 +14,9 @@
   imports = [
     # Machine-specific hardware config (committed to repo for reproducibility)
     ./hardware-configuration.nix
+    # Host-specific packages, overrides, and customizations
+    ./host.nix
+    # Shared modules
     ../../modules/shared/nix-settings.nix
     ../../modules/shared/fonts.nix
     ../../modules/nixos/base.nix
