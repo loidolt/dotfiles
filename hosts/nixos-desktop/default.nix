@@ -98,6 +98,24 @@
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
+  # Fonts (using modern nerd-fonts syntax)
+  fonts = {
+    packages = with pkgs; [
+      nerd-fonts.fira-code
+      nerd-fonts.jetbrains-mono
+      nerd-fonts.meslo-lg
+    ];
+    
+    fontconfig = {
+      enable = true;
+      defaultFonts = {
+        monospace = [ "JetBrainsMono Nerd Font" ];
+        sansSerif = [ "DejaVu Sans" ];
+        serif = [ "DejaVu Serif" ];
+      };
+    };
+  };
+
   # System packages
   environment.systemPackages = with pkgs; [
     vim

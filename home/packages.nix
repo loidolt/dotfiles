@@ -1,8 +1,8 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 {
   home.packages = with pkgs; [
-    # Core utilities
+    # Core utilities (all platforms)
     git
     curl
     wget
@@ -13,55 +13,57 @@
     jq
     unzip
     
-    # Modern CLI tools
-    ripgrep      # Fast grep alternative
-    fd           # Fast find alternative
-    bat          # Cat with syntax highlighting
-    fzf          # Fuzzy finder
-    eza          # Modern ls replacement
-    zoxide       # Smart cd command
+    # Modern CLI tools (all platforms)
+    ripgrep
+    fd
+    bat
+    fzf
+    eza
+    zoxide
     
-    # macOS GNU utilities (better than BSD versions)
+    # Development tools (all platforms)
+    nodejs_20
+    bun
+    devbox
+    nodePackages.typescript
+    nodePackages.prettier
+    nodePackages.eslint
+    gh
+    delta
+    lazygit
+    
+    # System monitoring (all platforms)
+    btop
+    
+    # Network tools (all platforms)
+    mosh
+    
+    # Archive utilities (all platforms)
+    p7zip
+    
+    # Document processing (all platforms)
+    pandoc
+    
+    # Container management (all platforms)
+    lazydocker
+    
+  ] ++ lib.optionals pkgs.stdenv.isDarwin [
+    # macOS-specific packages
+    # GNU utilities (better than BSD versions on macOS)
     coreutils
     gnused
     gnutar
     watch
     
-    # Development tools
-    nodejs_20    # Node.js LTS
-    bun          # Fast JavaScript runtime
-    devbox       # Project-specific dev environments
+    # Editors - VSCode works better via Homebrew on macOS
+    # vscode
     
-    # Node global packages (we'll manage these with Nix instead)
-    nodePackages.typescript
-    # ts-node removed - use NodeJS 22+ built-in TypeScript support
-    nodePackages.prettier
-    nodePackages.eslint
+  ] ++ lib.optionals pkgs.stdenv.isLinux [
+    # Linux-specific packages
+    vscode  # VSCode works well via Nix on Linux
     
-    # Additional useful tools
-    gh           # GitHub CLI
-    delta        # Better git diffs
-    lazygit      # Terminal UI for git
-    
-    # System monitoring and management
-    btop         # Better system monitor
-    
-    # Network and remote access
-    mosh         # Mobile shell for unstable connections
-    
-    # Archive utilities
-    p7zip        # 7-Zip archive support
-    
-    # Document processing
-    pandoc       # Universal document converter
-    
-    # Container management
-    lazydocker   # Docker TUI
-    
-    # Editors and IDEs
-    vscode       # Visual Studio Code
-    
-    # Fonts (Nerd Fonts for icons in terminal)
+    # Fonts for Home Manager on Linux (standalone mode)
+    # When using NixOS or nix-darwin, fonts should be in system config
     nerd-fonts.fira-code
     nerd-fonts.jetbrains-mono
     nerd-fonts.meslo-lg

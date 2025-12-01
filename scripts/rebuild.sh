@@ -177,21 +177,44 @@ case $PLATFORM in
         ;;
         
     "darwin")
-        info "Rebuilding Home Manager configuration for macOS..."
-        
-        # Use username for configuration
-        CONFIG="${HOSTNAME:-chrisloidolt}"
-        
-        if [[ "$BUILD_ONLY" == true ]]; then
-            REBUILD_CMD="nix build .#homeConfigurations.$CONFIG.activationPackage"
+        # Check if using nix-darwin or standalone Home Manager
+        if command -v darwin-rebuild &> /dev/null && [[ -d "$DOTFILES_DIR/hosts/darwin" ]]; then
+            info "Rebuilding nix-darwin configuration..."
+            
+            # Detect architecture
+            ARCH=$(uname -m)
+            if [[ "$ARCH" == "arm64" ]]; then
+                CONFIG="darwin-arm64"
+            else
+                CONFIG="darwin-x86"
+            fi
+            
+            if [[ "$BUILD_ONLY" == true ]]; then
+                REBUILD_CMD="nix build .#darwinConfigurations.$CONFIG.system"
+            else
+                REBUILD_CMD="darwin-rebuild switch --flake .#$CONFIG"
+            fi
+            
+            info "Running: $REBUILD_CMD"
+            eval "$REBUILD_CMD"
+            
+            success "nix-darwin rebuild complete!"
         else
-            REBUILD_CMD="home-manager switch --flake .#$CONFIG"
+            info "Rebuilding Home Manager configuration for macOS..."
+            
+            CONFIG="${HOSTNAME:-chrisloidolt}"
+            
+            if [[ "$BUILD_ONLY" == true ]]; then
+                REBUILD_CMD="nix build .#homeConfigurations.$CONFIG.activationPackage"
+            else
+                REBUILD_CMD="home-manager switch --flake .#$CONFIG"
+            fi
+            
+            info "Running: $REBUILD_CMD"
+            eval "$REBUILD_CMD"
+            
+            success "Home Manager rebuild complete!"
         fi
-        
-        info "Running: $REBUILD_CMD"
-        eval "$REBUILD_CMD"
-        
-        success "Home Manager rebuild complete!"
         
         if [[ "$SWITCH" == true ]]; then
             info "Close and reopen your terminal to see all changes"

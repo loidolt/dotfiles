@@ -2,6 +2,7 @@
 
 {
   imports = [
+    ./dotfiles.nix
     ./packages.nix
     ./programs/zsh.nix
     ./programs/starship.nix
@@ -36,10 +37,12 @@
   xdg.enable = true;
   
   # Nix configuration
+  # Note: When used with nix-darwin or NixOS (useGlobalPkgs = true), 
+  # the system manages nix.package, so we use mkDefault to allow override
   nix = {
-    # Use the Nix package from nixpkgs (only on standalone home-manager, not on NixOS)
-    # On NixOS, the system manages the Nix package, so we don't set it here
-    package = lib.mkIf (!pkgs.stdenv.isLinux) pkgs.nix;
+    # Use the Nix package from nixpkgs only in standalone Home Manager on macOS
+    # When integrated with nix-darwin or NixOS, the system manages this
+    package = lib.mkDefault pkgs.nix;
     
     # Enable automatic garbage collection
     gc = {
@@ -51,9 +54,6 @@
     settings = {
       # Enable flakes and nix-command
       experimental-features = [ "nix-command" "flakes" ];
-      
-      # Optimize store automatically
-      auto-optimise-store = true;
       
       # Use binary cache
       substituters = [

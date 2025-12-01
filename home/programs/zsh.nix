@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, config, lib, username, ... }:
 
 {
   programs.zsh = {
@@ -8,7 +8,7 @@
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
     
-    # Shell aliases
+    # Shell aliases - common to all platforms
     shellAliases = {
       # Modern CLI replacements
       ls = "eza --icons";
@@ -30,14 +30,24 @@
       tl = "tmux ls";
       tn = "tmux new -s";
       
-      # Home Manager aliases
-      hm = "home-manager switch --flake ~/Documents/GitHub/dotfiles#chrisloidolt";
-      hms = "home-manager switch --flake ~/Documents/GitHub/dotfiles#chrisloidolt";
-      
       # Convenience
       ".." = "cd ..";
       "..." = "cd ../..";
       "...." = "cd ../../..";
+      
+    } // lib.optionalAttrs pkgs.stdenv.isDarwin {
+      # macOS-specific aliases
+      # Home Manager rebuild (standalone)
+      hm = "home-manager switch --flake ${config.home.homeDirectory}/Documents/GitHub/dotfiles#${username}";
+      hms = "home-manager switch --flake ${config.home.homeDirectory}/Documents/GitHub/dotfiles#${username}";
+      
+      # Darwin rebuild (if using nix-darwin)
+      drb = "darwin-rebuild switch --flake ${config.home.homeDirectory}/Documents/GitHub/dotfiles#darwin-arm64";
+      
+    } // lib.optionalAttrs pkgs.stdenv.isLinux {
+      # Linux-specific aliases
+      # NixOS rebuild
+      nrb = "sudo nixos-rebuild switch --flake ${config.home.homeDirectory}/dotfiles";
     };
     
     # Environment variables specific to zsh
@@ -62,7 +72,7 @@
       theme = "";  # We use starship instead
     };
     
-    # Additional initialization (using new initContent)
+    # Additional initialization
     initContent = ''
       # Initialize zoxide (smart cd)
       eval "$(zoxide init zsh)"
