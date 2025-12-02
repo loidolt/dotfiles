@@ -81,7 +81,7 @@
       
       # Time
       time = {
-        disabled = false;
+        disabled = true;
         format = "at 🕙 [$time]($style) ";
         time_format = "%T";
       };
