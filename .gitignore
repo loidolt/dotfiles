@@ -44,9 +44,11 @@ node_modules/
 bun.lock
 package-lock.json
 yarn.lock
+pnpm-lock.yaml
 
 # Local secrets (not committed to repo)
 secrets.nix
+home/programs/ssh-hosts.nix
 
 # Claude/AI tool configs (local only)
 .claude/
@@ -58,3 +60,43 @@ TODO.md
 NOTES.md
 
 NIXOS_HOST.yml
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+vendor/
+
+# Terraform/Infrastructure
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+*.tfvars
+!*.tfvars.example
+
+# Kubernetes
+kubeconfig
+*.kubeconfig
+
+# Environment files (except examples)
+.env
+.env.*
+!.env.example

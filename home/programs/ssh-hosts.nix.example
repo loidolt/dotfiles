@@ -1,0 +1,46 @@
+# SSH Host Configuration Template
+#
+# Copy this file to ssh-hosts.nix and customize for your environment.
+# The ssh-hosts.nix file is gitignored to keep your network details private.
+#
+# Usage:
+#   cp ssh-hosts.nix.example ssh-hosts.nix
+#   # Edit ssh-hosts.nix with your actual host configurations
+#   hm  # Rebuild to apply changes
+#
+
+{ pkgs, lib, ... }:
+
+{
+  # Define your SSH host configurations here
+  # These will be merged with the base configuration in ssh.nix
+  matchBlocks = {
+    # Example: Personal machine
+    # "my-server" = {
+    #   hostname = "my-server.local";
+    #   user = "myuser";
+    #   identityFile = "~/.ssh/my-key";
+    # };
+
+    # Example: Work network (IP range)
+    # "10.0.*.*" = {
+    #   user = "work-user";
+    #   identityFile = "~/.ssh/work-key";
+    # };
+
+    # Example: Cloud server
+    # "34.123.45.67" = {
+    #   user = "admin";
+    #   identityFile = "~/.ssh/cloud-key";
+    #   port = 22;
+    # };
+
+    # Example: Jump host / bastion
+    # "internal-server" = {
+    #   hostname = "internal.corp.example.com";
+    #   user = "corp-user";
+    #   identityFile = "~/.ssh/corp-key";
+    #   proxyJump = "bastion.example.com";
+    # };
+  };
+}

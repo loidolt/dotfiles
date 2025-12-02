@@ -6,9 +6,12 @@
 A streamlined text editor configuration focused on:
 - Clean editing experience
 - Fast fuzzy finding
-- Syntax highlighting
+- Syntax highlighting via Tree-sitter
 - Basic git integration
-- No IDE features (LSP, autocompletion, formatters)
+
+Note: LSP servers are installed via Nix (see home/programs/neovim.nix)
+for use by external tools (e.g., OpenCode, AI assistants). This config
+intentionally keeps the editing experience minimal and distraction-free.
 
 --]]
 

@@ -1,237 +1,61 @@
 {
-  description = "Cross-platform NixOS/macOS/WSL dotfiles";
+  description = "Cross-platform dotfiles with Home Manager";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    nix-darwin = {
-      url = "github:LnL7/nix-darwin";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    nixos-wsl = {
-      url = "github:nix-community/NixOS-WSL";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
   };
 
-  outputs = { self, nixpkgs, home-manager, nix-darwin, nixos-wsl, nix-flatpak, ... }@inputs:
+  outputs = { nixpkgs, home-manager, ... }:
     let
       # Import user configuration
-      baseUserConfig = import ./user.nix;
+      userConfig = import ./user.nix;
 
-      # Import secrets if they exist, otherwise empty set
-      secrets =
-        if builtins.pathExists ./secrets.nix
-        then import ./secrets.nix
-        else { };
-
-      # Merge user config with secrets
-      userConfig = baseUserConfig // secrets;
-
-      inherit (userConfig) username vmUsername timezone locale;
-
-      # Supported systems
-      systems = [
-        "aarch64-darwin" # Apple Silicon
-        "x86_64-darwin"  # Intel Mac
-        "aarch64-linux"  # ARM64 Linux
-        "x86_64-linux"   # x86_64 Linux
-      ];
-
-      # Helper to generate package sets for all systems
-      forAllSystems = nixpkgs.lib.genAttrs systems;
-
-      # Helper function for system-specific package sets
-      mkPkgs = system: import nixpkgs {
-        inherit system;
-        config.allowUnfree = true;
-      };
-
-      # ============================================================
-      # Helper Functions - Reduce boilerplate for host configurations
-      # ============================================================
-
-      # Create a NixOS configuration
-      mkNixosHost = {
-        system,
-        hostPath,
-        hostUsername,
-        extraModules ? [ ],
-      }: nixpkgs.lib.nixosSystem {
-        inherit system;
-        specialArgs = {
-          inherit inputs userConfig;
-          username = hostUsername;
+      # Helper to create a Home Manager configuration
+      mkHome = system: home-manager.lib.homeManagerConfiguration {
+        pkgs = import nixpkgs {
+          inherit system;
+          config.allowUnfree = true;
         };
-        modules = [
-          hostPath
-          home-manager.nixosModules.home-manager
-          nix-flatpak.nixosModules.nix-flatpak
-          {
-            home-manager = {
-              useGlobalPkgs = true;
-              useUserPackages = true;
-              users.${hostUsername} = import ./home;
-              extraSpecialArgs = {
-                inherit inputs userConfig;
-                username = hostUsername;
-              };
-            };
-          }
-        ] ++ extraModules;
-      };
-
-      # Create a Darwin (macOS) configuration
-      mkDarwinHost = {
-        system,
-        hostUsername,
-        extraModules ? [ ],
-      }: nix-darwin.lib.darwinSystem {
-        inherit system;
-        specialArgs = {
-          inherit inputs userConfig;
-          username = hostUsername;
-        };
-        modules = [
-          ./hosts/darwin
-          home-manager.darwinModules.home-manager
-          {
-            home-manager = {
-              useGlobalPkgs = true;
-              useUserPackages = true;
-              users.${hostUsername} = import ./home;
-              extraSpecialArgs = {
-                inherit inputs userConfig;
-                username = hostUsername;
-              };
-            };
-          }
-        ] ++ extraModules;
-      };
-
-      # Create a standalone Home Manager configuration
-      mkHomeConfig = {
-        system,
-        homeUsername,
-      }: home-manager.lib.homeManagerConfiguration {
-        pkgs = mkPkgs system;
         extraSpecialArgs = {
-          inherit inputs userConfig;
-          username = homeUsername;
+          inherit userConfig;
+          username = userConfig.username;
         };
         modules = [ ./home ];
       };
 
-    in
-    {
-      # ============================================================
-      # Development Shells
-      # ============================================================
+      # Supported systems for dev shells
+      systems = [ "aarch64-darwin" "x86_64-darwin" "x86_64-linux" "aarch64-linux" ];
+      forAllSystems = nixpkgs.lib.genAttrs systems;
+      mkPkgs = system: import nixpkgs { inherit system; };
+
+    in {
+      # Home Manager configurations
+      homeConfigurations = {
+        # macOS (Apple Silicon) - primary
+        "${userConfig.username}" = mkHome "aarch64-darwin";
+        
+        # macOS (Intel)
+        "${userConfig.username}-x86" = mkHome "x86_64-darwin";
+        
+        # Linux (x86_64) - works on native Linux and WSL2
+        "${userConfig.username}-linux" = mkHome "x86_64-linux";
+        
+        # Linux (ARM64)
+        "${userConfig.username}-arm" = mkHome "aarch64-linux";
+      };
+
+      # Development shell for working on this repo
       devShells = forAllSystems (system: {
         default = (mkPkgs system).mkShell {
-          buildInputs = with (mkPkgs system); [
-            nil         # Nix LSP
-            nixpkgs-fmt # Nix formatter
-            statix      # Nix linter
-          ];
+          buildInputs = with (mkPkgs system); [ nil nixpkgs-fmt statix ];
         };
       });
 
-      # Formatter for all systems
+      # Formatter
       formatter = forAllSystems (system: (mkPkgs system).nixpkgs-fmt);
-
-      # ============================================================
-      # Home Manager Standalone Configurations
-      # For existing macOS setups or Linux without NixOS
-      # ============================================================
-      homeConfigurations = {
-        # ARM64 macOS (Apple Silicon)
-        "${username}" = mkHomeConfig {
-          system = "aarch64-darwin";
-          homeUsername = username;
-        };
-
-        # x86_64 macOS (Intel)
-        "${username}-x86" = mkHomeConfig {
-          system = "x86_64-darwin";
-          homeUsername = username;
-        };
-      };
-
-      # ============================================================
-      # Darwin (macOS) Configurations
-      # ============================================================
-      darwinConfigurations = {
-        # Apple Silicon Mac
-        "darwin-arm64" = mkDarwinHost {
-          system = "aarch64-darwin";
-          hostUsername = username;
-        };
-
-        # Intel Mac
-        "darwin-x86" = mkDarwinHost {
-          system = "x86_64-darwin";
-          hostUsername = username;
-        };
-      };
-
-      # ============================================================
-      # NixOS Configurations
-      #
-      # Each host directory contains a hardware-configuration.nix that must
-      # be generated on the target machine and committed to the repo.
-      #
-      # Usage: sudo nixos-rebuild switch --flake .#<config-name>
-      # ============================================================
-      nixosConfigurations = {
-        # NixOS Desktop (ARM64) - Graphical with KDE Plasma
-        # Intended for: Parallels on Apple Silicon, ARM64 bare metal
-        nixos-desktop = mkNixosHost {
-          system = "aarch64-linux";
-          hostPath = ./hosts/nixos-desktop;
-          hostUsername = vmUsername;
-        };
-
-        # lra-chrislw - NixOS Desktop on Proxmox VM (x86_64)
-        # Graphical with KDE Plasma for virtualized environment
-        lra-chrislw = mkNixosHost {
-          system = "x86_64-linux";
-          hostPath = ./hosts/lra-chrislw;
-          hostUsername = vmUsername;
-        };
-
-        # epa-cloidoltlw - NixOS Desktop on Bare Metal (x86_64)
-        # Graphical with KDE Plasma for physical hardware
-        epa-cloidoltlw = mkNixosHost {
-          system = "x86_64-linux";
-          hostPath = ./hosts/epa-cloidoltlw;
-          hostUsername = vmUsername;
-        };
-
-        # NixOS Headless (x86_64) - Minimal server configuration
-        # Intended for: Servers, VPS, headless VMs
-        nixos-headless = mkNixosHost {
-          system = "x86_64-linux";
-          hostPath = ./hosts/nixos-headless;
-          hostUsername = vmUsername;
-        };
-
-        # WSL2 Configuration (x86_64)
-        # Intended for: Windows Subsystem for Linux
-        wsl = mkNixosHost {
-          system = "x86_64-linux";
-          hostPath = ./hosts/wsl;
-          hostUsername = username;
-          extraModules = [ nixos-wsl.nixosModules.wsl ];
-        };
-      };
     };
 }

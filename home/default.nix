@@ -12,7 +12,6 @@
     ./programs/neovim.nix
     ./programs/fzf.nix
     ./programs/direnv.nix
-    ./programs/rustdesk.nix
   ];
 
   home = {
@@ -24,7 +23,6 @@
 
     stateVersion = "25.05";
 
-    # Environment variables
     sessionVariables = {
       EDITOR = "nvim";
       VISUAL = "nvim";
@@ -32,32 +30,14 @@
     };
   };
 
-  # Let Home Manager manage itself
   programs.home-manager.enable = true;
-
-  # Enable XDG directories
   xdg.enable = true;
 
-  # Nix configuration for standalone Home Manager
-  # Note: When used with nix-darwin or NixOS (useGlobalPkgs = true),
-  # the system manages nix.package, so we use mkDefault to allow override
+  # Nix settings for Home Manager standalone
   nix = {
-    # Use the Nix package from nixpkgs only in standalone Home Manager on macOS
-    # When integrated with nix-darwin or NixOS, the system manages this
-    package = lib.mkDefault pkgs.nix;
-
-    # Enable automatic garbage collection
-    gc = {
-      automatic = true;
-      options = "--delete-older-than 30d";
-    };
-
-    # Nix settings - these complement the system-level settings
+    package = pkgs.nix;
     settings = {
-      # Enable flakes and nix-command
       experimental-features = [ "nix-command" "flakes" ];
-
-      # Use binary cache
       substituters = [
         "https://cache.nixos.org"
         "https://nix-community.cachix.org"
@@ -66,14 +46,14 @@
         "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
         "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       ];
-
-      # Build settings
-      max-jobs = "auto";
-      cores = 0; # Use all available cores
+    };
+    gc = {
+      automatic = true;
+      options = "--delete-older-than 30d";
     };
   };
 
-  # Symlink additional configs
+  # Config file symlinks
   xdg.configFile = {
     "opencode" = {
       source = ../configs/opencode;

@@ -4,19 +4,16 @@
 
 set -euo pipefail
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+# Get script directory and source utilities
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$SCRIPT_DIR/lib/utils.sh"
 
 # Counters
 PASSED=0
 FAILED=0
 WARNINGS=0
 
-# Helper functions
+# Helper functions specific to validation
 print_header() {
     echo -e "\n${BLUE}=== $1 ===${NC}"
 }
@@ -41,7 +38,8 @@ check_command() {
     local display_name=${2:-$cmd}
     
     if command -v "$cmd" &> /dev/null; then
-        local version=$(command "$cmd" --version 2>&1 | head -1 || echo "unknown")
+        local version
+        version=$(command "$cmd" --version 2>&1 | head -1 || echo "unknown")
         print_success "$display_name: $version"
         return 0
     else
@@ -53,7 +51,7 @@ check_command() {
 # Start validation
 echo -e "${BLUE}╔════════════════════════════════════════╗${NC}"
 echo -e "${BLUE}║   Nix System Validation Script        ║${NC}"
-echo -e "${BLUE}╔════════════════════════════════════════╗${NC}"
+echo -e "${BLUE}╚════════════════════════════════════════╝${NC}"
 echo ""
 
 # System Information
@@ -65,6 +63,7 @@ echo "User: $(whoami)"
 echo "Home: $HOME"
 
 # Detect platform type
+PLATFORM="unknown"
 if [[ -f /etc/os-release ]]; then
     source /etc/os-release
     echo "OS: $NAME $VERSION"
@@ -80,8 +79,6 @@ if [[ -f /etc/os-release ]]; then
 elif [[ "$(uname -s)" == "Darwin" ]]; then
     PLATFORM="macos"
     echo "macOS Version: $(sw_vers -productVersion)"
-else
-    PLATFORM="unknown"
 fi
 
 # Nix Installation
@@ -93,7 +90,7 @@ if command -v nix &> /dev/null; then
     
     # Check Nix version
     version_number=$(echo "$nix_version" | grep -oE '[0-9]+\.[0-9]+' | head -1)
-    if [[ $(echo "$version_number >= 2.18" | bc -l 2>/dev/null || echo "0") == "1" ]]; then
+    if command -v bc &> /dev/null && [[ $(echo "$version_number >= 2.18" | bc -l 2>/dev/null || echo "0") == "1" ]]; then
         print_success "Nix version >= 2.18"
     else
         print_warning "Nix version < 2.18 (recommended: >= 2.18)"
@@ -248,7 +245,7 @@ if command -v home-manager &> /dev/null; then
         print_success "Current generation: $current_gen"
     fi
 else
-    print_warning "Home Manager not installed (expected after Phase 2)"
+    print_warning "Home Manager not installed"
 fi
 
 # NixOS Specific (if on NixOS)
@@ -291,17 +288,18 @@ if [[ "$PLATFORM" == "macos" ]]; then
     if command -v darwin-rebuild &> /dev/null; then
         print_success "nix-darwin installed"
     else
-        print_warning "nix-darwin not installed (expected after Phase 2)"
+        print_warning "nix-darwin not installed (optional)"
     fi
 fi
 
 # Dotfiles Repository
 print_header "Dotfiles Repository"
 
-if [[ -d ~/dotfiles ]]; then
-    print_success "Dotfiles directory exists"
+DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
+if [[ -d "$DOTFILES_DIR" ]]; then
+    print_success "Dotfiles directory exists: $DOTFILES_DIR"
     
-    cd ~/dotfiles
+    cd "$DOTFILES_DIR"
     
     if git rev-parse --git-dir &> /dev/null 2>&1; then
         print_success "Dotfiles is a git repository"
@@ -319,21 +317,13 @@ if [[ -d ~/dotfiles ]]; then
                 print_failure "Flake has errors"
             fi
         else
-            print_warning "flake.nix not found (expected after Phase 1)"
-        fi
-        
-        if [[ -f MIGRATION_LOG.md ]]; then
-            print_success "MIGRATION_LOG.md exists"
-        fi
-        
-        if [[ -f MIGRATION_CHECKLIST.md ]]; then
-            print_success "MIGRATION_CHECKLIST.md exists"
+            print_warning "flake.nix not found"
         fi
     else
         print_failure "Dotfiles is not a git repository"
     fi
 else
-    print_failure "Dotfiles directory not found at ~/dotfiles"
+    print_failure "Dotfiles directory not found"
 fi
 
 # Summary
@@ -349,14 +339,14 @@ echo ""
 
 if [[ $FAILED -eq 0 ]]; then
     if [[ $WARNINGS -eq 0 ]]; then
-        echo -e "${GREEN}🎉 All checks passed! Your Nix setup looks great!${NC}"
+        echo -e "${GREEN}All checks passed! Your Nix setup looks great!${NC}"
         exit 0
     else
-        echo -e "${YELLOW}✓ All critical checks passed, but there are some warnings.${NC}"
+        echo -e "${YELLOW}All critical checks passed, but there are some warnings.${NC}"
         echo "Review the warnings above to ensure everything is configured as expected."
         exit 0
     fi
 else
-    echo -e "${RED}❌ Some checks failed. Please review the errors above.${NC}"
+    echo -e "${RED}Some checks failed. Please review the errors above.${NC}"
     exit 1
 fi

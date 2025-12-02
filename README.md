@@ -1,182 +1,132 @@
 # Dotfiles
 
-Declarative, reproducible development environment managed with **Nix** and **Home Manager**.
-
-## Overview
-
-This repository provides a **declarative development environment** that includes:
-
-### Managed with Nix + Home Manager ✨
-- **Declarative configuration** - One source of truth for all settings
-- **Reproducible** - Same config works on macOS, NixOS, and WSL2
-- **Atomic updates** - All-or-nothing changes
-- **Rollback support** - Return to any previous state
-- **Cross-platform** - Same dotfiles on all systems
-
-### Programs Configured
-- **Neovim** (v0.11.5) - Modern text editor with LSP support
-- **Zsh** - Shell with oh-my-zsh, autosuggestions, and syntax highlighting
-- **Starship** - Modern, fast prompt with git integration
-- **Git** - Version control with delta for beautiful diffs
-- **Tmux** - Terminal multiplexer with truecolor support
-- **Modern CLI tools** - eza, bat, ripgrep, fd, fzf, zoxide, and more
-- **OpenCode** - AI-powered code editor CLI
-- **Ghostty** - GPU-accelerated terminal emulator
-
-
-
-## Repository Structure
-
-```
-dotfiles/
-├── flake.nix            # 🎯 Nix flake - main entry point
-├── flake.lock           # Locked dependency versions
-│
-├── home/                # 🏠 Home Manager configuration
-│   ├── default.nix     # Main home configuration
-│   ├── packages.nix    # Package list
-│   └── programs/       # Program-specific configs
-│       ├── zsh.nix
-│       ├── starship.nix
-│       ├── git.nix
-│       ├── tmux.nix
-│       ├── neovim.nix
-│       ├── fzf.nix
-│       └── direnv.nix
-│
-├── configs/            # 📝 Configuration files
-│   ├── neovim/        # Neovim config (synced from separate repo)
-│   ├── opencode/      # OpenCode AI editor config
-│   ├── ghostty/       # Ghostty terminal config
-│   └── tmux/          # Tmux config
-│
-├── hosts/              # 💻 Host-specific configs (future use)
-│   ├── darwin/        # macOS configurations
-│   ├── nixos-desktop/ # NixOS desktop
-│   └── wsl/           # WSL2 configuration
-│
-├── scripts/            # 🔧 Helper scripts
-│   └── validate-nix.sh # Validation script
-│
-└── docs/               # 📚 Documentation
-    ├── SETUP.md           # Setup guide
-    ├── NIX_ARCHITECTURE.md
-    ├── EMERGENCY_PROCEDURES.md
-    ├── PACKAGE_MANAGEMENT_GUIDE.md
-    ├── TROUBLESHOOTING.md
-    ├── QUICK_REFERENCE.md
-    └── OPENCODE_TMUX_FIX.md
-```
+Cross-platform dotfiles managed with **Home Manager** (Nix).
 
 ## Quick Start
 
-### 🚀 macOS Setup (Home Manager)
-
-**Current Status:** ✅ Home Manager is working on macOS!
+### macOS
 
 ```bash
-# Clone the repo
-git clone https://github.com/loidolt/dotfiles.git ~/Documents/GitHub/dotfiles
-cd ~/Documents/GitHub/dotfiles
-
-# Install Nix (if not already installed)
+# Install Nix
 sh <(curl -L https://nixos.org/nix/install) --daemon
 
 # Enable flakes
 mkdir -p ~/.config/nix
 echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
 
-# Activate Home Manager
-nix run home-manager/master -- switch --flake .#chrisloidolt -b backup
+# Clone and activate
+git clone https://github.com/loidolt/dotfiles.git ~/Documents/GitHub/dotfiles
+cd ~/Documents/GitHub/dotfiles
+nix run home-manager/master -- switch --flake .#chrisloidolt
 
-# Close and reopen your terminal
+# Install fonts (one-time, via Homebrew)
+brew install --cask font-fira-code-nerd-font font-jetbrains-mono-nerd-font font-meslo-lg-nerd-font
 ```
 
-This will install and configure:
-- ✅ All packages (git, curl, neovim, tmux, etc.)
-- ✅ Zsh with oh-my-zsh and plugins
-- ✅ Starship prompt
-- ✅ Modern CLI tools (eza, bat, ripgrep, fd, fzf, zoxide)
-- ✅ Neovim with LSP servers
-- ✅ Git with delta
-- ✅ Tmux with truecolor
-- ✅ All program configurations
-
-### 🔄 Making Changes
-
-After editing configuration files:
+### Linux / WSL2
 
 ```bash
-# Rebuild and activate
-home-manager switch --flake .#chrisloidolt
+# Install Nix
+sh <(curl -L https://nixos.org/nix/install) --daemon
 
-# Or with uncommitted changes
-home-manager switch --flake .#chrisloidolt --impure
+# Enable flakes
+mkdir -p ~/.config/nix
+echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+
+# Clone and activate
+git clone https://github.com/loidolt/dotfiles.git ~/dotfiles
+cd ~/dotfiles
+nix run home-manager/master -- switch --flake .#chrisloidolt-linux
 ```
 
-### 📦 Adding Packages
-
-Edit `home/packages.nix` and add your package:
-
-```nix
-home.packages = with pkgs; [
-  # ... existing packages ...
-  your-new-package
-];
-```
-
-Then rebuild:
-```bash
-home-manager switch --flake .#chrisloidolt
-```
-
-### ↩️ Rollback
-
-If something breaks, you can rollback:
+### Daily Usage
 
 ```bash
-# List previous generations
+# Rebuild after changes
+hm   # alias for home-manager switch
+
+# Update packages
+cd ~/Documents/GitHub/dotfiles && nix flake update && hm
+
+# Rollback
 home-manager generations
-
-# Activate a previous generation
-/nix/store/HASH-home-manager-generation/activate
+/nix/store/<hash>-home-manager-generation/activate
 ```
 
-## What's Installed
+## What's Included
 
-### Core Packages
-- git, curl, wget, vim, tmux, btop, tree, jq, unzip
+### Programs Configured
+- **Neovim** - Modern text editor with LSP support
+- **Zsh** - Shell with oh-my-zsh, autosuggestions, and syntax highlighting
+- **Starship** - Modern, fast prompt with git integration
+- **Git** - Version control with delta for beautiful diffs
+- **Tmux** - Terminal multiplexer with truecolor support
+- **FZF** - Fuzzy finder with fd integration
+- **Direnv** - Per-directory environments with nix-direnv
 
 ### Modern CLI Tools
 - **ripgrep** - Fast grep alternative
 - **fd** - Fast find alternative
 - **bat** - Cat with syntax highlighting
-- **fzf** - Fuzzy finder
 - **eza** - Modern ls with icons
 - **zoxide** - Smart cd command
-- **delta** - Better git diffs
 - **lazygit** - Terminal UI for git
+- **btop** - System monitor
 
 ### Languages & Runtimes
-- **Node.js 20** (LTS)
-- **Bun** - Fast JavaScript runtime
-- **TypeScript**, **Prettier**, **ESLint**
+- Node.js 20 (LTS)
+- Bun
+- TypeScript, Prettier, ESLint
+- Devbox (for per-project environments)
 
-### Programs
-- **Neovim** v0.11.5 with LSP servers (Lua, Nix, TypeScript, etc.)
-- **Git** v2.51.2 with delta integration
-- **Tmux** v3.6 with truecolor support
-- **Zsh** with oh-my-zsh, autosuggestions, syntax highlighting
-- **Starship** - Modern prompt
-- **FZF** - Fuzzy finder with fd integration
-- **Direnv** - Per-directory environments with nix-direnv
+## Repository Structure
 
-### Fonts
-- **FiraCode Nerd Font**
-- **JetBrainsMono Nerd Font**
-- **Meslo Nerd Font**
+```
+dotfiles/
+├── flake.nix                 # Nix flake - entry point
+├── flake.lock                # Locked dependency versions
+├── user.nix                  # User config (username, git)
+├── home/
+│   ├── default.nix           # Main home configuration
+│   ├── packages.nix          # Package list
+│   ├── dotfiles.nix          # Environment variables
+│   └── programs/
+│       ├── zsh.nix
+│       ├── git.nix
+│       ├── neovim.nix
+│       ├── tmux.nix
+│       ├── starship.nix
+│       ├── fzf.nix
+│       ├── direnv.nix
+│       └── ssh.nix
+├── configs/
+│   ├── neovim/               # Neovim config
+│   ├── opencode/             # OpenCode AI editor config
+│   └── ghostty/              # Ghostty terminal config
+├── project-templates/        # Devbox templates
+│   ├── python/
+│   ├── nodejs/
+│   ├── golang/
+│   ├── infrastructure/
+│   └── kubernetes/
+├── scripts/
+│   └── rebuild.sh            # Rebuild helper
+└── docs/
+    └── SETUP.md              # Detailed setup guide
+```
 
-See [`home/packages.nix`](home/packages.nix) for the complete list.
+## Per-Project Environments
+
+Use Devbox for project-specific tooling:
+
+```bash
+cd my-project
+devbox init
+devbox add python@3.12 poetry
+devbox shell
+```
+
+See `project-templates/` for pre-configured environments.
 
 ## Customization
 
@@ -187,11 +137,11 @@ Edit `home/packages.nix`:
 ```nix
 home.packages = with pkgs; [
   # Add your packages here
-  ripgrep
-  fd
   your-new-package
 ];
 ```
+
+Then rebuild: `hm`
 
 ### Modifying Program Configs
 
@@ -200,114 +150,6 @@ Program configurations are in `home/programs/`:
 - `git.nix` - Git settings
 - `neovim.nix` - Editor setup
 - `tmux.nix` - Terminal multiplexer
-- etc.
-
-After making changes, rebuild:
-```bash
-home-manager switch --flake .#chrisloidolt
-```
-
-
-
-## Advanced Usage
-
-### Update All Packages
-
-```bash
-cd ~/Documents/GitHub/dotfiles
-
-# Update flake.lock to latest package versions
-nix flake update
-
-# Rebuild with new packages
-home-manager switch --flake .#chrisloidolt
-```
-
-### Clean Old Generations
-
-```bash
-# List all generations
-home-manager generations
-
-# Delete generations older than 30 days
-nix-collect-garbage --delete-older-than 30d
-
-# Optimize Nix store (deduplicate)
-nix-store --optimise
-```
-
-### Search for Packages
-
-```bash
-# Search nixpkgs
-nix search nixpkgs ripgrep
-nix search nixpkgs nodejs
-
-# Or use the website
-# https://search.nixos.org/packages
-```
-
-## Configuration Details
-
-### Programs
-- **Neovim** - Based on LazyVim, LSP servers managed by Nix
-- **OpenCode** - AI editor with MCP servers (context7, sequentialthinking, etc.)
-- **Git** - Delta integration for beautiful diffs
-- **Tmux** - Truecolor support, vi-mode, custom keybindings
-- **Zsh** - oh-my-zsh with autosuggestions and syntax highlighting
-- **Starship** - Fast, customizable prompt
-
-### Documentation
-
-- **[docs/SETUP.md](docs/SETUP.md)** - Complete setup guide
-- **[docs/NIX_ARCHITECTURE.md](docs/NIX_ARCHITECTURE.md)** - How Nix configuration works
-- **[docs/EMERGENCY_PROCEDURES.md](docs/EMERGENCY_PROCEDURES.md)** - Recovery and troubleshooting
-- **[docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** - Common issues and solutions
-- **[docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md)** - Command reference
-- **[docs/PACKAGE_MANAGEMENT_GUIDE.md](docs/PACKAGE_MANAGEMENT_GUIDE.md)** - Managing packages with Nix
-- **Config READMEs:**
-  - [configs/opencode/README.md](configs/opencode/README.md)
-  - [configs/neovim/README.md](configs/neovim/README.md)
-  - [configs/tmux/README.md](configs/tmux/README.md)
-  - [configs/ghostty/README.md](configs/ghostty/README.md)
-
-## How It Works
-
-### Declarative Configuration
-
-Everything is defined in `.nix` files:
-- `flake.nix` - Entry point, defines inputs and outputs
-- `home/default.nix` - Main home configuration
-- `home/packages.nix` - Package list
-- `home/programs/*.nix` - Individual program configs
-
-### Home Manager
-
-Home Manager creates symlinks from the Nix store to your home directory:
-- Configs in `configs/` → Nix store → `~/.config/`
-- Programs installed to `/nix/store/` → Available in `~/.nix-profile/bin/`
-
-**Benefits:**
-- ✅ Declarative - describe what you want, not how to get it
-- ✅ Reproducible - same config = same result
-- ✅ Atomic - all-or-nothing updates
-- ✅ Rollback - return to any previous generation
-
-### Architecture
-
-```
-flake.nix
-    ↓
-home-manager (reads home/default.nix)
-    ↓
-Imports: packages.nix, programs/*.nix
-    ↓
-Builds derivations in /nix/store
-    ↓
-Creates symlinks: ~/.config, ~/.nix-profile, etc.
-    ↓
-Activation: sets up shell, PATH, environment
-```
 
 ## Troubleshooting
 
@@ -321,12 +163,14 @@ nix flake check
 nix build .#homeConfigurations.chrisloidolt.activationPackage --show-trace
 ```
 
-### Terminal Doesn't Start
+### Rollback
 
 ```bash
-# Rollback to previous generation
+# List previous generations
 home-manager generations
-/nix/store/PREVIOUS-HASH-home-manager-generation/activate
+
+# Activate a previous generation
+/nix/store/HASH-home-manager-generation/activate
 ```
 
 ### Programs Not Found
@@ -336,31 +180,8 @@ home-manager generations
 echo $PATH | grep nix-profile
 
 # Rebuild
-home-manager switch --flake .#chrisloidolt
+hm
 ```
-
-### Config Changes Not Applied
-
-```bash
-# Make sure files are tracked by git
-git status
-
-# Rebuild
-home-manager switch --flake .#chrisloidolt
-```
-
-See [docs/EMERGENCY_PROCEDURES.md](docs/EMERGENCY_PROCEDURES.md) for detailed troubleshooting.
-
-## Features
-
-✨ **Declarative** - One source of truth for all configuration  
-🔄 **Reproducible** - Same config works everywhere  
-⚛️ **Atomic** - All-or-nothing updates  
-↩️ **Rollback** - Return to any previous state  
-🌍 **Cross-platform** - macOS, NixOS, WSL2  
-📦 **Modern tools** - Latest packages from nixpkgs  
-🔒 **Immutable** - Packages can't be accidentally broken  
-📝 **Well-documented** - Comprehensive migration guides  
 
 ## Philosophy
 
@@ -370,22 +191,8 @@ This dotfiles system follows these principles:
 2. **Reproducible** - Same inputs = same outputs, always
 3. **Atomic** - Changes are all-or-nothing, no partial states
 4. **Rollback** - Can revert to any previous generation
-5. **Transparent** - All configs in version control
-6. **Safe** - Test changes before applying
-
-## Contributing
-
-This is a personal dotfiles repository, but feel free to:
-- **Fork it** and customize for your needs
-- **Star it** if you find it useful
-- **Share it** with others learning dotfiles management
+5. **Simple** - Home Manager only, no system-level complexity
 
 ## License
 
 See the LICENSE file for details.
-
----
-
-**Happy coding!** 🚀
-
-For detailed setup instructions, see [docs/SETUP.md](docs/SETUP.md)

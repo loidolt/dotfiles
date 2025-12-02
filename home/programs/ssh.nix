@@ -1,43 +1,47 @@
 # SSH Configuration
-# Manages SSH client settings and ssh-agent across all hosts
+# Manages SSH client settings and ssh-agent
+#
+# Host-specific configurations (work servers, internal networks, etc.)
+# should be defined in ssh-hosts.nix which is gitignored.
+# See ssh-hosts.nix.example for a template.
 
-{ pkgs, lib, ... }:
+{ pkgs, lib, config, ... }:
 
+let
+  # Check if the hosts file exists and import it
+  hostsFile = ./ssh-hosts.nix;
+  hasHostsFile = builtins.pathExists hostsFile;
+  hostConfig = if hasHostsFile then import hostsFile { inherit pkgs lib; } else {};
+in
 {
+  # Force overwrite existing SSH config (Home Manager manages this)
+  home.file.".ssh/config".force = true;
+
   programs.ssh = {
     enable = true;
 
-    # Disable default config - we explicitly set what we need in matchBlocks."*"
-    # This silences the deprecation warning about future removal of defaults
+    # Disable default config - we set what we need in matchBlocks."*"
     enableDefaultConfig = false;
 
-    # GitHub configuration
     matchBlocks = {
       # Default settings for all hosts
       "*" = {
         addKeysToAgent = "yes";
-        # Explicit defaults we want to keep (previously set by enableDefaultConfig)
-        extraOptions = {
-          IdentitiesOnly = "no";
+        extraOptions = lib.optionalAttrs pkgs.stdenv.isDarwin {
+          UseKeychain = "yes";
         };
       };
 
+      # GitHub - this is public information, safe to include
       "github.com" = {
         hostname = "github.com";
         user = "git";
-        identityFile = "~/.ssh/id_ed25519_github";
-        addKeysToAgent = "yes";
+        identityFile = "~/.ssh/id_rsa";
       };
-    };
-
-    # Extra config for macOS
-    extraConfig = lib.optionalString pkgs.stdenv.isDarwin ''
-      # Use macOS Keychain
-      UseKeychain yes
-    '';
+    } // (hostConfig.matchBlocks or {});
   };
 
-  # Enable ssh-agent via home-manager
+  # Enable ssh-agent via home-manager on Linux only
+  # On macOS, the system ssh-agent is used instead
   services.ssh-agent.enable = !pkgs.stdenv.isDarwin;
-  # Note: On macOS, the system ssh-agent is used instead
 }

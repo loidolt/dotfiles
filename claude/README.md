@@ -198,6 +198,26 @@ Since this configuration is in your dotfiles repo:
 2. On other machines, pull the latest dotfiles
 3. Run `./sync-mcp-servers.js` to update the local Claude Code config
 
+## MCP Configuration Locations
+
+This dotfiles repository has MCP configurations in multiple places. Here's how they relate:
+
+| Location | Purpose | Format | Used By |
+|----------|---------|--------|---------|
+| `claude/mcp-servers.json` | Source of truth for Claude Code MCP servers | Claude format | `generate-project-mcp.js`, `sync-mcp-servers.js` |
+| `.mcp.json` (project root) | This dotfiles project's MCP config | Claude format | Claude Code (when working on dotfiles) |
+| `configs/opencode/opencode.json` | OpenCode-specific MCP configuration | OpenCode format | OpenCode editor |
+
+**Key Differences:**
+
+- **Claude format**: Uses `command`, `args`, `env` structure
+- **OpenCode format**: Uses `type`, `enabled`, `command`/`url` structure
+
+**Workflow:**
+1. Define servers in `claude/mcp-servers.json` (the source of truth)
+2. Run `generate-project-mcp.js` to create `.mcp.json` files for your projects
+3. The `configs/opencode/opencode.json` is maintained separately for OpenCode compatibility
+
 ## Comparison with OpenCode
 
 | Feature | OpenCode | Claude Code |

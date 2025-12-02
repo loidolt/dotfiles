@@ -2,66 +2,44 @@
 
 {
   home.packages = with pkgs; [
-    # Core utilities (all platforms)
-    git
-    curl
-    wget
-    vim
-    tmux
-    tree
-    jq
-    unzip
+    # Core utilities
+    git curl wget vim tmux tree jq unzip
 
-    # Modern CLI tools (all platforms)
-    ripgrep
-    fd
-    bat
-    fzf
-    eza
-    zoxide
+    # Modern CLI tools
+    ripgrep fd bat fzf eza zoxide
 
-    # Development tools (all platforms)
-    nodejs_20
-    bun
-    devbox
-    nodePackages.typescript
-    nodePackages.prettier
-    nodePackages.eslint
-    # gh - installed via programs.gh in git.nix
-    # delta - installed via programs.delta in git.nix
+    # Development tools
+    nodejs_20 bun devbox
+    nodePackages.typescript nodePackages.prettier nodePackages.eslint
     lazygit
 
-    # System monitoring (all platforms)
+    # System monitoring
     btop
 
-    # Network tools (all platforms)
-    mosh
+    # Network & archive tools
+    mosh p7zip
 
-    # Archive utilities (all platforms)
-    p7zip
-
-    # Document processing (all platforms)
+    # Document processing
     pandoc
 
-    # Container management (all platforms)
+    # Container management
     lazydocker
 
   ] ++ lib.optionals pkgs.stdenv.isDarwin [
-    # macOS-specific packages
-    # GNU utilities (better than BSD versions on macOS)
-    coreutils
-    gnused
-    gnutar
-    watch
+    # macOS-specific (GNU utils)
+    coreutils gnused gnutar watch
 
   ] ++ lib.optionals pkgs.stdenv.isLinux [
-    # Linux-specific packages
-    vscode # VSCode works well via Nix on Linux
+    # Linux-specific
+    vscode
 
-    # Fonts for Home Manager on Linux (standalone mode)
-    # When using NixOS or nix-darwin, fonts should be in system config
+    # Fonts (Home Manager manages these on Linux)
     nerd-fonts.fira-code
     nerd-fonts.jetbrains-mono
     nerd-fonts.meslo-lg
   ];
+
+  # On macOS, install fonts via Homebrew or manually:
+  #   brew install --cask font-fira-code-nerd-font font-jetbrains-mono-nerd-font font-meslo-lg-nerd-font
+  # Nix fonts on macOS require system-level installation which we avoid in standalone HM mode.
 }

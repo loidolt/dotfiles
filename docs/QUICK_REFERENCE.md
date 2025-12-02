@@ -5,11 +5,14 @@
 ### Home Manager
 
 ```bash
-# Rebuild and switch
+# Rebuild and switch (use alias)
+hm
+
+# Or full command
 home-manager switch --flake ~/Documents/GitHub/dotfiles#chrisloidolt
 
-# Rebuild with uncommitted changes
-home-manager switch --flake ~/Documents/GitHub/dotfiles#chrisloidolt --impure
+# Linux version
+home-manager switch --flake ~/dotfiles#chrisloidolt-linux
 
 # List all generations
 home-manager generations
@@ -24,7 +27,7 @@ home-manager generations
 # Update all packages
 cd ~/Documents/GitHub/dotfiles
 nix flake update
-home-manager switch --flake .#chrisloidolt
+hm
 
 # Search for packages
 nix search nixpkgs <package-name>
@@ -43,12 +46,6 @@ nix-store --optimise
 ### Tmux
 
 ```bash
-# Reload config
-tmux source ~/.tmux.conf
-
-# Restart tmux server
-tmux kill-server
-
 # New named session
 tmux new -s myname
 
@@ -57,19 +54,19 @@ tmux attach -t myname
 
 # List sessions
 tmux ls
+
+# Kill session
+tmux kill-session -t myname
 ```
 
-### Git
+### Git Aliases
 
 ```bash
-# Common shortcuts (from zsh aliases)
 gs      # git status
-ga      # git add
 gc      # git commit
 gp      # git push
 gl      # git pull
 gd      # git diff
-lg      # lazygit
 ```
 
 ### Modern CLI Tools
@@ -104,157 +101,33 @@ Ctrl-T  # Search files
 
 ### Configurations
 
-- Dotfiles repo: `~/Documents/GitHub/dotfiles`
-- Neovim: `~/.config/nvim/` → symlinked to `~/Documents/GitHub/dotfiles/configs/neovim/`
-- OpenCode: `~/.config/opencode/` → symlinked to `~/Documents/GitHub/dotfiles/configs/opencode/`
+- Dotfiles repo: `~/Documents/GitHub/dotfiles` (macOS) or `~/dotfiles` (Linux)
+- Neovim: `~/.config/nvim/` (symlinked)
+- OpenCode: `~/.config/opencode/` (symlinked)
+- Ghostty: `~/.config/ghostty/` (symlinked)
 - Tmux: `~/.tmux.conf` (managed by Home Manager)
 - Zsh: `~/.zshrc` (managed by Home Manager)
 
 ### Nix Files
 
-- Home Manager config: `~/Documents/GitHub/dotfiles/home/`
-- Flake: `~/Documents/GitHub/dotfiles/flake.nix`
-- Packages: `~/Documents/GitHub/dotfiles/home/packages.nix`
-- Program configs: `~/Documents/GitHub/dotfiles/home/programs/`
-
----
-
-## Troubleshooting
-
-### Check Installation
-
-```bash
-# Verify programs are from Nix
-which nvim
-which tmux
-which git
-# All should show /nix/store/... paths
-
-# Check Home Manager generation
-home-manager generations
-```
-
-### Fix Tmux Colors
-
-```bash
-# Verify truecolor config is loaded
-tmux show-options -g -s | grep terminal
-
-# Should see:
-# terminal-features* "...:RGB"
-# terminal-overrides* "...:Tc"
-
-# Restart tmux completely
-tmux kill-server && tmux
-
-# Test colors
-echo $TERM        # Should be: tmux-256color
-echo $COLORTERM   # Should be: truecolor
-```
-
-### Reload Shell
-
-```bash
-source ~/.zshrc
-# or
-exec zsh
-```
-
----
-
-## Useful Checks
-
-### Verify Truecolor Support
-
-```bash
-# Test color gradient (should show smooth colors)
-awk 'BEGIN{
-    s="/\\/\\/\\/\\/\\"; s=s s s s s s s s;
-    for (colnum = 0; colnum<77; colnum++) {
-        r = 255-(colnum*255/76);
-        g = (colnum*510/76);
-        b = (colnum*255/76);
-        if (g>255) g = 510-g;
-        printf "\033[48;2;%d;%d;%dm", r,g,b;
-        printf "\033[38;2;%d;%d;%dm", 255-r,255-g,255-b;
-        printf "%s\033[0m", substr(s,colnum+1,1);
-    }
-    printf "\n";
-}'
-```
-
-### Check Installed Packages
-
-```bash
-# List all Nix packages
-nix-env -q
-
-# Check specific program version
-nvim --version
-tmux -V
-git --version
-```
-
----
-
-## Quick Edits
-
-### Edit Dotfiles
-
-```bash
-# Open in editor
-nvim ~/Documents/GitHub/dotfiles
-
-# Edit specific configs
-nvim ~/Documents/GitHub/dotfiles/home/packages.nix
-nvim ~/Documents/GitHub/dotfiles/home/programs/zsh.nix
-nvim ~/Documents/GitHub/dotfiles/configs/opencode/opencode.json
-```
-
-### Update Package Lists
-
-```bash
-# Edit package list
-nvim ~/Documents/GitHub/dotfiles/home/packages.nix
-
-# Rebuild
-home-manager switch --flake ~/Documents/GitHub/dotfiles#chrisloidolt
-```
-
----
-
-## Git Workflow
-
-### Update Dotfiles
-
-```bash
-cd ~/Documents/GitHub/dotfiles
-git pull
-home-manager switch --flake .#chrisloidolt
-```
-
-### Commit Changes
-
-```bash
-cd ~/Documents/GitHub/dotfiles
-git add .
-git commit -m "Update configuration"
-git push
-```
+- Flake: `flake.nix`
+- User config: `user.nix`
+- Packages: `home/packages.nix`
+- Program configs: `home/programs/`
 
 ---
 
 ## Keyboard Shortcuts
 
-### Tmux
+### Tmux (Ctrl-b prefix)
 
-- `Ctrl-b %` - Split pane vertically
-- `Ctrl-b "` - Split pane horizontally
-- `Ctrl-b o` - Switch to next pane
-- `Ctrl-b c` - Create new window
-- `Ctrl-b n` - Next window
-- `Ctrl-b p` - Previous window
-- `Ctrl-b d` - Detach from session
+- `%` - Split pane vertically
+- `"` - Split pane horizontally
+- `o` - Switch to next pane
+- `c` - Create new window
+- `n` - Next window
+- `p` - Previous window
+- `d` - Detach from session
 
 ### Zsh
 
@@ -264,13 +137,25 @@ git push
 
 ---
 
+## Quick Edits
+
+```bash
+# Edit package list
+nvim ~/Documents/GitHub/dotfiles/home/packages.nix
+
+# Edit zsh config
+nvim ~/Documents/GitHub/dotfiles/home/programs/zsh.nix
+
+# Rebuild after changes
+hm
+```
+
+---
+
 ## Resources
 
 - [Main README](../README.md)
 - [Setup Guide](SETUP.md)
-- [Nix Architecture](NIX_ARCHITECTURE.md)
-- [Emergency Procedures](EMERGENCY_PROCEDURES.md)
 - [Troubleshooting](TROUBLESHOOTING.md)
-- [OpenCode Tmux Fix](OPENCODE_TMUX_FIX.md)
 - [Home Manager Manual](https://nix-community.github.io/home-manager/)
 - [Nix Package Search](https://search.nixos.org/packages)

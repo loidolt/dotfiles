@@ -3,35 +3,12 @@
 # Update Nix flake inputs and rebuild
 #
 
-set -e
+set -euo pipefail
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
-
-# Function to print colored output
-info() {
-    echo -e "${BLUE}ℹ${NC} $1"
-}
-
-success() {
-    echo -e "${GREEN}✓${NC} $1"
-}
-
-error() {
-    echo -e "${RED}✗${NC} $1"
-}
-
-warn() {
-    echo -e "${YELLOW}⚠${NC} $1"
-}
-
-# Change to dotfiles directory
+# Get script directory and source utilities
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
+source "$SCRIPT_DIR/lib/utils.sh"
 
 echo ""
 echo -e "${BLUE}╔════════════════════════════════════════╗${NC}"
@@ -50,13 +27,11 @@ fi
 
 # Check for uncommitted changes
 if [[ -n $(git status -s) ]]; then
-    warn "You have uncommitted changes:"
+    warning "You have uncommitted changes:"
     git status -s
     echo ""
-    warn "It's recommended to commit changes before updating"
-    read -p "Continue anyway? (y/N) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    warning "It's recommended to commit changes before updating"
+    if ! ask "Continue anyway?"; then
         info "Update cancelled"
         exit 0
     fi
@@ -138,8 +113,8 @@ if [[ "$REBUILD" == true ]]; then
     if [[ -f "$SCRIPT_DIR/rebuild.sh" ]]; then
         "$SCRIPT_DIR/rebuild.sh"
     else
-        warn "rebuild.sh not found, skipping rebuild"
-        warn "Run 'scripts/rebuild.sh' manually to apply changes"
+        warning "rebuild.sh not found, skipping rebuild"
+        warning "Run 'scripts/rebuild.sh' manually to apply changes"
     fi
 else
     info "Skipping rebuild (use --rebuild or run scripts/rebuild.sh manually)"
@@ -176,23 +151,23 @@ echo ""
 # Show helpful information
 echo -e "${BLUE}What was updated:${NC}"
 if [[ -n "$UPDATE_SPECIFIC" ]]; then
-    echo "  • $UPDATE_SPECIFIC input"
+    echo "  - $UPDATE_SPECIFIC input"
 else
-    echo "  • All flake inputs (nixpkgs, home-manager, etc.)"
+    echo "  - All flake inputs (nixpkgs, home-manager, etc.)"
 fi
 echo ""
 
 if [[ "$REBUILD" == false ]]; then
-    echo -e "${YELLOW}⚠ Note:${NC} Changes are not yet active"
+    echo -e "${YELLOW}Note:${NC} Changes are not yet active"
     echo "  Run 'scripts/rebuild.sh' to apply updates"
     echo ""
 fi
 
 echo -e "${BLUE}Next steps:${NC}"
-echo "  • Test your system to ensure everything works"
-echo "  • If issues occur, rollback with previous generation"
+echo "  - Test your system to ensure everything works"
+echo "  - If issues occur, rollback with previous generation"
 if [[ "$COMMIT" == false ]]; then
-    echo "  • Commit flake.lock: git add flake.lock && git commit -m 'Update flake inputs'"
+    echo "  - Commit flake.lock: git add flake.lock && git commit -m 'Update flake inputs'"
 fi
-echo "  • Push changes: git push"
+echo "  - Push changes: git push"
 echo ""

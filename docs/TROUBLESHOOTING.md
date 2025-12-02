@@ -29,37 +29,27 @@ warning: ignoring the client-specified setting 'trusted-public-keys'
 **Cause:** Your user is not in the Nix daemon's trusted users list.
 
 **Fix:**
+```bash
+# Edit Nix config
+sudo nano /etc/nix/nix.conf
 
-1. **Automated (recommended):**
-   ```bash
-   /tmp/fix-nix-warnings.sh
-   ```
+# Add this line:
+trusted-users = root chrisloidolt
 
-2. **Manual:**
-   ```bash
-   # Edit Nix config
-   sudo nano /etc/nix/nix.conf
-   
-   # Add this line:
-   trusted-users = root chrisloidolt
-   
-   # Save and exit (Ctrl+O, Enter, Ctrl+X)
-   
-   # Restart Nix daemon
-   sudo launchctl kickstart -k system/org.nixos.nix-daemon
-   ```
+# Save and exit (Ctrl+O, Enter, Ctrl+X)
+
+# Restart Nix daemon (macOS)
+sudo launchctl kickstart -k system/org.nixos.nix-daemon
+
+# Restart Nix daemon (Linux)
+sudo systemctl restart nix-daemon
+```
 
 **Impact:** Cosmetic only. Everything works fine, you just see warnings.
 
-**Benefits of fixing:**
-- Clean output
-- Can use custom binary caches (faster builds)
-- Can enable store optimization
-- Can use additional trusted public keys
-
 ---
 
-### "215 unread news items"
+### "X unread news items"
 
 **Cause:** Home Manager has accumulated news/changelog items.
 
@@ -68,7 +58,7 @@ warning: ignoring the client-specified setting 'trusted-public-keys'
 # Read the news
 home-manager news
 
-# Mark all as read without reading
+# Mark all as read
 home-manager news --show > /dev/null
 ```
 
@@ -89,88 +79,54 @@ exec zsh
 
 # Or source directly
 source ~/.zshrc
+```
 
-# Then try
+---
+
+### Build fails
+
+**Cause:** Syntax error or missing dependency.
+
+**Fix:**
+```bash
+# Check for errors
+nix flake check
+
+# Build with verbose output
+nix build .#homeConfigurations.chrisloidolt.activationPackage --show-trace
+```
+
+---
+
+### Programs not found after rebuild
+
+**Cause:** Shell PATH not updated.
+
+**Fix:**
+```bash
+# Restart your shell
+exec zsh
+
+# Or check PATH includes nix-profile
+echo $PATH | grep nix-profile
+```
+
+---
+
+### Config changes not applied
+
+**Cause:** Files need to be tracked by git, or you need to rebuild.
+
+**Fix:**
+```bash
+# Check git status
+git status
+
+# Add files if needed
+git add .
+
+# Rebuild
 hm
-```
-
----
-
-### devbox: command not found
-
-**Cause:** Home Manager hasn't been applied yet.
-
-**Fix:**
-```bash
-cd ~/Documents/GitHub/dotfiles
-home-manager switch --flake .#chrisloidolt
-```
-
----
-
-### "No such file or directory: ~/.config/home-manager"
-
-**Cause:** Using wrong path to home-manager configuration.
-
-**Fix:** Use one of these commands instead:
-```bash
-# Use the alias (after reloading shell)
-hm
-
-# Or full path
-home-manager switch --flake ~/Documents/GitHub/dotfiles#chrisloidolt
-
-# Or from dotfiles directory
-cd ~/Documents/GitHub/dotfiles
-home-manager switch --flake .#chrisloidolt
-```
-
----
-
-## Devbox Issues
-
-### "Package not found"
-
-**Cause:** Package name doesn't exist or is spelled incorrectly.
-
-**Fix:**
-```bash
-# Search for packages
-devbox search <package-name>
-
-# Or search on nixpkgs
-# https://search.nixos.org/packages
-```
-
----
-
-### Changes to devbox.json not applied
-
-**Cause:** Need to reload the environment.
-
-**Fix:**
-```bash
-# Exit and re-enter devbox shell
-exit
-devbox shell
-
-# Or update packages
-devbox update
-```
-
----
-
-### Conflicting package versions
-
-**Cause:** Different devbox environments trying to use same resources.
-
-**Fix:**
-```bash
-# Each project has isolated environment
-# Just use devbox shell in the project directory
-
-cd /path/to/project
-devbox shell
 ```
 
 ---
@@ -183,51 +139,63 @@ devbox shell
 
 **Fix:**
 ```bash
-# Remove old generations
+# Remove old generations (older than 30 days)
+nix-collect-garbage --delete-older-than 30d
+
+# Remove ALL old generations (be careful)
 nix-collect-garbage -d
 
-# Or use home-manager
-home-manager expire-generations "-7 days"
+# Optimize store (deduplicate)
+nix-store --optimise
 ```
 
 ---
 
-### Build fails with "cannot build derivation"
+### "cannot build derivation"
 
 **Cause:** Network issues or corrupted downloads.
 
 **Fix:**
 ```bash
-# Clear the Nix store cache and retry
+# Verify and repair store
 nix-store --verify --check-contents --repair
 
-# Or force a rebuild
-home-manager switch --flake ~/Documents/GitHub/dotfiles#chrisloidolt --refresh
+# Or force a fresh build
+home-manager switch --flake .#chrisloidolt --refresh
+```
+
+---
+
+## Rollback
+
+If something breaks badly:
+
+```bash
+# List all generations
+home-manager generations
+
+# Activate a previous (working) generation
+/nix/store/HASH-home-manager-generation/activate
+
+# Then fix the issue in your config before rebuilding
 ```
 
 ---
 
 ## Getting Help
 
-1. **Check logs:**
+1. **Verbose output:**
    ```bash
-   # Home Manager logs
-   journalctl --user -u home-manager-*
-   
-   # Nix daemon logs (on macOS)
-   tail -f /var/log/nix-daemon.log
+   home-manager switch --flake .#chrisloidolt --verbose
    ```
 
-2. **Verbose output:**
+2. **Check flake:**
    ```bash
-   home-manager switch --flake ~/Documents/GitHub/dotfiles#chrisloidolt --verbose
+   nix flake check
+   nix flake show
    ```
 
 3. **Documentation:**
    - [Home Manager Manual](https://nix-community.github.io/home-manager/)
    - [Nix Manual](https://nixos.org/manual/nix/stable/)
-   - [Devbox Docs](https://www.jetify.com/devbox/docs/)
-
-4. **This repository:**
-   - [Package Management Guide](./PACKAGE_MANAGEMENT_GUIDE.md)
-   - [Quick Reference](./QUICK_REFERENCE.md)
+   - [Nix Package Search](https://search.nixos.org/packages)

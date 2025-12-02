@@ -16,10 +16,16 @@ const CLAUDE_CONFIG = path.join(os.homedir(), '.claude.json');
 
 function readJSON(filepath) {
   try {
-    return JSON.parse(fs.readFileSync(filepath, 'utf-8'));
+    const content = fs.readFileSync(filepath, 'utf-8');
+    return JSON.parse(content);
   } catch (error) {
     if (error.code === 'ENOENT') {
       return null;
+    }
+    if (error instanceof SyntaxError) {
+      console.error(`Error: Invalid JSON in ${filepath}`);
+      console.error(`  ${error.message}`);
+      process.exit(1);
     }
     throw error;
   }

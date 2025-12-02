@@ -39,19 +39,19 @@ in
       "..." = "cd ../..";
       "...." = "cd ../../..";
 
-    } // lib.optionalAttrs pkgs.stdenv.isDarwin {
-      # macOS-specific aliases
-      # Home Manager rebuild (standalone)
-      hm = "home-manager switch --flake $DOTFILES#${username}";
-      hms = "home-manager switch --flake $DOTFILES#${username}";
+      # Unified rebuild alias (works everywhere)
+      hms = "home-manager switch --flake $DOTFILES";
 
-      # Darwin rebuild (if using nix-darwin)
-      drb = "darwin-rebuild switch --flake $DOTFILES#darwin-arm64";
+      # Dotfiles validation
+      dotfiles-check = "cd $DOTFILES && nix flake check && echo 'All checks passed!'";
+
+    } // lib.optionalAttrs pkgs.stdenv.isDarwin {
+      # macOS uses the default config name
+      hm = "home-manager switch --flake $DOTFILES#${username}";
 
     } // lib.optionalAttrs pkgs.stdenv.isLinux {
-      # Linux-specific aliases
-      # NixOS rebuild
-      nrb = "sudo nixos-rebuild switch --flake $DOTFILES";
+      # Linux uses the -linux config name
+      hm = "home-manager switch --flake $DOTFILES#${username}-linux";
     };
 
     # Environment variables specific to zsh
