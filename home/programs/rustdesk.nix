@@ -6,38 +6,34 @@
 #
 # Configuration is done via secrets.nix:
 #   rustdesk = {
-#     server = "your-server.example.com";
-#     key = "your-public-key";
-#     password = "your-permanent-password";  # optional
+#     # REQUIRED: Get this by configuring one RustDesk client manually, then:
+#     # Settings → Network → Export Server Config
+#     # This is a base64-encoded string containing server, relay, and key info
+#     configString = "your-exported-config-string";
+#
+#     # OPTIONAL: Permanent password for unattended access
+#     password = "your-permanent-password";
 #   };
 #
-# Note: Configuration is applied via `rustdesk --config` on first login.
-#       The password is set via `rustdesk --password`.
+# Note: The --config option requires an encoded config string from RustDesk,
+#       NOT raw server/key values. Export from a configured client.
 
 { pkgs, lib, config, userConfig, ... }:
 
 let
   hasRustdeskConfig = userConfig ? rustdesk;
-  hasServer = hasRustdeskConfig && userConfig.rustdesk ? server;
-  hasKey = hasRustdeskConfig && userConfig.rustdesk ? key;
+  hasConfigString = hasRustdeskConfig && userConfig.rustdesk ? configString;
   hasPassword = hasRustdeskConfig && userConfig.rustdesk ? password;
-
-  # Build the RustDesk --config string
-  # Format: "host=server.example.com,key=PUBLICKEY"
-  # Reference: https://github.com/rustdesk/rustdesk/discussions/7118
-  configParts = lib.optional hasServer "host=${userConfig.rustdesk.server}"
-    ++ lib.optional hasKey "key=${userConfig.rustdesk.key}";
-  configString = lib.concatStringsSep "," configParts;
 
   # Flatpak RustDesk binary path
   flatpakRustdesk = "/var/lib/flatpak/exports/bin/com.rustdesk.RustDesk";
 in
 {
   # Configure RustDesk server settings via systemd user service
-  # Uses --config command line option which requires the app to be installed
+  # Uses --config command line option with the exported config string
   systemd.user.services = lib.mkMerge [
-    # Service to configure server/key
-    (lib.mkIf (hasServer || hasKey) {
+    # Service to configure server using exported config string
+    (lib.mkIf hasConfigString {
       rustdesk-configure = {
         Unit = {
           Description = "Configure RustDesk server settings";
@@ -46,7 +42,7 @@ in
         Service = {
           Type = "oneshot";
           ExecStart = toString (pkgs.writeShellScript "rustdesk-configure" ''
-            CONFIG_STRING="${configString}"
+            CONFIG_STRING="${userConfig.rustdesk.configString}"
             
             # Mark file to track if config has been applied
             CONFIG_MARKER="$HOME/.config/rustdesk/.nix-configured"
@@ -57,10 +53,9 @@ in
               exit 0
             fi
             
-            echo "Configuring RustDesk with: $CONFIG_STRING"
+            echo "Configuring RustDesk..."
             
             if [ -x "${flatpakRustdesk}" ]; then
-              # Flatpak needs to run with flatpak-spawn or directly
               ${flatpakRustdesk} --config "$CONFIG_STRING" || true
             elif command -v rustdesk &> /dev/null; then
               rustdesk --config "$CONFIG_STRING" || true
@@ -86,7 +81,8 @@ in
       rustdesk-set-password = {
         Unit = {
           Description = "Set RustDesk permanent password";
-          After = [ "graphical-session.target" "rustdesk-configure.service" ];
+          After = [ "graphical-session.target" ] 
+            ++ lib.optional hasConfigString "rustdesk-configure.service";
         };
         Service = {
           Type = "oneshot";
