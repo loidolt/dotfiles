@@ -3,8 +3,35 @@
 let
   # Use the DOTFILES path from dotfiles.nix
   dotfilesPath = config.home.sessionVariables.DOTFILES;
+  
+  # Script to set zsh as default shell if it isn't already
+  set-zsh-default = pkgs.writeShellScriptBin "set-zsh-default" ''
+    ZSH_PATH="${pkgs.zsh}/bin/zsh"
+    
+    # Check if zsh is already the default shell
+    if [ "$SHELL" = "$ZSH_PATH" ]; then
+      exit 0
+    fi
+    
+    echo "Setting zsh as default shell..."
+    
+    # Add zsh to /etc/shells if not present (requires sudo)
+    if ! grep -q "$ZSH_PATH" /etc/shells 2>/dev/null; then
+      echo "Adding $ZSH_PATH to /etc/shells (requires sudo)..."
+      echo "$ZSH_PATH" | sudo tee -a /etc/shells > /dev/null
+    fi
+    
+    # Change the default shell
+    echo "Changing default shell to zsh (requires sudo)..."
+    sudo chsh -s "$ZSH_PATH" "$USER"
+    
+    echo "Default shell changed to zsh. Please log out and back in for the change to take effect."
+  '';
 in
 {
+  # Add the helper script to packages
+  home.packages = [ set-zsh-default ];
+
   programs.zsh = {
     enable = true;
 
