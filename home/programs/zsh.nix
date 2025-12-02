@@ -82,8 +82,8 @@ in
     sessionVariables = {
       # Use eza for tree view
       TREE_CMD = "eza --tree";
-      # Add local bin to PATH (for tools like Claude Code)
-      PATH = "$HOME/.local/bin:$PATH";
+      # Add local bin directories to PATH (for tools like Claude Code, OpenCode, etc.)
+      PATH = "$HOME/.local/bin:$HOME/.opencode/bin:$PATH";
     };
 
     # Oh My Zsh configuration
