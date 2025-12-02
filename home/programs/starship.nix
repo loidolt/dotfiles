@@ -65,6 +65,11 @@
         disabled = true;
       };
       
+      # GCP - disabled (not using GCP)
+      gcloud = {
+        disabled = true;
+      };
+      
       # Docker
       docker_context = {
         symbol = " ";
