@@ -66,18 +66,15 @@ in
       "..." = "cd ../..";
       "...." = "cd ../../..";
 
-      # Unified rebuild alias (works everywhere)
-      hms = "home-manager switch --flake $DOTFILES";
-
       # Dotfiles validation
       dotfiles-check = "cd $DOTFILES && nix flake check && echo 'All checks passed!'";
 
     } // lib.optionalAttrs pkgs.stdenv.isDarwin {
-      # macOS uses the default config name
+      # macOS rebuild alias
       hm = "home-manager switch --flake $DOTFILES#${username}";
 
     } // lib.optionalAttrs pkgs.stdenv.isLinux {
-      # Linux uses the -linux config name
+      # Linux rebuild alias
       hm = "home-manager switch --flake $DOTFILES#${username}-linux";
     };
 
