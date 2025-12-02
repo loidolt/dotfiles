@@ -28,16 +28,17 @@ This document tracks the implementation of fixes identified in the codebase revi
 ---
 
 ### 2. Fix validate-configs.sh
-**Status:** [x] Completed
-**Files:** `scripts/validate-configs.sh`
+**Status:** [x] Completed (merged into validate-nix.sh)
+**Files:** `scripts/validate-nix.sh`
 
 **Problem:** Script tried to validate non-existent NixOS/Darwin configurations and hardcoded username.
 
 **Solution:**
-- Removed NixOS and Darwin validation checks (they don't exist in flake.nix)
+- Merged functionality into `scripts/validate-nix.sh`
+- Removed standalone `validate-configs.sh` script
 - Extract username dynamically from `user.nix`
 - Detect current platform and validate appropriate Home Manager config
-- Now uses `lib/utils.sh` for consistent styling
+- Added `hm-validate` alias for easy access
 
 ---
 
@@ -55,13 +56,15 @@ This document tracks the implementation of fixes identified in the codebase revi
 
 ### 4. Consolidate Scripts to Use lib/utils.sh
 **Status:** [x] Completed
-**Files:** `scripts/rebuild.sh`, `scripts/update.sh`, `scripts/validate-nix.sh`, `scripts/validate-configs.sh`
+**Files:** `scripts/update.sh`, `scripts/validate-nix.sh`
 
 **Problem:** Each script defined its own color codes and helper functions.
 
 **Solution:**
 - Updated all scripts to source `lib/utils.sh`
 - Removed duplicate color/function definitions
+- Removed redundant `rebuild.sh` (replaced by `hm` alias)
+- Merged `validate-configs.sh` into `validate-nix.sh`
 - Scripts are now more consistent and maintainable
 
 ---
@@ -163,10 +166,9 @@ After these changes, you should:
    hm
    ```
 
-2. **Test the validation scripts**:
+2. **Test the validation script**:
    ```bash
-   ./scripts/validate-configs.sh
-   ./scripts/validate-nix.sh
+   hm-validate   # or ./scripts/validate-nix.sh
    ```
 
 3. **Verify SSH still works** (the config structure changed but functionality is preserved):

@@ -9,10 +9,10 @@
 hm
 
 # Or full command
-home-manager switch --flake ~/Documents/GitHub/dotfiles#chrisloidolt
+home-manager switch --flake ~/Documents/GitHub/dotfiles#chrisloidolt --impure
 
 # Linux version
-home-manager switch --flake ~/dotfiles#chrisloidolt-linux
+home-manager switch --flake ~/dotfiles#chrisloidolt-linux --impure
 
 # List all generations
 home-manager generations

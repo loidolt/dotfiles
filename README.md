@@ -17,7 +17,7 @@ echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
 # Clone and activate
 git clone https://github.com/loidolt/dotfiles.git ~/Documents/GitHub/dotfiles
 cd ~/Documents/GitHub/dotfiles
-nix run home-manager/master -- switch --flake .#chrisloidolt
+nix run home-manager/master -- switch --flake .#chrisloidolt --impure
 
 # Install fonts (one-time, via Homebrew)
 brew install --cask font-fira-code-nerd-font font-jetbrains-mono-nerd-font font-meslo-lg-nerd-font
@@ -36,17 +36,21 @@ echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
 # Clone and activate
 git clone https://github.com/loidolt/dotfiles.git ~/dotfiles
 cd ~/dotfiles
-nix run home-manager/master -- switch --flake .#chrisloidolt-linux
+nix run home-manager/master -- switch --flake .#chrisloidolt-linux --impure
 ```
 
 ### Daily Usage
 
 ```bash
 # Rebuild after changes
-hm   # alias for home-manager switch
+hm              # alias for home-manager switch
 
-# Update packages
-cd ~/Documents/GitHub/dotfiles && nix flake update && hm
+# Update flake inputs and rebuild
+hm-update       # runs update.sh with interactive prompts
+
+# Validate your setup
+hm-validate     # comprehensive system validation
+dotfiles-check  # quick flake check
 
 # Rollback
 home-manager generations
@@ -110,7 +114,8 @@ dotfiles/
 │   ├── infrastructure/
 │   └── kubernetes/
 ├── scripts/
-│   └── rebuild.sh            # Rebuild helper
+│   ├── update.sh             # Update flake inputs
+│   └── validate-nix.sh       # Validate Nix setup
 └── docs/
     └── SETUP.md              # Detailed setup guide
 ```
@@ -160,7 +165,7 @@ Program configurations are in `home/programs/`:
 nix flake check
 
 # Build with full trace
-nix build .#homeConfigurations.chrisloidolt.activationPackage --show-trace
+nix build .#homeConfigurations.chrisloidolt.activationPackage --show-trace --impure
 ```
 
 ### Rollback

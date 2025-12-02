@@ -19,7 +19,7 @@ mkdir -p ~/.config/nix
 echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
 
 # Restart your terminal, then activate Home Manager
-nix run home-manager/master -- switch --flake .#chrisloidolt -b backup
+nix run home-manager/master -- switch --flake .#chrisloidolt -b backup --impure
 
 # Install fonts via Homebrew
 brew install --cask font-fira-code-nerd-font font-jetbrains-mono-nerd-font font-meslo-lg-nerd-font
@@ -42,7 +42,7 @@ mkdir -p ~/.config/nix
 echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
 
 # Restart your terminal, then activate Home Manager
-nix run home-manager/master -- switch --flake .#chrisloidolt-linux -b backup
+nix run home-manager/master -- switch --flake .#chrisloidolt-linux -b backup --impure
 
 # Close and reopen your terminal
 ```
@@ -196,7 +196,7 @@ Program configurations are in `home/programs/`:
 nix flake check
 
 # Build with full trace
-nix build .#homeConfigurations.chrisloidolt.activationPackage --show-trace
+nix build .#homeConfigurations.chrisloidolt.activationPackage --show-trace --impure
 ```
 
 ### Programs Not Found

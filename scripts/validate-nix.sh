@@ -326,6 +326,45 @@ else
     print_failure "Dotfiles directory not found"
 fi
 
+# Configuration Build Validation
+print_header "Configuration Build Validation"
+
+# Extract username from user.nix
+USERNAME=$(grep 'username = ' "$DOTFILES_DIR/user.nix" 2>/dev/null | sed 's/.*username = "\([^"]*\)".*/\1/')
+if [[ -z "$USERNAME" ]]; then
+    print_warning "Could not extract username from user.nix, skipping build validation"
+else
+    # Determine config name based on platform
+    if [[ "$PLATFORM" == "macos" ]]; then
+        if [[ "$(uname -m)" == "arm64" ]]; then
+            CONFIG_NAME="${USERNAME}"
+        else
+            CONFIG_NAME="${USERNAME}-x86"
+        fi
+    else
+        if [[ "$(uname -m)" == "aarch64" ]]; then
+            CONFIG_NAME="${USERNAME}-arm"
+        else
+            CONFIG_NAME="${USERNAME}-linux"
+        fi
+    fi
+
+    # Check flake validity
+    if nix flake check --no-build 2>&1; then
+        print_success "Flake passes checks"
+    else
+        print_failure "Flake check failed"
+    fi
+
+    # Dry-run build of Home Manager config
+    # Note: --impure allows reading gitignored files like ssh-hosts.nix
+    if nix build ".#homeConfigurations.${CONFIG_NAME}.activationPackage" --dry-run --impure 2>&1; then
+        print_success "Home Manager config ($CONFIG_NAME) builds successfully"
+    else
+        print_failure "Home Manager build would fail for $CONFIG_NAME"
+    fi
+fi
+
 # Summary
 echo ""
 echo -e "${BLUE}╔════════════════════════════════════════╗${NC}"

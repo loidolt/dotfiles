@@ -66,16 +66,18 @@ in
       "..." = "cd ../..";
       "...." = "cd ../../..";
 
-      # Dotfiles validation
+      # Dotfiles management
       dotfiles-check = "cd $DOTFILES && nix flake check && echo 'All checks passed!'";
+      hm-update = "$DOTFILES/scripts/update.sh";
+      hm-validate = "$DOTFILES/scripts/validate-nix.sh";
 
     } // lib.optionalAttrs pkgs.stdenv.isDarwin {
-      # macOS rebuild alias
-      hm = "home-manager switch --flake $DOTFILES#${username}";
+      # macOS rebuild alias (--impure allows reading gitignored ssh-hosts.nix)
+      hm = "home-manager switch --flake $DOTFILES#${username} --impure";
 
     } // lib.optionalAttrs pkgs.stdenv.isLinux {
-      # Linux rebuild alias
-      hm = "home-manager switch --flake $DOTFILES#${username}-linux";
+      # Linux rebuild alias (--impure allows reading gitignored ssh-hosts.nix)
+      hm = "home-manager switch --flake $DOTFILES#${username}-linux --impure";
     };
 
     # Environment variables specific to zsh

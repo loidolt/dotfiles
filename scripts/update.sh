@@ -110,14 +110,17 @@ if [[ "$REBUILD" == true ]]; then
     info "Rebuilding with updated inputs..."
     echo ""
     
-    if [[ -f "$SCRIPT_DIR/rebuild.sh" ]]; then
-        "$SCRIPT_DIR/rebuild.sh"
+    # Detect platform and run home-manager switch
+    if [[ "$(uname -s)" == "Darwin" ]]; then
+        CONFIG="${USER}"
     else
-        warning "rebuild.sh not found, skipping rebuild"
-        warning "Run 'scripts/rebuild.sh' manually to apply changes"
+        CONFIG="${USER}-linux"
     fi
+    
+    # Note: --impure allows reading gitignored files like ssh-hosts.nix
+    home-manager switch --flake "$DOTFILES_DIR#${CONFIG}" --impure
 else
-    info "Skipping rebuild (use --rebuild or run scripts/rebuild.sh manually)"
+    info "Skipping rebuild (run 'hm' manually to apply changes)"
 fi
 
 # Commit if requested
@@ -159,7 +162,7 @@ echo ""
 
 if [[ "$REBUILD" == false ]]; then
     echo -e "${YELLOW}Note:${NC} Changes are not yet active"
-    echo "  Run 'scripts/rebuild.sh' to apply updates"
+    echo "  Run 'hm' to apply updates"
     echo ""
 fi
 

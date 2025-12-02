@@ -93,7 +93,7 @@ source ~/.zshrc
 nix flake check
 
 # Build with verbose output
-nix build .#homeConfigurations.chrisloidolt.activationPackage --show-trace
+nix build .#homeConfigurations.chrisloidolt.activationPackage --show-trace --impure
 ```
 
 ---
@@ -161,7 +161,7 @@ nix-store --optimise
 nix-store --verify --check-contents --repair
 
 # Or force a fresh build
-home-manager switch --flake .#chrisloidolt --refresh
+home-manager switch --flake .#chrisloidolt --refresh --impure
 ```
 
 ---
@@ -186,7 +186,7 @@ home-manager generations
 
 1. **Verbose output:**
    ```bash
-   home-manager switch --flake .#chrisloidolt --verbose
+   home-manager switch --flake .#chrisloidolt --verbose --impure
    ```
 
 2. **Check flake:**

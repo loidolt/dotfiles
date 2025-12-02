@@ -68,7 +68,7 @@ home.packages = with pkgs; [
 ### Step 2: Rebuild
 
 ```bash
-home-manager switch --flake ~/Documents/GitHub/dotfiles#chrisloidolt
+home-manager switch --flake ~/Documents/GitHub/dotfiles#chrisloidolt --impure
 ```
 
 ### Step 3: Verify
@@ -196,7 +196,7 @@ Ask yourself:
 # Update Nix packages
 cd ~/Documents/GitHub/dotfiles
 nix flake update
-home-manager switch --flake .#chrisloidolt
+home-manager switch --flake .#chrisloidolt --impure
 ```
 
 ### Updating Project Tools
