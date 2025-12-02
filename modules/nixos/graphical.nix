@@ -44,9 +44,20 @@
     cmake
     pkg-config
 
-    # RustDesk remote desktop (using flutter variant)
-    rustdesk-flutter
   ];
+
+  # Enable Flatpak for applications not well-supported in nixpkgs
+  services.flatpak = {
+    enable = lib.mkDefault true;
+
+    # Flatpak packages (installed declaratively via nix-flatpak)
+    packages = [
+      "com.rustdesk.RustDesk"
+    ];
+
+    # Update flatpaks on system activation
+    update.onActivation = true;
+  };
 
   # Enable Docker for development workstations
   virtualisation.docker.enable = lib.mkDefault true;

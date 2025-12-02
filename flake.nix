@@ -18,9 +18,11 @@
       url = "github:nix-community/NixOS-WSL";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
   };
 
-  outputs = { self, nixpkgs, home-manager, nix-darwin, nixos-wsl, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, nix-darwin, nixos-wsl, nix-flatpak, ... }@inputs:
     let
       # Import user configuration
       baseUserConfig = import ./user.nix;
@@ -72,6 +74,7 @@
         modules = [
           hostPath
           home-manager.nixosModules.home-manager
+          nix-flatpak.nixosModules.nix-flatpak
           {
             home-manager = {
               useGlobalPkgs = true;
