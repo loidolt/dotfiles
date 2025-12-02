@@ -43,18 +43,11 @@
     gnumake
     cmake
     pkg-config
+
+    # RustDesk remote desktop
+    rustdesk
   ];
 
   # Enable Docker for development workstations
   virtualisation.docker.enable = lib.mkDefault true;
-
-  # RustDesk remote desktop
-  programs.rustdesk = {
-    enable = lib.mkDefault true;
-    # Pre-configure server and key if provided in userConfig
-  } // lib.optionalAttrs (userConfig ? rustdesk && userConfig.rustdesk ? server) {
-    relayServer = userConfig.rustdesk.server;
-  } // lib.optionalAttrs (userConfig ? rustdesk && userConfig.rustdesk ? key) {
-    publicKey = userConfig.rustdesk.key;
-  };
 }

@@ -12,6 +12,7 @@
     ./programs/neovim.nix
     ./programs/fzf.nix
     ./programs/direnv.nix
+    ./programs/rustdesk.nix
   ];
 
   home = {
