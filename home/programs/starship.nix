@@ -60,6 +60,11 @@
         disabled = true;
       };
       
+      # AWS - disabled (not using AWS)
+      aws = {
+        disabled = true;
+      };
+      
       # Docker
       docker_context = {
         symbol = " ";
