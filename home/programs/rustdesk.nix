@@ -11,7 +11,8 @@
 #     password = "your-permanent-password";  # optional
 #   };
 #
-# Note: The password is set via a systemd user service that runs on login.
+# Note: Configuration is applied via `rustdesk --config` on first login.
+#       The password is set via `rustdesk --password`.
 
 { pkgs, lib, config, userConfig, ... }:
 
@@ -21,58 +22,89 @@ let
   hasKey = hasRustdeskConfig && userConfig.rustdesk ? key;
   hasPassword = hasRustdeskConfig && userConfig.rustdesk ? password;
 
-  # Build the RustDesk config content in TOML format
-  # Reference: https://rustdesk.com/docs/en/self-host/client-configuration/
-  configContent = lib.concatStringsSep "\n" (
-    lib.optional hasServer ''rendezvous_server = "${userConfig.rustdesk.server}"''
-    ++ lib.optional hasKey ''key = "${userConfig.rustdesk.key}"''
-  );
+  # Build the RustDesk --config string
+  # Format: "host=server.example.com,key=PUBLICKEY"
+  # Reference: https://github.com/rustdesk/rustdesk/discussions/7118
+  configParts = lib.optional hasServer "host=${userConfig.rustdesk.server}"
+    ++ lib.optional hasKey "key=${userConfig.rustdesk.key}";
+  configString = lib.concatStringsSep "," configParts;
 
   # Flatpak RustDesk binary path
   flatpakRustdesk = "/var/lib/flatpak/exports/bin/com.rustdesk.RustDesk";
 in
 {
-  # Create config file if server or key is configured
-  # Note: Flatpak uses ~/.var/app/com.rustdesk.RustDesk/config/rustdesk/
-  # but RustDesk also checks ~/.config/rustdesk/ on Linux
-  xdg.configFile = lib.mkIf (hasServer || hasKey) {
-    "rustdesk/RustDesk2.toml" = {
-      text = configContent;
-    };
-  };
+  # Configure RustDesk server settings via systemd user service
+  # Uses --config command line option which requires the app to be installed
+  systemd.user.services = lib.mkMerge [
+    # Service to configure server/key
+    (lib.mkIf (hasServer || hasKey) {
+      rustdesk-configure = {
+        Unit = {
+          Description = "Configure RustDesk server settings";
+          After = [ "graphical-session.target" ];
+        };
+        Service = {
+          Type = "oneshot";
+          ExecStart = toString (pkgs.writeShellScript "rustdesk-configure" ''
+            CONFIG_STRING="${configString}"
+            
+            # Mark file to track if config has been applied
+            CONFIG_MARKER="$HOME/.config/rustdesk/.nix-configured"
+            
+            # Only configure if not already done (or config changed)
+            if [ -f "$CONFIG_MARKER" ] && [ "$(cat "$CONFIG_MARKER")" = "$CONFIG_STRING" ]; then
+              echo "RustDesk already configured with current settings"
+              exit 0
+            fi
+            
+            echo "Configuring RustDesk with: $CONFIG_STRING"
+            
+            if [ -x "${flatpakRustdesk}" ]; then
+              # Flatpak needs to run with flatpak-spawn or directly
+              ${flatpakRustdesk} --config "$CONFIG_STRING" || true
+            elif command -v rustdesk &> /dev/null; then
+              rustdesk --config "$CONFIG_STRING" || true
+            else
+              echo "RustDesk not found, skipping configuration"
+              exit 0
+            fi
+            
+            # Mark as configured
+            mkdir -p "$(dirname "$CONFIG_MARKER")"
+            echo "$CONFIG_STRING" > "$CONFIG_MARKER"
+          '');
+          RemainAfterExit = true;
+        };
+        Install = {
+          WantedBy = [ "graphical-session.target" ];
+        };
+      };
+    })
 
-  # Also create config in Flatpak location
-  home.file = lib.mkIf (hasServer || hasKey) {
-    ".var/app/com.rustdesk.RustDesk/config/rustdesk/RustDesk2.toml" = {
-      text = configContent;
-    };
-  };
-
-  # Set permanent password via systemd user service
-  # RustDesk requires the --password flag to set the permanent password
-  systemd.user.services = lib.mkIf hasPassword {
-    rustdesk-set-password = {
-      Unit = {
-        Description = "Set RustDesk permanent password";
-        After = [ "graphical-session.target" ];
+    # Service to set permanent password
+    (lib.mkIf hasPassword {
+      rustdesk-set-password = {
+        Unit = {
+          Description = "Set RustDesk permanent password";
+          After = [ "graphical-session.target" "rustdesk-configure.service" ];
+        };
+        Service = {
+          Type = "oneshot";
+          ExecStart = toString (pkgs.writeShellScript "rustdesk-set-password" ''
+            if [ -x "${flatpakRustdesk}" ]; then
+              ${flatpakRustdesk} --password "${userConfig.rustdesk.password}"
+            elif command -v rustdesk &> /dev/null; then
+              rustdesk --password "${userConfig.rustdesk.password}"
+            else
+              echo "RustDesk not found, skipping password setup"
+            fi
+          '');
+          RemainAfterExit = true;
+        };
+        Install = {
+          WantedBy = [ "graphical-session.target" ];
+        };
       };
-      Service = {
-        Type = "oneshot";
-        # Try Flatpak first, fall back to system package
-        ExecStart = toString (pkgs.writeShellScript "rustdesk-set-password" ''
-          if [ -x "${flatpakRustdesk}" ]; then
-            ${flatpakRustdesk} --password ${userConfig.rustdesk.password}
-          elif command -v rustdesk &> /dev/null; then
-            rustdesk --password ${userConfig.rustdesk.password}
-          else
-            echo "RustDesk not found, skipping password setup"
-          fi
-        '');
-        RemainAfterExit = true;
-      };
-      Install = {
-        WantedBy = [ "graphical-session.target" ];
-      };
-    };
-  };
+    })
+  ];
 }
