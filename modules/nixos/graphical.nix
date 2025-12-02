@@ -61,6 +61,65 @@
     update.onActivation = true;
   };
 
+  # ==========================================================================
+  # RustDesk Service Configuration
+  # ==========================================================================
+  # RustDesk needs to run as a system service for unattended access.
+  # The service starts after the display manager and provides remote access.
+  #
+  # After installation, configure RustDesk via the GUI:
+  #   1. Open RustDesk
+  #   2. Settings → Network → ID/Relay Server (configure your server)
+  #   3. Settings → Security → Set permanent password
+
+  systemd.services.rustdesk = {
+    description = "RustDesk Remote Desktop Service";
+    documentation = [ "https://rustdesk.com/docs" ];
+
+    # Start after display manager is ready
+    after = [ "network.target" "display-manager.service" ];
+    wants = [ "network.target" ];
+    wantedBy = [ "graphical.target" ];
+
+    # Flatpak needs access to the user's session for screen sharing
+    # We run as the primary user to access their X/Wayland session
+    serviceConfig = {
+      Type = "simple";
+      User = username;
+      Group = "users";
+
+      # Environment for Flatpak and display access
+      Environment = [
+        "DISPLAY=:0"
+        "XDG_RUNTIME_DIR=/run/user/1000"
+      ];
+
+      # Run RustDesk in service mode via Flatpak
+      ExecStart = "/var/lib/flatpak/exports/bin/com.rustdesk.RustDesk --service";
+
+      # Restart on failure
+      Restart = "on-failure";
+      RestartSec = 5;
+
+      # Security hardening (limited due to Flatpak requirements)
+      NoNewPrivileges = false;  # Flatpak may need this
+      ProtectSystem = "strict";
+      ProtectHome = "read-only";
+      ReadWritePaths = [
+        "/home/${username}/.var/app/com.rustdesk.RustDesk"
+        "/tmp"
+      ];
+    };
+  };
+
+  # Firewall rules for RustDesk
+  # RustDesk uses TCP 21115-21117 for relay and UDP 21116 for hole punching
+  # These are only needed if connecting directly (not via relay server)
+  networking.firewall = {
+    allowedTCPPorts = [ 21115 21116 21117 21118 21119 ];
+    allowedUDPPorts = [ 21116 ];
+  };
+
   # Enable Docker for development workstations
   virtualisation.docker.enable = lib.mkDefault true;
 }
