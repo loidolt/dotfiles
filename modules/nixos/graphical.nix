@@ -52,7 +52,9 @@
   programs.rustdesk = {
     enable = lib.mkDefault true;
     # Pre-configure server and key if provided in userConfig
-    relayServer = lib.mkIf (userConfig ? rustdesk && userConfig.rustdesk ? server) userConfig.rustdesk.server;
-    publicKey = lib.mkIf (userConfig ? rustdesk && userConfig.rustdesk ? key) userConfig.rustdesk.key;
+  } // lib.optionalAttrs (userConfig ? rustdesk && userConfig.rustdesk ? server) {
+    relayServer = userConfig.rustdesk.server;
+  } // lib.optionalAttrs (userConfig ? rustdesk && userConfig.rustdesk ? key) {
+    publicKey = userConfig.rustdesk.key;
   };
 }
