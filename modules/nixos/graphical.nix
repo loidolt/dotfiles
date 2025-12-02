@@ -44,8 +44,8 @@
     cmake
     pkg-config
 
-    # RustDesk remote desktop
-    rustdesk
+    # RustDesk remote desktop (using flutter variant)
+    rustdesk-flutter
   ];
 
   # Enable Docker for development workstations
