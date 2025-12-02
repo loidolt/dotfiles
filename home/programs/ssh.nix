@@ -7,11 +7,19 @@
   programs.ssh = {
     enable = true;
 
+    # Disable default config - we explicitly set what we need in matchBlocks."*"
+    # This silences the deprecation warning about future removal of defaults
+    enableDefaultConfig = false;
+
     # GitHub configuration
     matchBlocks = {
       # Default settings for all hosts
       "*" = {
         addKeysToAgent = "yes";
+        # Explicit defaults we want to keep (previously set by enableDefaultConfig)
+        extraOptions = {
+          IdentitiesOnly = "no";
+        };
       };
 
       "github.com" = {

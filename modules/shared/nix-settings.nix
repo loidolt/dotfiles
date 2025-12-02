@@ -30,6 +30,10 @@ in
       # Build settings
       max-jobs = "auto";
       cores = 0; # Use all available cores
+
+      # Increase download buffer size to prevent warning during large fetches
+      # Default is 64MB, increase to 256MB for large packages like rustdesk
+      download-buffer-size = 256 * 1024 * 1024;
     } // lib.optionalAttrs (!isDarwin) {
       # Linux/NixOS specific: optimize store automatically
       auto-optimise-store = true;

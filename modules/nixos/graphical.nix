@@ -37,7 +37,6 @@
   environment.systemPackages = with pkgs; [
     firefox
     kdePackages.konsole
-    rustdesk
 
     # Build tools needed for compiling software (including neovim plugins)
     gcc
@@ -48,13 +47,15 @@
   ];
 
   # Enable Flatpak for applications not well-supported in nixpkgs
-  # Note: RustDesk moved to native nixpkgs package for better integration
+  # RustDesk: nixpkgs package has cargo-auditable build bug, using Flatpak instead
+  # TODO: Switch to nixpkgs when https://github.com/NixOS/nixpkgs/issues/... is fixed
   services.flatpak = {
     enable = lib.mkDefault true;
 
     # Flatpak packages (installed declaratively via nix-flatpak)
-    # Add packages here that aren't available or well-supported in nixpkgs
-    packages = [ ];
+    packages = [
+      "com.rustdesk.RustDesk"
+    ];
 
     # Update flatpaks on system activation
     update.onActivation = true;

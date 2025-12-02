@@ -1,7 +1,8 @@
 # RustDesk configuration
 # Remote desktop client with optional server/key/password pre-configuration
 #
-# RustDesk is installed via nixpkgs in modules/nixos/graphical.nix
+# RustDesk is installed via Flatpak (declaratively via nix-flatpak module).
+# Note: The nixpkgs package has a cargo-auditable build bug, so we use Flatpak.
 #
 # Configuration is done via secrets.nix:
 #   rustdesk = {
@@ -26,11 +27,23 @@ let
     lib.optional hasServer ''rendezvous_server = "${userConfig.rustdesk.server}"''
     ++ lib.optional hasKey ''key = "${userConfig.rustdesk.key}"''
   );
+
+  # Flatpak RustDesk binary path
+  flatpakRustdesk = "/var/lib/flatpak/exports/bin/com.rustdesk.RustDesk";
 in
 {
   # Create config file if server or key is configured
+  # Note: Flatpak uses ~/.var/app/com.rustdesk.RustDesk/config/rustdesk/
+  # but RustDesk also checks ~/.config/rustdesk/ on Linux
   xdg.configFile = lib.mkIf (hasServer || hasKey) {
     "rustdesk/RustDesk2.toml" = {
+      text = configContent;
+    };
+  };
+
+  # Also create config in Flatpak location
+  home.file = lib.mkIf (hasServer || hasKey) {
+    ".var/app/com.rustdesk.RustDesk/config/rustdesk/RustDesk2.toml" = {
       text = configContent;
     };
   };
@@ -45,8 +58,11 @@ in
       };
       Service = {
         Type = "oneshot";
+        # Try Flatpak first, fall back to system package
         ExecStart = toString (pkgs.writeShellScript "rustdesk-set-password" ''
-          if command -v rustdesk &> /dev/null; then
+          if [ -x "${flatpakRustdesk}" ]; then
+            ${flatpakRustdesk} --password ${userConfig.rustdesk.password}
+          elif command -v rustdesk &> /dev/null; then
             rustdesk --password ${userConfig.rustdesk.password}
           else
             echo "RustDesk not found, skipping password setup"
