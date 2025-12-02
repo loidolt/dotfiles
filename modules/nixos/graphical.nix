@@ -3,7 +3,7 @@
 #
 # Note: Fonts are now handled by the shared fonts module
 
-{ config, pkgs, lib, username, ... }:
+{ config, pkgs, lib, username, userConfig, ... }:
 
 {
   # Add docker group for graphical users (common for dev workstations)
@@ -47,4 +47,12 @@
 
   # Enable Docker for development workstations
   virtualisation.docker.enable = lib.mkDefault true;
+
+  # RustDesk remote desktop
+  programs.rustdesk = {
+    enable = lib.mkDefault true;
+    # Pre-configure server and key if provided in userConfig
+    relayServer = lib.mkIf (userConfig ? rustdesk && userConfig.rustdesk ? server) userConfig.rustdesk.server;
+    publicKey = lib.mkIf (userConfig ? rustdesk && userConfig.rustdesk ? key) userConfig.rustdesk.key;
+  };
 }

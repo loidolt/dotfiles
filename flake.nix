@@ -23,7 +23,17 @@
   outputs = { self, nixpkgs, home-manager, nix-darwin, nixos-wsl, ... }@inputs:
     let
       # Import user configuration
-      userConfig = import ./user.nix;
+      baseUserConfig = import ./user.nix;
+
+      # Import secrets if they exist, otherwise empty set
+      secrets =
+        if builtins.pathExists ./secrets.nix
+        then import ./secrets.nix
+        else { };
+
+      # Merge user config with secrets
+      userConfig = baseUserConfig // secrets;
+
       inherit (userConfig) username vmUsername timezone locale;
 
       # Supported systems

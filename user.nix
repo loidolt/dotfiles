@@ -26,4 +26,7 @@
 
   # Locale settings
   locale = "en_US.UTF-8";
+
+  # Note: Secrets (like RustDesk server/key) should go in secrets.nix
+  # See secrets.nix.example for the template
 }

@@ -45,6 +45,9 @@ bun.lock
 package-lock.json
 yarn.lock
 
+# Local secrets (not committed to repo)
+secrets.nix
+
 # Claude/AI tool configs (local only)
 .claude/
 
