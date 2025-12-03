@@ -104,6 +104,15 @@ in
       theme = ""; # We use starship instead
     };
 
+    # Profile initialization (runs once for login shells)
+    # This ensures nix-daemon.sh is sourced to get ~/.nix-profile/bin in PATH
+    profileExtra = ''
+      # Source nix-daemon.sh if it exists (adds ~/.nix-profile/bin to PATH)
+      if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+        . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+      fi
+    '';
+
     # Additional initialization
     initContent = ''
       # Initialize zoxide (smart cd)
