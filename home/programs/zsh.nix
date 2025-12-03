@@ -70,6 +70,7 @@ in
       dotfiles-check = "cd $DOTFILES && nix flake check && echo 'All checks passed!'";
       hm-update = "$DOTFILES/scripts/update.sh";
       hm-validate = "$DOTFILES/scripts/validate-nix.sh";
+      hm-health = "$DOTFILES/scripts/health-check.sh";
 
     } // lib.optionalAttrs pkgs.stdenv.isDarwin {
       # macOS rebuild alias (--impure allows reading gitignored ssh-hosts.nix)
