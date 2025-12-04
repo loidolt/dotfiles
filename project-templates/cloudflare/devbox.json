@@ -1,0 +1,52 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/main/.schema/devbox.schema.json",
+  "packages": [
+    "nodejs_22@latest",
+    "pnpm@latest",
+    "wrangler@latest",
+    "nodePackages.typescript@latest",
+    "nodePackages.typescript-language-server@latest"
+  ],
+  "shell": {
+    "init_hook": [
+      "echo '☁️  Cloudflare Workers development environment loaded'",
+      "echo ''",
+      "node --version",
+      "pnpm --version",
+      "wrangler --version",
+      "echo ''",
+      "echo 'Available tools: node, pnpm, wrangler, typescript, tsserver (LSP)'",
+      "echo ''",
+      "echo 'Quick start:'",
+      "echo '  devbox run init    - Initialize new worker'",
+      "echo '  devbox run dev     - Start local dev server'",
+      "echo '  devbox run deploy  - Deploy to Cloudflare'"
+    ],
+    "scripts": {
+      "init": [
+        "wrangler init"
+      ],
+      "dev": [
+        "wrangler dev"
+      ],
+      "deploy": [
+        "wrangler deploy"
+      ],
+      "tail": [
+        "wrangler tail"
+      ],
+      "install": [
+        "pnpm install"
+      ],
+      "test": [
+        "pnpm test"
+      ],
+      "lint": [
+        "pnpm lint"
+      ],
+      "format": [
+        "pnpm format"
+      ]
+    }
+  }
+}

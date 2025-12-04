@@ -1,0 +1,58 @@
+% gcp, google-cloud, gcloud
+
+# Initialize gcloud configuration
+gcloud init
+
+# List all projects
+gcloud projects list
+
+# Set active project
+gcloud config set project <project_id>
+
+# List all compute instances
+gcloud compute instances list
+
+# SSH into a compute instance
+gcloud compute ssh <instance_name> --zone=<zone>
+
+# List Cloud Run services
+gcloud run services list
+
+# Deploy Cloud Run service
+gcloud run deploy <service_name> --image <image_url> --region <region>
+
+# View logs for Cloud Run service
+gcloud logs read --limit 50 --format json | jless
+
+# List Cloud Storage buckets
+gcloud storage buckets list
+
+# Copy file to Cloud Storage
+gcloud storage cp <local_file> gs://<bucket_name>/
+
+# Download from Cloud Storage
+gcloud storage cp gs://<bucket_name>/<remote_file> <local_path>
+
+# Set default region
+gcloud config set compute/region <region>
+
+# Get current configuration
+gcloud config list
+
+# List all gcloud commands
+gcloud help
+
+# Authenticate with service account
+gcloud auth activate-service-account --key-file=<key_file>
+
+$ project_id: gcloud projects list --format="value(projectId)" 2>/dev/null || echo "my-project"
+$ instance_name: gcloud compute instances list --format="value(name)" 2>/dev/null || echo "instance-1"
+$ zone: echo "us-central1-a us-east1-b europe-west1-c asia-east1-a" | tr ' ' '\n'
+$ region: echo "us-central1 us-east1 europe-west1 asia-east1" | tr ' ' '\n'
+$ service_name: echo "my-service api-service worker-service" | tr ' ' '\n'
+$ image_url: echo "gcr.io/project/image:tag"
+$ bucket_name: echo "my-bucket data-bucket backups" | tr ' ' '\n'
+$ local_file: fd --type f | head -20
+$ remote_file: echo "data.json backup.tar.gz config.yaml" | tr ' ' '\n'
+$ local_path: echo ". ./downloads /tmp" | tr ' ' '\n'
+$ key_file: fd -e json | grep -i service | head -10

@@ -75,13 +75,27 @@ home-manager generations
 - **eza** - Modern ls with icons
 - **zoxide** - Smart cd command
 - **lazygit** - Terminal UI for git
+- **lazydocker** - Terminal UI for docker
+- **lazysql** - Terminal UI for databases
 - **btop** - System monitor
+- **glow** - Markdown renderer
+- **yq** - YAML/TOML processor
+- **tldr** - Simplified man pages
+- **dust** - Disk usage visualization
+- **hyperfine** - Command benchmarking
+- **jless** - Interactive JSON viewer
+- **procs** - Better process viewer
+- **xh** - HTTP client with better UX
 
 ### Languages & Runtimes
 - Node.js 20 (LTS)
 - Bun
 - TypeScript, Prettier, ESLint
 - Devbox (for per-project environments)
+
+### Cloud & Infrastructure Tools
+- **wrangler** - Cloudflare Workers CLI
+- **google-cloud-sdk** - Google Cloud Platform tools
 
 ## Repository Structure
 
@@ -111,6 +125,7 @@ dotfiles/
 │   ├── python/
 │   ├── nodejs/
 │   ├── golang/
+│   ├── cloudflare/           # Cloudflare Workers
 │   ├── infrastructure/
 │   └── kubernetes/
 ├── scripts/

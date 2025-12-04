@@ -7,11 +7,16 @@
 
     # Modern CLI tools
     ripgrep fd bat fzf eza zoxide navi
+    glow yq-go tldr dust hyperfine jless procs xh lazysql
 
     # Development tools
     nodejs_20 bun devbox
     nodePackages.typescript nodePackages.prettier nodePackages.eslint
     lazygit
+
+    # Cloud & Infrastructure
+    wrangler
+    google-cloud-sdk
 
     # System monitoring
     btop

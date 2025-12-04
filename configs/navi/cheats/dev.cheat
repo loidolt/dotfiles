@@ -47,3 +47,120 @@ $ seconds: echo "1 2 5 10" | tr ' ' '\n'
 $ command: echo "ls -la" "ps aux" "df -h" | tr ' ' '\n'
 $ log_file: fd --type f -e log | head -20
 $ pattern: echo "ERROR WARN INFO DEBUG" | tr ' ' '\n'
+
+# ============================================================
+# NEW TOOLS - Added 2025-12-03
+# ============================================================
+
+# Render markdown file
+glow <markdown_file>
+
+# Render markdown in pager mode
+glow -p <markdown_file>
+
+# View markdown from URL
+glow <markdown_url>
+
+# View all markdown files in directory
+glow <directory>
+
+# Query YAML file
+yq '.<path>' <yaml_file>
+
+# Convert YAML to JSON
+yq -o json '.' <yaml_file>
+
+# Convert JSON to YAML
+yq -P '.' <json_file>
+
+# Update YAML in-place
+yq -i '.<path> = "<value>"' <yaml_file>
+
+# Merge YAML files
+yq eval-all 'select(fileIndex == 0) * select(fileIndex == 1)' <yaml_file1> <yaml_file2>
+
+# Benchmark command performance
+hyperfine '<command1>' '<command2>'
+
+# Benchmark with warmup runs
+hyperfine --warmup <runs> '<bench_command>'
+
+# Benchmark and export results to markdown
+hyperfine --export-markdown results.md '<command1>' '<command2>'
+
+# Set number of benchmark runs
+hyperfine --runs <runs> '<bench_command>'
+
+# Interactive JSON viewer
+cat <json_file> | jless
+
+# View JSON from API with jless
+curl <api_url> | jless
+
+# Navigate JSON (j/k=up/down, /=search, q=quit)
+jless <json_file>
+
+# Better HTTP GET request
+xh GET <api_url>
+
+# POST JSON data
+xh POST <api_url> key=<value>
+
+# POST with JSON file
+xh POST <api_url> < <json_file>
+
+# Add headers to request
+xh GET <api_url> Authorization:<token>
+
+# Download file with xh
+xh GET <download_url> --download
+
+# Form data upload
+xh --form POST <api_url> file@<file_path>
+
+# Disk usage visualization
+dust <directory>
+
+# Show top N largest directories
+dust -n <number> <directory>
+
+# Limit directory depth
+dust -d <depth> <directory>
+
+# Better process list
+procs
+
+# Filter processes by name
+procs <process_name>
+
+# Process tree view
+procs --tree
+
+# Sort by CPU usage
+procs --sortd cpu
+
+# Sort by memory usage
+procs --sortd mem
+
+# Watch processes (like top)
+procs --watch
+
+$ markdown_file: fd -e md | head -20
+$ markdown_url: echo "https://raw.githubusercontent.com/user/repo/main/README.md"
+$ directory: echo ". docs configs ~/Projects" | tr ' ' '\n'
+$ yaml_file: fd -e yaml -e yml | head -20
+$ yaml_file1: fd -e yaml -e yml | head -10
+$ yaml_file2: fd -e yaml -e yml | head -10
+$ json_file: fd -e json | head -20
+$ path: echo ".data .results .items .spec.containers[0]" | tr ' ' '\n'
+$ value: echo "new-value 1.0.0 production" | tr ' ' '\n'
+$ runs: echo "3 5 10 20" | tr ' ' '\n'
+$ bench_command: echo "ls -la" "fd -e json" "rg pattern" | tr ' ' '\n'
+$ command1: echo "rg pattern" "grep -r pattern" "fd -e json" | tr ' ' '\n'
+$ command2: echo "grep -r pattern" "find . -name '*.json'" "ag pattern" | tr ' ' '\n'
+$ api_url: echo "https://api.github.com/users/octocat https://jsonplaceholder.typicode.com/posts http://localhost:8787/api" | tr ' ' '\n'
+$ download_url: echo "https://example.com/file.zip http://localhost:8787/download" | tr ' ' '\n'
+$ file_path: fd --type f | head -20
+$ number: echo "10 20 30 50" | tr ' ' '\n'
+$ depth: echo "2 3 4 5" | tr ' ' '\n'
+$ process_name: echo "node python java postgres nginx docker" | tr ' ' '\n'

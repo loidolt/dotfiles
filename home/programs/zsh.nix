@@ -66,6 +66,21 @@ in
       "..." = "cd ../..";
       "...." = "cd ../../..";
 
+      # Documentation & viewing
+      mdcat = "glow";          # Render markdown
+      mdview = "glow -p";      # Markdown pager mode
+
+      # JSON/YAML tools
+      yaml = "yq";             # Quick YAML queries
+      jv = "jless";            # Interactive JSON viewer
+
+      # Disk & system
+      disk = "dust";           # Better disk usage
+      pls = "procs";           # Better process list
+
+      # HTTP/API tools
+      http = "xh";             # Simpler curl alternative
+
       # Dotfiles management
       dotfiles-check = "cd $DOTFILES && nix flake check && echo 'All checks passed!'";
       hm-update = "$DOTFILES/scripts/update.sh";

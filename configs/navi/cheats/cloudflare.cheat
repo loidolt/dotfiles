@@ -1,0 +1,38 @@
+% cloudflare, workers, wrangler
+
+# Create a new Cloudflare Worker project
+wrangler init <project_name>
+
+# Start local development server
+wrangler dev
+
+# Deploy worker to Cloudflare
+wrangler deploy
+
+# Tail worker logs in real-time
+wrangler tail
+
+# View worker details
+wrangler whoami
+
+# Create a new Worker with TypeScript
+wrangler init <project_name> --type=webpack
+
+# Test worker locally with specific environment
+wrangler dev --env <environment>
+
+# Deploy to specific environment
+wrangler deploy --env <environment>
+
+# View wrangler configuration
+cat wrangler.toml
+
+# Run worker tests
+wrangler dev --test
+
+# Publish worker with name override
+wrangler deploy --name <worker_name>
+
+$ project_name: echo "my-worker my-api my-service worker-api" | tr ' ' '\n'
+$ environment: echo "production staging development" | tr ' ' '\n'
+$ worker_name: echo "prod-worker staging-worker dev-worker" | tr ' ' '\n'
