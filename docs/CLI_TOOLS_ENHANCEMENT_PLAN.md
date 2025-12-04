@@ -1,8 +1,8 @@
 # CLI/TUI Tools Enhancement Plan
 
-**Status:** ✅ Approved - Ready for Implementation  
+**Status:** ✅ Implemented - Fix Applied  
 **Date:** 2025-12-03  
-**Goal:** Add 11 high-value CLI/TUI tools to enhance productivity without adding complexity
+**Goal:** Add 10 high-value CLI/TUI tools to enhance productivity without adding complexity (wrangler moved to project-specific installation)
 
 **Decisions:**
 1. Wrangler: Use latest from nixpkgs
@@ -11,16 +11,24 @@
 4. Databases: PostgreSQL, MSSQL, Redis, MySQL, SQLite
 5. Additional tools: None for now
 
+**Implementation Notes:**
+- **Wrangler installation approach changed**: Wrangler bundles Prettier, ESLint, and TypeScript which conflict with global installations
+- **Solution**: Wrangler is installed per-project via devbox (see project-templates/cloudflare/) instead of globally
+- This approach is actually better practice - keeps project tooling isolated
+- All Node.js development tools (TypeScript, Prettier, ESLint) remain available globally
+- The Cloudflare Workers project template includes wrangler automatically
+
 ---
 
 ## Overview
 
 This plan adds modern CLI/TUI tools to your dotfiles setup, focusing on tools that complement your existing workflow. The enhancement includes:
 
-- **11 new packages** (10 tools + wrangler + gcloud)
+- **10 new global packages** (9 CLI tools + gcloud)
+- **Wrangler** installed per-project via Cloudflare Workers devbox template
 - **7 new shell aliases** for convenience
 - **3 new navi cheatsheets** (Cloudflare, GCP, tool updates)
-- **1 new project template** (Cloudflare Workers)
+- **1 new project template** (Cloudflare Workers with wrangler)
 - **1 comprehensive guide** (CLI Tools Guide)
 
 ---
@@ -60,13 +68,16 @@ glow yq-go tldr dust hyperfine jless procs xh lazysql
 ```nix
 # Add new section after Development tools:
 # Cloud & Infrastructure
-wrangler
 google-cloud-sdk
 ```
 
 **Tool descriptions:**
-- `wrangler` - Cloudflare Workers CLI
-- `google-cloud-sdk` - Google Cloud Platform tools
+- `google-cloud-sdk` - Google Cloud Platform tools (minimal gcloud CLI)
+
+**Note on Wrangler:**
+- Wrangler is NOT installed globally due to package conflicts (bundles Prettier, ESLint, TypeScript)
+- Instead, wrangler is included in the Cloudflare Workers project template (project-templates/cloudflare/)
+- This is better practice - keeps project tooling isolated per-project
 
 **Updated structure:**
 ```nix

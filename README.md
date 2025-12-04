@@ -94,8 +94,9 @@ home-manager generations
 - Devbox (for per-project environments)
 
 ### Cloud & Infrastructure Tools
-- **wrangler** - Cloudflare Workers CLI
 - **google-cloud-sdk** - Google Cloud Platform tools
+
+**Note:** Wrangler (Cloudflare Workers CLI) is available in the `project-templates/cloudflare/` devbox template to avoid package conflicts with global Node.js tooling.
 
 ## Repository Structure
 

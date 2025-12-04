@@ -15,7 +15,6 @@
     lazygit
 
     # Cloud & Infrastructure
-    wrangler
     google-cloud-sdk
 
     # System monitoring

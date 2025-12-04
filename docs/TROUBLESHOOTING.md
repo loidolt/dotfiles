@@ -117,6 +117,33 @@ nix build .#homeConfigurations.chrisloidolt.activationPackage --show-trace --imp
 
 ---
 
+### Package conflict errors (e.g., wrangler vs prettier)
+
+**Error:**
+```
+pkgs.buildEnv error: two given paths contain a conflicting subpath:
+  `/nix/store/.../wrangler-.../lib/node_modules/prettier/LICENSE' and
+  `/nix/store/.../prettier-.../lib/node_modules/prettier/LICENSE'
+```
+
+**Cause:** Two packages provide the same files. Common with Node.js tools where one package bundles another.
+
+**Fix:**
+```bash
+# Remove the conflicting global package
+# Example: wrangler includes prettier, so remove global prettier
+# Edit home/packages.nix and remove nodePackages.prettier
+
+# Then rebuild
+hm
+```
+
+**Note:** If you need the removed tool globally:
+- Install via npm: `npm install -g prettier`
+- Add to project-specific devbox environments instead of global packages
+
+---
+
 ### Programs not found after rebuild
 
 **Cause:** Shell PATH not updated or nix-profile not in PATH.
