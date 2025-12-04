@@ -1,5 +1,24 @@
 # Troubleshooting Guide
 
+## Quick Health Check
+
+Run the health check script to diagnose common issues:
+
+```bash
+hm-health
+# Or directly:
+~/dotfiles/scripts/health-check.sh
+```
+
+This will check:
+- Nix installation and daemon status
+- PATH configuration (nix-profile, local bins)
+- Shell configuration files
+- External tools (opencode, claude)
+- Key nix-managed tools
+
+---
+
 ## Home Manager Warnings
 
 ### "Git tree is dirty"
@@ -100,7 +119,7 @@ nix build .#homeConfigurations.chrisloidolt.activationPackage --show-trace --imp
 
 ### Programs not found after rebuild
 
-**Cause:** Shell PATH not updated.
+**Cause:** Shell PATH not updated or nix-profile not in PATH.
 
 **Fix:**
 ```bash
@@ -109,7 +128,33 @@ exec zsh
 
 # Or check PATH includes nix-profile
 echo $PATH | grep nix-profile
+
+# If nix-profile is missing from PATH (common on Linux), source it manually:
+source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+
+# Then run hm to ensure .zprofile is created
+hm
 ```
+
+---
+
+### External tools not found (opencode, claude)
+
+**Cause:** These tools are installed via their own installers, not through nix/home-manager.
+
+**Fix:**
+```bash
+# Install opencode
+curl -fsSL https://opencode.ai/install | bash
+
+# Install Claude CLI
+curl -fsSL https://claude.ai/install | bash
+
+# Ensure ~/.local/bin exists (needed for claude)
+mkdir -p ~/.local/bin
+```
+
+**Note:** The PATH already includes `~/.local/bin` and `~/.opencode/bin`, so after installation these tools should work in new terminal sessions.
 
 ---
 
