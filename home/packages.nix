@@ -6,7 +6,7 @@
     git curl wget vim tmux tree jq unzip
 
     # Modern CLI tools
-    ripgrep fd bat fzf eza zoxide
+    ripgrep fd bat fzf eza zoxide navi
 
     # Development tools
     nodejs_20 bun devbox

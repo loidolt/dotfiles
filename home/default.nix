@@ -12,6 +12,7 @@
     ./programs/neovim.nix
     ./programs/fzf.nix
     ./programs/direnv.nix
+    ./programs/navi.nix
   ];
 
   home = {
@@ -61,6 +62,10 @@
     };
     "ghostty" = {
       source = ../configs/ghostty;
+      recursive = true;
+    };
+    "navi/cheats" = {
+      source = ../configs/navi/cheats;
       recursive = true;
     };
   };

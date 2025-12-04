@@ -1,0 +1,46 @@
+% system, utilities
+
+# Find large files in directory
+find <directory> -type f -size +<size>M -exec ls -lh {} \; | awk '{ print $9 ": " $5 }'
+
+# Check disk usage by directory
+du -h --max-depth=<depth> <directory> | sort -hr
+
+# Find files modified in last n days
+find <directory> -type f -mtime -<days>
+
+# Kill process by name
+pkill -f <process_name>
+
+# Watch command output every n seconds
+watch -n <seconds> <command>
+
+# Find process using port
+lsof -i :<port>
+
+# Create compressed tar archive
+tar -czf <archive>.tar.gz <directory>
+
+# Extract tar.gz archive
+tar -xzf <archive>.tar.gz
+
+# Monitor system resources
+btop
+
+# Check listening ports
+ss -tulpn
+
+# Sync directories with rsync
+rsync -avz --progress <source> <destination>
+
+$ directory: fd --type d | head -20
+$ size: echo "10 50 100 500 1000" | tr ' ' '\n'
+$ depth: echo "1 2 3 4 5" | tr ' ' '\n'
+$ days: echo "1 7 14 30 60" | tr ' ' '\n'
+$ process_name: ps aux | awk '{print $11}' | sort -u
+$ seconds: echo "1 2 5 10 30" | tr ' ' '\n'
+$ port: echo "3000 8080 5432 6379 27017" | tr ' ' '\n'
+$ command: echo "Enter command to watch"
+$ archive: echo "archive-name"
+$ source: echo "/path/to/source"
+$ destination: echo "/path/to/destination"

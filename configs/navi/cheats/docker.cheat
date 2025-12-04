@@ -1,0 +1,41 @@
+% docker, containers
+
+# Remove all stopped containers
+docker container prune -f
+
+# Remove all unused images
+docker image prune -a -f
+
+# Remove all volumes
+docker volume prune -f
+
+# Stop all running containers
+docker stop $(docker ps -q)
+
+# Remove container and its volumes
+docker rm -v <container>
+
+# View container logs with tail
+docker logs -f --tail <lines> <container>
+
+# Execute command in running container
+docker exec -it <container> <command>
+
+# Copy file from container to host
+docker cp <container>:<source_path> <dest_path>
+
+# Copy file from host to container
+docker cp <source_path> <container>:<dest_path>
+
+# Inspect container IP address
+docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' <container>
+
+# Build with no cache
+docker build --no-cache -t <tag> .
+
+$ container: docker ps -a --format '{{.Names}}'
+$ lines: echo "50 100 200 500" | tr ' ' '\n'
+$ command: echo "/bin/bash /bin/sh sh bash" | tr ' ' '\n'
+$ source_path: echo "/path/to/file"
+$ dest_path: echo "/path/to/destination"
+$ tag: echo "image:tag"
