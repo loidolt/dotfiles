@@ -1,4 +1,4 @@
-% system, utilities
+% system, utilities, files
 
 # Find large files in directory
 find <directory> -type f -size +<size>M -exec ls -lh {} \; | awk '{ print $9 ": " $5 }'
@@ -15,9 +15,6 @@ pkill -f <process_name>
 # Watch command output every n seconds
 watch -n <seconds> <command>
 
-# Find process using port
-lsof -i :<port>
-
 # Create compressed tar archive
 tar -czf <archive>.tar.gz <directory>
 
@@ -27,11 +24,32 @@ tar -xzf <archive>.tar.gz
 # Monitor system resources
 btop
 
-# Check listening ports
-ss -tulpn
-
 # Sync directories with rsync
 rsync -avz --progress <source> <destination>
+
+# Set file permissions (common patterns)
+chmod <permissions> <file>
+
+# Change owner and group recursively
+chown -R <user>:<group> <path>
+
+# Find and delete files matching pattern
+find <directory> -name "<pattern>" -type f -delete
+
+# Find empty directories
+find <directory> -type d -empty
+
+# Calculate folder size sorted by size
+du -sh <directory>/* | sort -hr
+
+# Create nested directory structure
+mkdir -p <path>
+
+# Show calendar for specific month
+cal <month> <year>
+
+# Quick calculator
+echo "<expression>" | bc -l
 
 $ directory: fd --type d | head -20
 $ size: echo "10 50 100 500 1000" | tr ' ' '\n'
@@ -39,8 +57,16 @@ $ depth: echo "1 2 3 4 5" | tr ' ' '\n'
 $ days: echo "1 7 14 30 60" | tr ' ' '\n'
 $ process_name: ps aux | awk '{print $11}' | sort -u
 $ seconds: echo "1 2 5 10 30" | tr ' ' '\n'
-$ port: echo "3000 8080 5432 6379 27017" | tr ' ' '\n'
 $ command: echo "Enter command to watch"
 $ archive: echo "archive-name"
 $ source: echo "/path/to/source"
 $ destination: echo "/path/to/destination"
+$ permissions: echo "755 644 600 700 775" | tr ' ' '\n'
+$ file: fd --type f | head -20
+$ user: echo "$USER root"
+$ group: echo "$(id -gn) root"
+$ path: echo "/path/to/directory"
+$ pattern: echo "*.log *.tmp .DS_Store" | tr ' ' '\n'
+$ month: echo "1 2 3 4 5 6 7 8 9 10 11 12" | tr ' ' '\n'
+$ year: echo "2024 2025 2026" | tr ' ' '\n'
+$ expression: echo "scale=2; 10/3" "sqrt(16)" "2^10"

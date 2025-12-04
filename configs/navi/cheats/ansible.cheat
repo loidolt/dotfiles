@@ -1,0 +1,39 @@
+% ansible, automation, playbooks
+
+# Run playbook with verbose output
+ansible-playbook <playbook> -v<verbosity>
+
+# Run playbook on specific hosts
+ansible-playbook <playbook> --limit <host_pattern>
+
+# Run playbook with specific tags
+ansible-playbook <playbook> --tags <tags>
+
+# Dry run playbook (check mode)
+ansible-playbook <playbook> --check
+
+# Encrypt file with ansible vault
+ansible-vault encrypt <file>
+
+# Decrypt vault encrypted file
+ansible-vault decrypt <file>
+
+# Edit encrypted vault file
+ansible-vault edit <file>
+
+# Check playbook syntax
+ansible-playbook <playbook> --syntax-check
+
+# List all tasks in playbook
+ansible-playbook <playbook> --list-tasks
+
+# Run ad-hoc command on hosts
+ansible <host_pattern> -m <module> -a "<args>"
+
+$ playbook: fd --type f -e yml -e yaml | grep -E '(playbook|site|main)' | head -20
+$ verbosity: echo "v vv vvv vvvv" | tr ' ' '\n'
+$ host_pattern: echo "all webservers dbservers localhost" | tr ' ' '\n'
+$ tags: echo "deploy config install update" | tr ' ' '\n'
+$ file: fd --type f | head -20
+$ module: echo "ping shell command copy file apt yum service" | tr ' ' '\n'
+$ args: echo "uptime" "name=nginx state=started"

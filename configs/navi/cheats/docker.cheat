@@ -1,4 +1,4 @@
-% docker, containers
+% docker, containers, compose
 
 # Remove all stopped containers
 docker container prune -f
@@ -33,9 +33,35 @@ docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' <co
 # Build with no cache
 docker build --no-cache -t <tag> .
 
+# Start compose services in detached mode
+docker-compose up -d
+
+# Stop compose services and remove volumes
+docker-compose down -v
+
+# View logs for specific compose service
+docker-compose logs -f <service>
+
+# Restart specific compose service
+docker-compose restart <service>
+
+# Execute command in running compose service
+docker-compose exec <service> <compose_command>
+
+# List compose services with status
+docker-compose ps
+
+# Pull latest images for compose services
+docker-compose pull
+
+# Build and start compose services with no cache
+docker-compose build --no-cache && docker-compose up -d
+
 $ container: docker ps -a --format '{{.Names}}'
 $ lines: echo "50 100 200 500" | tr ' ' '\n'
 $ command: echo "/bin/bash /bin/sh sh bash" | tr ' ' '\n'
 $ source_path: echo "/path/to/file"
 $ dest_path: echo "/path/to/destination"
 $ tag: echo "image:tag"
+$ service: docker-compose ps --services
+$ compose_command: echo "/bin/bash /bin/sh bash sh" | tr ' ' '\n'

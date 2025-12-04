@@ -27,8 +27,42 @@ git checkout HEAD -- <file>
 # Show changes in stash
 git stash show -p stash@{<index>}
 
+# Cherry-pick commit from another branch
+git cherry-pick <commit>
+
+# Create worktree for parallel work
+git worktree add <path> <branch>
+
+# Show commit graph with pretty log
+git log --graph --oneline --decorate --all
+
+# View file history with patches
+git log -p <file>
+
+# Find commits that modified specific file
+git log --follow -- <file>
+
+# Diff between two branches
+git diff <branch1>..<branch2>
+
+# Show who changed each line in file
+git blame <file>
+
+# Revert commit (create inverse commit)
+git revert <commit>
+
+# List unmerged branches
+git branch --no-merged
+
+# Clean untracked files with confirmation
+git clean -fd -n
+
 $ n: echo "1 2 3 4 5" | tr ' ' '\n'
 $ index: git stash list | cut -d: -f1 | sed 's/stash@{//;s/}//'
 $ branch: git branch -r | sed 's/origin\///' | grep -v HEAD
 $ file: git status --short | awk '{print $2}'
 $ message: echo "Enter commit message"
+$ commit: git log --oneline -20 | awk '{print $1}'
+$ path: echo "../worktree-name /tmp/worktree"
+$ branch1: git branch | sed 's/\*//' | awk '{print $1}'
+$ branch2: git branch | sed 's/\*//' | awk '{print $1}'

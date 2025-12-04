@@ -1,0 +1,49 @@
+% development, tools, utilities
+
+# Start quick HTTP server
+python3 -m http.server <port> || npx http-server -p <port>
+
+# POST JSON data with curl
+curl -X POST <url> -H "Content-Type: application/json" -d '<json_data>'
+
+# Curl with authentication header
+curl -H "Authorization: Bearer <token>" <url>
+
+# Pretty print JSON with jq
+cat <file> | jq '.'
+
+# Extract JSON values with jq
+cat <file> | jq '.<key>'
+
+# Validate JSON syntax
+cat <file> | jq empty
+
+# Generate random UUID
+uuidgen | tr '[:upper:]' '[:lower:]'
+
+# Generate secure random password
+openssl rand -base64 <length>
+
+# Watch file changes and re-run command
+watch -n <seconds> <command>
+
+# Tail logs with grep filter
+tail -f <log_file> | grep --line-buffered "<pattern>"
+
+# Create timestamped backup
+cp <file> <file>.backup.$(date +%Y%m%d_%H%M%S)
+
+# Benchmark command execution time
+time <command>
+
+$ port: echo "8000 8080 3000 5000" | tr ' ' '\n'
+$ url: echo "http://localhost:8080/api/endpoint"
+$ json_data: echo '{"key": "value"}'
+$ token: echo "your-auth-token-here"
+$ file: fd --type f -e json | head -20
+$ key: echo "data results items" | tr ' ' '\n'
+$ length: echo "12 16 24 32" | tr ' ' '\n'
+$ seconds: echo "1 2 5 10" | tr ' ' '\n'
+$ command: echo "ls -la" "ps aux" "df -h" | tr ' ' '\n'
+$ log_file: fd --type f -e log | head -20
+$ pattern: echo "ERROR WARN INFO DEBUG" | tr ' ' '\n'

@@ -1,0 +1,36 @@
+% macos, utilities, system
+
+# Copy command output to clipboard
+<command> | pbcopy
+
+# Paste clipboard to file
+pbpaste > <file>
+
+# Show hidden files in Finder
+defaults write com.apple.finder AppleShowAllFiles -bool <show> && killall Finder
+
+# Flush DNS cache
+sudo dscacheutil -flushcache && sudo killall -HUP mDNSResponder
+
+# Prevent Mac from sleeping
+caffeinate -d -t <seconds>
+
+# Screenshot selection to clipboard
+screencapture -ic
+
+# Open file with default application
+open <file>
+
+# Restart Dock
+killall Dock
+
+# Restart Finder
+killall Finder
+
+# Show network connection speed
+nettop -m tcp
+
+$ command: echo "ls -la" "cat file.txt" "echo 'text'" | tr ' ' '\n'
+$ file: fd --type f | head -20
+$ show: echo "true false" | tr ' ' '\n'
+$ seconds: echo "3600 7200 14400 28800" | tr ' ' '\n'

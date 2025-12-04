@@ -33,5 +33,23 @@ nix flake check
 # Update specific input
 nix flake lock --update-input <input>
 
+# Open shell with temporary packages
+nix shell nixpkgs#<packages>
+
+# Build local package
+nix build
+
+# Show why package depends on another
+nix why-depends <package1> <package2>
+
+# Optimize nix store (remove duplicates)
+nix store optimise
+
+# Show package metadata
+nix eval nixpkgs#<package>.meta --json | jq
+
 $ package: echo "Enter package name"
 $ input: nix flake metadata --json | jq -r '.locks.nodes.root.inputs | keys[]'
+$ packages: echo "ripgrep fd jq" "python3 nodejs" | tr ' ' '\n'
+$ package1: echo ".#default"
+$ package2: echo "nixpkgs#glibc nixpkgs#gcc" | tr ' ' '\n'

@@ -1,0 +1,48 @@
+% network, diagnostics, nmap
+
+# Find process using specific port
+lsof -i :<port> || ss -tulpn | grep :<port>
+
+# Kill process on specific port
+kill $(lsof -t -i:<port>)
+
+# List all listening ports and processes
+ss -tulpn | grep LISTEN
+
+# Check if port is open locally
+nc -zv localhost <port>
+
+# Test remote port connectivity
+nc -zv <host> <port>
+
+# Quick host discovery scan
+nmap -sn <network>/24
+
+# Fast port scan (top 1000 ports)
+nmap -F <host>
+
+# Service version detection
+nmap -sV <host>
+
+# Stealth SYN scan
+sudo nmap -sS <host>
+
+# DNS lookup with detailed info
+dig <domain> +short
+
+# Trace network path with statistics
+mtr <host> --report --report-cycles <count>
+
+# SSH local port forwarding
+ssh -L <local_port>:<remote_host>:<remote_port> <user>@<ssh_host>
+
+$ port: echo "3000 8080 5432 6379 27017 5000 4000" | tr ' ' '\n'
+$ host: echo "localhost 127.0.0.1 192.168.1.1" | tr ' ' '\n'
+$ network: echo "192.168.1.0 10.0.0.0 172.16.0.0" | tr ' ' '\n'
+$ domain: echo "example.com google.com"
+$ count: echo "10 20 50" | tr ' ' '\n'
+$ local_port: echo "8080 8000 3000 5000" | tr ' ' '\n'
+$ remote_host: echo "localhost 127.0.0.1" | tr ' ' '\n'
+$ remote_port: echo "80 443 5432 3306" | tr ' ' '\n'
+$ user: echo "$USER"
+$ ssh_host: echo "example.com"
