@@ -22,7 +22,7 @@
     "playwright": {
       "command": "npx",
       "args": [
-        "--isolated",
+        "-y",
         "@playwright/mcp@latest"
       ]
     },
