@@ -22,6 +22,14 @@
 
     # Network & archive tools
     mosh p7zip
+    
+    # Network diagnostics & tools
+    bind # nslookup, dig, host, nslookup
+    traceroute
+    nmap
+    tcpdump
+    whois
+    netcat-gnu
 
     # Document processing
     pandoc
@@ -36,6 +44,9 @@
   ] ++ lib.optionals pkgs.stdenv.isLinux [
     # Linux-specific
     vscode
+    
+    # Network tools
+    iproute2 # ip, ss, and other modern network tools
 
     # Fonts (Home Manager manages these on Linux)
     nerd-fonts.fira-code
