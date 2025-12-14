@@ -15,13 +15,16 @@ if ! is_linux; then
     exit 1
 fi
 
+if ! is_fedora_based; then
+    error "This script is for Fedora/RHEL-based systems only"
+    error "Detected distribution family: $(detect_distro_family)"
+    exit 1
+fi
+
+# Get distribution name for display
 if [ -f /etc/os-release ]; then
     . /etc/os-release
-    if [[ ! "$ID" =~ ^(fedora|rhel|centos|rocky|almalinux)$ ]]; then
-        error "This script is for Fedora/RHEL-based systems only"
-        exit 1
-    fi
-    info "Detected: $PRETTY_NAME"
+    info "Detected: ${PRETTY_NAME:-$ID}"
 fi
 
 # Check for internet connection

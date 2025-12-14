@@ -77,6 +77,87 @@ detect_os() {
     fi
 }
 
+# Detect distribution family (debian, fedora, arch, or unknown)
+detect_distro_family() {
+    if ! is_linux; then
+        echo "unknown"
+        return 1
+    fi
+    
+    # Check for os-release file (modern standard)
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        
+        # Check ID_LIKE first (includes parent distros)
+        if [ -n "${ID_LIKE:-}" ]; then
+            # ID_LIKE can be space-separated list, check each one
+            for like_id in $ID_LIKE; do
+                case "$like_id" in
+                    debian|ubuntu)
+                        echo "debian"
+                        return 0
+                        ;;
+                    fedora|rhel|centos)
+                        echo "fedora"
+                        return 0
+                        ;;
+                    arch|archlinux)
+                        echo "arch"
+                        return 0
+                        ;;
+                esac
+            done
+        fi
+        
+        # If ID_LIKE didn't match, check ID directly
+        case "${ID:-}" in
+            debian|ubuntu|linuxmint|pop|kali|parrot|mx|deepin|zorin|elementary|raspbian|devuan)
+                echo "debian"
+                return 0
+                ;;
+            fedora|rhel|centos|rocky|almalinux|oracle|scientific|cloudlinux|eurolinux)
+                echo "fedora"
+                return 0
+                ;;
+            arch|manjaro|endeavouros|garuda|artix|arcolinux|blackarch)
+                echo "arch"
+                return 0
+                ;;
+        esac
+    fi
+    
+    # Fallback: check for package manager binaries
+    if command_exists apt-get || command_exists dpkg; then
+        echo "debian"
+        return 0
+    elif command_exists dnf || command_exists yum; then
+        echo "fedora"
+        return 0
+    elif command_exists pacman; then
+        echo "arch"
+        return 0
+    fi
+    
+    # Could not detect
+    echo "unknown"
+    return 1
+}
+
+# Check if system is Debian-based
+is_debian_based() {
+    [[ "$(detect_distro_family)" == "debian" ]]
+}
+
+# Check if system is Fedora/RHEL-based
+is_fedora_based() {
+    [[ "$(detect_distro_family)" == "fedora" ]]
+}
+
+# Check if system is Arch-based
+is_arch_based() {
+    [[ "$(detect_distro_family)" == "arch" ]]
+}
+
 # Check if command exists
 command_exists() {
     command -v "$1" &>/dev/null
@@ -144,5 +225,6 @@ pause() {
 # Export functions so they're available in subshells
 export -f debug info success warning error section
 export -f is_macos is_linux is_arm detect_os
+export -f detect_distro_family is_debian_based is_fedora_based is_arch_based
 export -f command_exists is_sudo get_user get_home
 export -f ask check_internet pause
