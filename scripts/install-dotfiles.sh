@@ -207,9 +207,34 @@ else
     HM_CMD="nix run home-manager/master --"
 fi
 
+# Check if there are existing dotfiles to backup
+EXISTING_FILES=()
+if [ -f "$HOME/.zshrc" ]; then EXISTING_FILES+=(".zshrc"); fi
+if [ -f "$HOME/.zprofile" ]; then EXISTING_FILES+=(".zprofile"); fi
+if [ -f "$HOME/.config/nix/nix.conf" ]; then EXISTING_FILES+=(".config/nix/nix.conf"); fi
+
+if [ ${#EXISTING_FILES[@]} -gt 0 ]; then
+    warning "Existing dotfiles will be backed up with .backup extension:"
+    for file in "${EXISTING_FILES[@]}"; do
+        echo "  - $HOME/$file"
+    done
+    echo ""
+fi
+
 # Note: --impure allows reading gitignored files like ssh-hosts.nix
-if $HM_CMD switch --flake "$DOTFILES_DIR#${CONFIG_NAME}" --impure; then
+#       -b backup creates .backup files for conflicts
+if $HM_CMD switch --flake "$DOTFILES_DIR#${CONFIG_NAME}" --impure -b backup; then
     success "Home Manager installation completed!"
+    
+    if [ ${#EXISTING_FILES[@]} -gt 0 ]; then
+        echo ""
+        info "Backup files created (you can delete these later):"
+        for file in "${EXISTING_FILES[@]}"; do
+            if [ -f "$HOME/${file}.backup" ]; then
+                echo "  - $HOME/${file}.backup"
+            fi
+        done
+    fi
 else
     error "Home Manager installation failed!"
     echo ""
