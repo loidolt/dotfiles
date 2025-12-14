@@ -140,6 +140,16 @@ else
         else
             warning "nix-daemon is not running. Starting it now..."
             sudo systemctl start nix-daemon
+            sudo systemctl enable nix-daemon
+            
+            if systemctl is-active --quiet nix-daemon; then
+                success "nix-daemon started successfully"
+            else
+                error "Failed to start nix-daemon"
+                info "You may need to start it manually:"
+                info "  sudo systemctl start nix-daemon"
+                info "  sudo systemctl enable nix-daemon"
+            fi
         fi
     else
         warning "Skipping Nix installation"
@@ -160,7 +170,32 @@ if command_exists nix; then
     fi
 fi
 
-section "Debian/Ubuntu Setup Complete"
+section "Post-Installation Checks"
+
+# Check if user is in nix-users group
+if groups | grep -q nix-users; then
+    success "User is in nix-users group"
+else
+    warning "User is NOT in nix-users group!"
+    info "Adding user to nix-users group..."
+    
+    if sudo usermod -aG nix-users "$(whoami)"; then
+        success "User added to nix-users group"
+        warning "You MUST log out and log back in for group changes to take effect"
+    else
+        error "Failed to add user to nix-users group"
+        info "Manually add yourself:"
+        info "  sudo usermod -aG nix-users $(whoami)"
+    fi
+fi
+
+# Final daemon check
+if ! systemctl is-active --quiet nix-daemon; then
+    warning "nix-daemon is still not running"
+    info "Start it with: sudo systemctl start nix-daemon && sudo systemctl enable nix-daemon"
+fi
+
+section "Debian-based System Setup Complete"
 success "All prerequisites installed"
 echo ""
 info "Required components:"
@@ -171,4 +206,9 @@ echo "  ✓ ca-certificates"
 echo "  ✓ Nix with flakes support"
 echo "  ✓ nix-daemon (systemd service)"
 echo ""
-warning "IMPORTANT: Close this terminal and open a new one before proceeding"
+warning "IMPORTANT NEXT STEPS:"
+echo "  1. Close this terminal COMPLETELY"
+echo "  2. Open a NEW terminal (this ensures group membership takes effect)"
+echo "  3. Verify with: groups | grep nix-users"
+echo "  4. Then run: cd ~/dotfiles && ./scripts/install-dotfiles.sh"
+echo ""

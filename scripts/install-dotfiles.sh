@@ -26,6 +26,35 @@ fi
 
 success "Nix is installed: $(nix --version)"
 
+# Check if nix-daemon is running (Linux only)
+if is_linux; then
+    if systemctl is-active --quiet nix-daemon 2>/dev/null; then
+        success "nix-daemon is running"
+    else
+        error "nix-daemon is not running!"
+        info "Start it with:"
+        echo "  sudo systemctl start nix-daemon"
+        echo "  sudo systemctl enable nix-daemon"
+        exit 1
+    fi
+    
+    # Check if user is in nix-users group
+    if groups | grep -q nix-users; then
+        success "User is in nix-users group"
+    else
+        error "User is NOT in nix-users group!"
+        info "Fix this with:"
+        echo "  sudo usermod -aG nix-users $(whoami)"
+        echo ""
+        warning "After adding yourself to the group, you MUST:"
+        echo "  1. Log out completely"
+        echo "  2. Log back in"
+        echo "  3. Verify with: groups | grep nix-users"
+        echo "  4. Run this script again"
+        exit 1
+    fi
+fi
+
 # Verify we're in the dotfiles directory
 if [ ! -f "$DOTFILES_DIR/flake.nix" ]; then
     error "Cannot find flake.nix in $DOTFILES_DIR"
