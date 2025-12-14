@@ -4,15 +4,50 @@ Cross-platform dotfiles managed with **Home Manager** (Nix).
 
 ## Quick Start
 
-### macOS
+### Automated Setup (Recommended)
+
+The easiest way to get started is using the automated initial setup scripts. These install only the bare minimum required for Nix to work.
+
+#### macOS / Linux
 
 ```bash
-# Install Nix
-sh <(curl -L https://nixos.org/nix/install) --daemon
+# Download and run the initial setup
+curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/dotfiles/main/scripts/initial-setup.sh | bash
+```
 
-# Enable flakes
-mkdir -p ~/.config/nix
-echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+Or if you've already cloned the repository:
+
+```bash
+cd ~/dotfiles
+bash scripts/initial-setup.sh
+```
+
+#### Windows (WSL2)
+
+Run in PowerShell as Administrator:
+
+```powershell
+# Download and run the Windows setup
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/YOUR_USERNAME/dotfiles/main/scripts/setup-windows-initial.ps1" -OutFile "$env:TEMP\setup-windows-initial.ps1"
+& "$env:TEMP\setup-windows-initial.ps1"
+```
+
+Or if you've already cloned the repository:
+
+```powershell
+cd ~/dotfiles/scripts
+.\setup-windows-initial.ps1
+```
+
+### Manual Setup
+
+If you prefer to install manually:
+
+#### macOS
+
+```bash
+# Install Nix (with flakes support)
+curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
 
 # Clone and activate
 git clone https://github.com/loidolt/dotfiles.git ~/Documents/GitHub/dotfiles
@@ -23,21 +58,29 @@ nix run home-manager/master -- switch --flake .#chrisloidolt --impure
 brew install --cask font-fira-code-nerd-font font-jetbrains-mono-nerd-font font-meslo-lg-nerd-font
 ```
 
-### Linux / WSL2
+#### Linux / WSL2
 
 ```bash
-# Install Nix
-sh <(curl -L https://nixos.org/nix/install) --daemon
-
-# Enable flakes
-mkdir -p ~/.config/nix
-echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+# Install Nix (with flakes support)
+curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
 
 # Clone and activate
 git clone https://github.com/loidolt/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 nix run home-manager/master -- switch --flake .#chrisloidolt-linux --impure
 ```
+
+### What Gets Installed Initially
+
+The initial setup scripts install **only** these essential components:
+
+- **macOS**: Xcode Command Line Tools (git), curl, Nix
+- **Debian/Ubuntu**: git, curl, xz-utils, ca-certificates, Nix
+- **Fedora/RHEL**: git, curl, xz, ca-certificates, Nix  
+- **Arch Linux**: git, curl, xz, ca-certificates-utils, Nix
+- **Windows**: WSL2 + Ubuntu (then follow Linux steps inside WSL)
+
+Everything else (shell, editor, CLI tools, etc.) is managed by Nix and Home Manager.
 
 ### Daily Usage
 
