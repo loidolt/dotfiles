@@ -213,7 +213,21 @@ if [ -f "$HOME/.zshrc" ]; then EXISTING_FILES+=(".zshrc"); fi
 if [ -f "$HOME/.zprofile" ]; then EXISTING_FILES+=(".zprofile"); fi
 if [ -f "$HOME/.config/nix/nix.conf" ]; then EXISTING_FILES+=(".config/nix/nix.conf"); fi
 
+# Check for existing .backup files and remove/rename them
+BACKUP_TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+for file in "${EXISTING_FILES[@]}"; do
+    BACKUP_FILE="$HOME/${file}.backup"
+    if [ -f "$BACKUP_FILE" ]; then
+        warning "Found existing backup: ${file}.backup"
+        # Move old backup to timestamped version
+        OLD_BACKUP="$HOME/${file}.backup.$BACKUP_TIMESTAMP"
+        mv "$BACKUP_FILE" "$OLD_BACKUP"
+        info "Moved to: ${file}.backup.$BACKUP_TIMESTAMP"
+    fi
+done
+
 if [ ${#EXISTING_FILES[@]} -gt 0 ]; then
+    echo ""
     warning "Existing dotfiles will be backed up with .backup extension:"
     for file in "${EXISTING_FILES[@]}"; do
         echo "  - $HOME/$file"
