@@ -169,8 +169,17 @@ info "This may take several minutes on the first run..."
 info "Nix will download and build all required packages"
 echo ""
 
+# Determine if home-manager is already installed
+if command_exists home-manager; then
+    info "Using existing home-manager installation"
+    HM_CMD="home-manager"
+else
+    info "First-time installation - using nix run home-manager/master"
+    HM_CMD="nix run home-manager/master --"
+fi
+
 # Note: --impure allows reading gitignored files like ssh-hosts.nix
-if home-manager switch --flake "$DOTFILES_DIR#${CONFIG_NAME}" --impure; then
+if $HM_CMD switch --flake "$DOTFILES_DIR#${CONFIG_NAME}" --impure; then
     success "Home Manager installation completed!"
 else
     error "Home Manager installation failed!"
@@ -178,6 +187,7 @@ else
     info "Common issues:"
     echo "  - Check that your username matches system username"
     echo "  - Ensure Nix daemon is running: systemctl status nix-daemon"
+    echo "  - Verify flake is valid: nix flake check $DOTFILES_DIR"
     echo "  - Try restarting your shell and running again"
     echo ""
     exit 1
