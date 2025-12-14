@@ -6,23 +6,31 @@ Cross-platform dotfiles managed with **Home Manager** (Nix).
 
 ### Automated Setup (Recommended)
 
-The easiest way to get started is using the automated initial setup scripts. These install only the bare minimum required for Nix to work.
+The easiest way to get started is using our two-step automated setup process:
 
-#### macOS / Linux
+#### Step 1: Initial System Setup
 
-```bash
-# Download and run the initial setup
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/dotfiles/main/scripts/initial-setup.sh | bash
-```
+This installs only the bare minimum (git, curl, Nix) required to bootstrap the system.
 
-Or if you've already cloned the repository:
+**macOS / Linux:**
 
 ```bash
+# Clone the repository first
+git clone https://github.com/YOUR_USERNAME/dotfiles.git ~/dotfiles
 cd ~/dotfiles
+
+# Run initial setup (installs Nix and dependencies)
 bash scripts/initial-setup.sh
+
+# Close terminal and open a new one (IMPORTANT!)
 ```
 
-#### Windows (WSL2)
+**Supported Linux Distributions:**
+- **Debian-based**: Debian, Ubuntu, Kali, Linux Mint, Pop!_OS, Elementary, etc.
+- **Fedora-based**: Fedora, RHEL, CentOS, Rocky, AlmaLinux, etc.
+- **Arch-based**: Arch, Manjaro, EndeavourOS, Garuda, etc.
+
+**Windows (WSL2):**
 
 Run in PowerShell as Administrator:
 
@@ -32,12 +40,23 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/YOUR_USERNAME/dotfiles
 & "$env:TEMP\setup-windows-initial.ps1"
 ```
 
-Or if you've already cloned the repository:
+#### Step 2: Install Dotfiles
 
-```powershell
-cd ~/dotfiles/scripts
-.\setup-windows-initial.ps1
+After restarting your terminal, install the actual dotfiles configuration:
+
+```bash
+cd ~/dotfiles
+bash scripts/install-dotfiles.sh
 ```
+
+This script will:
+- Auto-detect your platform (macOS/Linux, x86/ARM)
+- Verify your user configuration
+- Install Home Manager with all tools and configurations
+- Set up ZSH as your default shell (optional)
+- Verify the installation
+
+**That's it!** Your development environment is now fully configured.
 
 ### Manual Setup
 
@@ -70,17 +89,20 @@ cd ~/dotfiles
 nix run home-manager/master -- switch --flake .#chrisloidolt-linux --impure
 ```
 
-### What Gets Installed Initially
+### What Gets Installed
 
-The initial setup scripts install **only** these essential components:
-
+**Step 1 (`initial-setup.sh`)** installs these essential components:
 - **macOS**: Xcode Command Line Tools (git), curl, Nix
-- **Debian/Ubuntu**: git, curl, xz-utils, ca-certificates, Nix
-- **Fedora/RHEL**: git, curl, xz, ca-certificates, Nix  
-- **Arch Linux**: git, curl, xz, ca-certificates-utils, Nix
+- **Debian-based**: git, curl, xz-utils, ca-certificates, Nix
+- **Fedora-based**: git, curl, xz, ca-certificates, Nix  
+- **Arch-based**: git, curl, xz, ca-certificates-utils, Nix
 - **Windows**: WSL2 + Ubuntu (then follow Linux steps inside WSL)
 
-Everything else (shell, editor, CLI tools, etc.) is managed by Nix and Home Manager.
+**Step 2 (`install-dotfiles.sh`)** installs everything else via Nix and Home Manager:
+- All CLI tools and programs listed below
+- ZSH with custom configuration
+- Neovim, Tmux, Git, and other development tools
+- Your personalized environment
 
 ### Daily Usage
 
@@ -173,7 +195,10 @@ dotfiles/
 │   ├── infrastructure/
 │   └── kubernetes/
 ├── scripts/
+│   ├── initial-setup.sh      # Bootstrap Nix installation
+│   ├── install-dotfiles.sh   # Install dotfiles with Home Manager
 │   ├── update.sh             # Update flake inputs
+│   ├── health-check.sh       # Verify installation
 │   └── validate-nix.sh       # Validate Nix setup
 └── docs/
     └── SETUP.md              # Detailed setup guide
