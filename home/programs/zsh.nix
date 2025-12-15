@@ -124,8 +124,17 @@ in
     initContent = ''
       # Source nix-daemon.sh if it exists (adds ~/.nix-profile/bin to PATH)
       # This needs to run for all interactive shells, not just login shells
+      # Check multiple possible locations for different Nix installer types:
+      # 1. Standard multi-user installation path
       if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
         . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+      # 2. Determinate Systems installer may put it in the nix store
+      elif [ -n "$(command -v nix 2>/dev/null)" ]; then
+        # Nix is already available, find nix-daemon.sh in the store
+        NIX_DAEMON_SH="$(dirname $(dirname $(command -v nix)))/etc/profile.d/nix-daemon.sh"
+        if [ -e "$NIX_DAEMON_SH" ]; then
+          . "$NIX_DAEMON_SH"
+        fi
       fi
 
       # Initialize zoxide (smart cd) - only if available
