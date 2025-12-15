@@ -121,16 +121,18 @@ in
     };
 
     # Profile initialization (runs once for login shells)
-    # This ensures nix-daemon.sh is sourced to get ~/.nix-profile/bin in PATH
     profileExtra = ''
+      # Placeholder for login shell specific initialization
+    '';
+
+    # Additional initialization (runs for ALL interactive shells)
+    initExtra = ''
       # Source nix-daemon.sh if it exists (adds ~/.nix-profile/bin to PATH)
+      # This needs to be in initExtra, not profileExtra, so it works for all interactive shells
       if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
         . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
       fi
-    '';
 
-    # Additional initialization
-    initExtra = ''
       # Initialize zoxide (smart cd) - only if available
       if command -v zoxide &> /dev/null; then
         eval "$(zoxide init zsh)"
