@@ -120,15 +120,10 @@ in
       theme = ""; # We use starship instead
     };
 
-    # Profile initialization (runs once for login shells)
-    profileExtra = ''
-      # Placeholder for login shell specific initialization
-    '';
-
     # Additional initialization (runs for ALL interactive shells)
-    initExtra = ''
+    initContent = ''
       # Source nix-daemon.sh if it exists (adds ~/.nix-profile/bin to PATH)
-      # This needs to be in initExtra, not profileExtra, so it works for all interactive shells
+      # This needs to run for all interactive shells, not just login shells
       if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
         . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
       fi
