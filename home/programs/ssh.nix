@@ -10,7 +10,7 @@
 let
   # Check if the hosts file exists and import it
   # Use absolute path to work with --impure flag (allows reading gitignored files)
-  hostsFile = /. + (builtins.getEnv "PWD") + "/home/programs/ssh-hosts.nix";
+  hostsFile = /. + (builtins.getEnv "DOTFILES") + "/home/programs/ssh-hosts.nix";
   hasHostsFile = builtins.pathExists hostsFile;
   hostConfig = if hasHostsFile then import hostsFile { inherit pkgs lib; } else {};
 in
