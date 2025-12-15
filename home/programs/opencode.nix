@@ -23,10 +23,13 @@ let
       url = "https://github.com/sst/opencode/releases/download/v${version}/opencode-${opencodeSystem}${archiveExt}";
       sha256 = {
         "darwin-arm64" = "1jps2r5s1qm25lyy8g264i7x6mwjp3lr5v7i9cnpgr45qwidblpz";
-        "darwin-x64" = ""; # Add hash when needed
-        "linux-x64" = "";  # Add hash when needed
-        "linux-arm64" = ""; # Add hash when needed
-      }.${opencodeSystem} or (throw "No hash for system: ${opencodeSystem}");
+        # To add hashes for other platforms:
+        # 1. Download the release: nix-prefetch-url https://github.com/sst/opencode/releases/download/v${version}/opencode-<platform>.{zip,tar.gz}
+        # 2. Convert to base32: nix hash to-base32 <sha256-hex>
+        # "darwin-x64" = "";
+        # "linux-x64" = "";
+        # "linux-arm64" = "";
+      }.${opencodeSystem} or (throw "Unsupported platform: ${opencodeSystem}. Only darwin-arm64 is currently configured.");
     };
 
     nativeBuildInputs = [ pkgs.unzip ] ++ lib.optionals isLinux [ pkgs.gnutar pkgs.gzip ];

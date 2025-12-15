@@ -1,7 +1,18 @@
 #!/usr/bin/env bash
+# DEPRECATED: Use setup-linux-initial.sh instead
+# This script is kept for backwards compatibility but redirects to the consolidated script
 # Arch Linux initial setup - installs bare minimum for Nix
 # Requirements: git, curl, xz, ca-certificates
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+echo "⚠️  DEPRECATED: This script has been consolidated into setup-linux-initial.sh"
+echo "Redirecting to the new consolidated Linux setup script..."
+echo ""
+
+exec bash "$SCRIPT_DIR/setup-linux-initial.sh"
+
+# Legacy code below (not executed due to exec above)
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
