@@ -130,9 +130,11 @@ in
     '';
 
     # Additional initialization
-    initContent = ''
-      # Initialize zoxide (smart cd)
-      eval "$(zoxide init zsh)"
+    initExtra = ''
+      # Initialize zoxide (smart cd) - only if available
+      if command -v zoxide &> /dev/null; then
+        eval "$(zoxide init zsh)"
+      fi
 
       # Better history
       setopt HIST_IGNORE_ALL_DUPS
