@@ -128,17 +128,11 @@ else
     echo "  Try: source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
 fi
 
-# Check local bin directories
+# Check local bin directory (for manually installed tools like claude CLI)
 if echo "$PATH" | grep -q ".local/bin"; then
     check_pass "~/.local/bin is in PATH"
 else
     check_warn "~/.local/bin is NOT in PATH"
-fi
-
-if echo "$PATH" | grep -q ".opencode/bin"; then
-    check_pass "~/.opencode/bin is in PATH"
-else
-    check_warn "~/.opencode/bin is NOT in PATH"
 fi
 
 section "Shell Configuration"
@@ -161,36 +155,23 @@ if is_linux; then
     fi
 fi
 
-section "External Tools (not managed by nix)"
-
-# Check opencode
-if command_exists opencode; then
-    check_pass "opencode is installed: $(which opencode)"
-elif [ -x "$HOME/.opencode/bin/opencode" ]; then
-    check_warn "opencode exists but not in PATH"
-else
-    check_warn "opencode is not installed"
-    echo "  Install with: curl -fsSL https://opencode.ai/install | bash"
-fi
-
-# Check claude CLI
-if command_exists claude; then
-    check_pass "claude CLI is installed: $(which claude)"
-elif [ -x "$HOME/.local/bin/claude" ]; then
-    check_warn "claude exists but not in PATH"
-else
-    check_warn "claude CLI is not installed"
-    echo "  Install with: curl -fsSL https://claude.ai/install | bash"
-fi
-
 section "Key Nix-Managed Tools"
 
 # Check essential tools from nix profile
-for tool in nvim git tmux fzf eza bat starship zoxide; do
+for tool in nvim git tmux fzf eza bat starship zoxide opencode claude; do
     if bash -l -c "command -v $tool" &>/dev/null; then
         check_pass "$tool is available"
     else
         check_fail "$tool is NOT available (run hm to fix)"
+    fi
+done
+
+# Check Python tools from nix profile
+for tool in black flake8 isort autopep8; do
+    if bash -l -c "command -v $tool" &>/dev/null; then
+        check_pass "Python tool $tool is available"
+    else
+        check_warn "Python tool $tool is NOT available (run hm to fix)"
     fi
 done
 
@@ -207,7 +188,6 @@ else
     info "Common fixes:"
     echo "  1. Run 'hm' to apply home-manager configuration"
     echo "  2. Start a new terminal session after changes"
-    echo "  3. Run installers for external tools (opencode, claude)"
 fi
 
 exit $ISSUES_FOUND

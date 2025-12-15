@@ -14,6 +14,14 @@
     nodePackages.typescript nodePackages.prettier nodePackages.eslint
     lazygit
 
+    # Python development tools
+    python3
+    pipx
+    python3Packages.black
+    python3Packages.flake8
+    python3Packages.isort
+    python3Packages.autopep8
+
     # Cloud & Infrastructure
     google-cloud-sdk
 
@@ -25,7 +33,6 @@
     
     # Network diagnostics & tools
     bind # nslookup, dig, host, nslookup
-    traceroute
     nmap
     tcpdump
     whois
@@ -44,9 +51,10 @@
   ] ++ lib.optionals pkgs.stdenv.isLinux [
     # Linux-specific
     vscode
-    
+
     # Network tools
     iproute2 # ip, ss, and other modern network tools
+    traceroute
 
     # Fonts (Home Manager manages these on Linux)
     nerd-fonts.fira-code

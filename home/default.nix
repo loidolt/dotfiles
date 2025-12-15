@@ -13,6 +13,8 @@
     ./programs/fzf.nix
     ./programs/direnv.nix
     ./programs/navi.nix
+    ./programs/opencode.nix
+    ./programs/claude.nix
   ];
 
   home = {

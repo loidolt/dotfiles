@@ -165,23 +165,18 @@ hm
 
 ---
 
-### External tools not found (opencode, claude)
+### External tools not found
 
-**Cause:** These tools are installed via their own installers, not through nix/home-manager.
+**OpenCode & Claude CLI:** Both are now managed via Nix - run `hm` to install.
 
-**Fix:**
+If you need to install them manually instead:
 ```bash
-# Install opencode
+# Install OpenCode
 curl -fsSL https://opencode.ai/install | bash
 
 # Install Claude CLI
-curl -fsSL https://claude.ai/install | bash
-
-# Ensure ~/.local/bin exists (needed for claude)
-mkdir -p ~/.local/bin
+curl -fsSL https://claude.ai/install.sh | bash
 ```
-
-**Note:** The PATH already includes `~/.local/bin` and `~/.opencode/bin`, so after installation these tools should work in new terminal sessions.
 
 ---
 
