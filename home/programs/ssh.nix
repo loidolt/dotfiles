@@ -36,7 +36,7 @@ in
       "github.com" = {
         hostname = "github.com";
         user = "git";
-        identityFile = "~/.ssh/id_rsa";
+        identityFile = "~/.ssh/id_ed25519_github";
       };
     } // (hostConfig.matchBlocks or {});
   };
