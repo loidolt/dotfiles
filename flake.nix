@@ -13,6 +13,9 @@
     let
       # Import user configuration
       userConfig = import ./user.nix;
+      
+      # Self-locating dotfiles path
+      dotfilesPath = toString ./.;
 
       # Helper to create a Home Manager configuration
       mkHome = system: home-manager.lib.homeManagerConfiguration {
@@ -21,41 +24,25 @@
           config.allowUnfree = true;
         };
         extraSpecialArgs = {
-          inherit userConfig;
-          username = userConfig.username;
+          inherit userConfig dotfilesPath;
         };
         modules = [ ./home ];
       };
 
-      # Supported systems for dev shells
+      # Supported systems
       systems = [ "aarch64-darwin" "x86_64-darwin" "x86_64-linux" "aarch64-linux" ];
-      forAllSystems = nixpkgs.lib.genAttrs systems;
-      mkPkgs = system: import nixpkgs { inherit system; };
 
     in {
       # Home Manager configurations
       homeConfigurations = {
-        # macOS (Apple Silicon) - primary
-        "${userConfig.username}" = mkHome "aarch64-darwin";
+        # Auto-detect current platform (default)
+        default = mkHome builtins.currentSystem;
         
-        # macOS (Intel)
-        "${userConfig.username}-x86" = mkHome "x86_64-darwin";
-        
-        # Linux (x86_64) - works on native Linux and WSL2
-        "${userConfig.username}-linux" = mkHome "x86_64-linux";
-        
-        # Linux (ARM64)
-        "${userConfig.username}-arm" = mkHome "aarch64-linux";
-      };
-
-      # Development shell for working on this repo
-      devShells = forAllSystems (system: {
-        default = (mkPkgs system).mkShell {
-          buildInputs = with (mkPkgs system); [ nil nixpkgs-fmt statix ];
-        };
-      });
-
-      # Formatter
-      formatter = forAllSystems (system: (mkPkgs system).nixpkgs-fmt);
+        # Optional: Explicit platform targeting (rarely needed)
+        # Usage: home-manager switch --flake .#aarch64-darwin
+      } // (builtins.listToAttrs (map (system: {
+        name = system;
+        value = mkHome system;
+      }) systems));
     };
 }

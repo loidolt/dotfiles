@@ -5,12 +5,11 @@
 # should be defined in ssh-hosts.nix which is gitignored.
 # See ssh-hosts.nix.example for a template.
 
-{ pkgs, lib, config, ... }:
+{ pkgs, lib, dotfilesPath, ... }:
 
 let
   # Check if the hosts file exists and import it
-  # Use absolute path to work with --impure flag (allows reading gitignored files)
-  hostsFile = /. + (builtins.getEnv "DOTFILES") + "/home/programs/ssh-hosts.nix";
+  hostsFile = dotfilesPath + "/home/programs/ssh-hosts.nix";
   hasHostsFile = builtins.pathExists hostsFile;
   hostConfig = if hasHostsFile then import hostsFile { inherit pkgs lib; } else {};
 in

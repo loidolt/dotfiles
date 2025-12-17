@@ -1,9 +1,6 @@
-{ pkgs, config, lib, username, ... }:
+{ pkgs, config, lib, userConfig, ... }:
 
 let
-  # Use the DOTFILES path from dotfiles.nix
-  dotfilesPath = config.home.sessionVariables.DOTFILES;
-  
   # Script to set zsh as default shell if it isn't already
   set-zsh-default = pkgs.writeShellScriptBin "set-zsh-default" ''
     ZSH_PATH="${pkgs.zsh}/bin/zsh"
@@ -81,19 +78,11 @@ in
       # HTTP/API tools
       http = "xh";             # Simpler curl alternative
 
-      # Dotfiles management
-      dotfiles-check = "cd $DOTFILES && nix flake check && echo 'All checks passed!'";
+      # Dotfiles management - works on all platforms!
+      hm = "home-manager switch --flake $DOTFILES --impure";
       hm-update = "$DOTFILES/scripts/update.sh";
       hm-validate = "$DOTFILES/scripts/validate-nix.sh";
       hm-health = "$DOTFILES/scripts/health-check.sh";
-
-    } // lib.optionalAttrs pkgs.stdenv.isDarwin {
-      # macOS rebuild alias (--impure allows reading gitignored ssh-hosts.nix)
-      hm = "home-manager switch --flake $DOTFILES#${username} --impure";
-
-    } // lib.optionalAttrs pkgs.stdenv.isLinux {
-      # Linux rebuild alias (--impure allows reading gitignored ssh-hosts.nix)
-      hm = "home-manager switch --flake $DOTFILES#${username}-linux --impure";
     };
 
     # Environment variables specific to zsh

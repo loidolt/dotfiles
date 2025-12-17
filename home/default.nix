@@ -1,4 +1,4 @@
-{ config, pkgs, lib, username, userConfig, ... }:
+{ config, pkgs, lib, userConfig, dotfilesPath, ... }:
 
 {
   imports = [
@@ -13,16 +13,14 @@
     ./programs/fzf.nix
     ./programs/direnv.nix
     ./programs/navi.nix
-    ./programs/opencode.nix
-    ./programs/claude.nix
   ];
 
   home = {
-    username = username;
+    username = userConfig.username;
     homeDirectory =
       if pkgs.stdenv.isDarwin
-      then "/Users/${username}"
-      else "/home/${username}";
+      then "/Users/${userConfig.username}"
+      else "/home/${userConfig.username}";
 
     stateVersion = "25.05";
 

@@ -78,61 +78,11 @@ fi
 
 success "Internet connection verified"
 
-# Detect platform and determine configuration name
+# Detect platform
 section "Detecting Platform"
 
-SYSTEM_TYPE=""
-CONFIG_NAME=""
-
-if is_macos; then
-    if is_arm; then
-        SYSTEM_TYPE="macOS (Apple Silicon)"
-        # Check user.nix for username
-        if [ -f "$DOTFILES_DIR/user.nix" ]; then
-            USERNAME=$(grep 'username = ' "$DOTFILES_DIR/user.nix" | sed 's/.*"\(.*\)".*/\1/')
-            CONFIG_NAME="$USERNAME"
-        else
-            error "Cannot find user.nix configuration file"
-            exit 1
-        fi
-    else
-        SYSTEM_TYPE="macOS (Intel)"
-        if [ -f "$DOTFILES_DIR/user.nix" ]; then
-            USERNAME=$(grep 'username = ' "$DOTFILES_DIR/user.nix" | sed 's/.*"\(.*\)".*/\1/')
-            CONFIG_NAME="$USERNAME-x86"
-        else
-            error "Cannot find user.nix configuration file"
-            exit 1
-        fi
-    fi
-elif is_linux; then
-    if is_arm; then
-        SYSTEM_TYPE="Linux (ARM64)"
-        if [ -f "$DOTFILES_DIR/user.nix" ]; then
-            USERNAME=$(grep 'username = ' "$DOTFILES_DIR/user.nix" | sed 's/.*"\(.*\)".*/\1/')
-            CONFIG_NAME="$USERNAME-arm"
-        else
-            error "Cannot find user.nix configuration file"
-            exit 1
-        fi
-    else
-        SYSTEM_TYPE="Linux (x86_64)"
-        if [ -f "$DOTFILES_DIR/user.nix" ]; then
-            USERNAME=$(grep 'username = ' "$DOTFILES_DIR/user.nix" | sed 's/.*"\(.*\)".*/\1/')
-            CONFIG_NAME="$USERNAME-linux"
-        else
-            error "Cannot find user.nix configuration file"
-            exit 1
-        fi
-    fi
-else
-    error "Unsupported platform: $OSTYPE"
-    exit 1
-fi
-
-info "Platform: $SYSTEM_TYPE"
-info "Configuration: $CONFIG_NAME"
-info "Username: $USERNAME"
+info "Platform: $(detect_os)"
+info "Using auto-detected configuration"
 
 # Check if user.nix needs customization
 section "Configuration Check"
@@ -237,7 +187,7 @@ fi
 
 # Note: --impure allows reading gitignored files like ssh-hosts.nix
 #       -b backup creates .backup files for conflicts
-if $HM_CMD switch --flake "$DOTFILES_DIR#${CONFIG_NAME}" --impure -b backup; then
+if $HM_CMD switch --flake "$DOTFILES_DIR" --impure -b backup; then
     success "Home Manager installation completed!"
     
     if [ ${#EXISTING_FILES[@]} -gt 0 ]; then

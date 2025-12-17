@@ -14,6 +14,10 @@
     nodePackages.typescript nodePackages.prettier nodePackages.eslint
     lazygit
 
+    # AI coding tools
+    opencode       # AI coding agent (v1.0.150)
+    claude-code    # Claude Code CLI (v2.0.70)
+
     # Python development tools
     python3
     pipx
