@@ -52,3 +52,6 @@
 
 [rerere]
 	enabled = true
+[user]
+	name = loidolt
+	email = loidolt@gmail.com
