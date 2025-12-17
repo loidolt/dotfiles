@@ -35,6 +35,9 @@
     in {
       # Home Manager configurations
       homeConfigurations = {
+        # User configuration
+        "${userConfig.username}" = mkHome builtins.currentSystem;
+        
         # Auto-detect current platform (default)
         default = mkHome builtins.currentSystem;
         
@@ -45,13 +48,6 @@
         value = mkHome system;
       }) systems));
 
-      # Packages for home-manager to use
-      packages = builtins.listToAttrs (map (system: {
-        name = system;
-        value = {
-          # Provide the activation package for home-manager
-          homeConfigurations."chrisloidolt" = mkHome system;
-        };
-      }) systems);
+
     };
 }
