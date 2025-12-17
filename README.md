@@ -157,6 +157,29 @@ See package lists in:
 
 ---
 
+## Claude Code & MCP Servers
+
+Claude Code is installed as a cask on macOS and includes MCP (Model Context Protocol) server configuration management.
+
+### MCP Server Configuration
+
+MCP servers are configured in `stow/claude/.config/claude/mcp-servers.json` and deployed via stow to `~/.config/claude/`.
+
+**Generate project-scoped `.mcp.json`:**
+```bash
+cd ~/path/to/your/project
+node ~/.config/claude/generate-project-mcp.js
+```
+
+**Sync to global config:**
+```bash
+node ~/.config/claude/sync-mcp-servers.js
+```
+
+See [stow/claude/.config/claude/README.md](stow/claude/.config/claude/README.md) for details.
+
+---
+
 ## Customization
 
 ### Modifying Configurations
@@ -169,6 +192,7 @@ All configurations are in the `stow/` directory:
 - `stow/tmux/` - Tmux terminal multiplexer
 - `stow/starship/` - Shell prompt styling
 - `stow/ghostty/` - Ghostty terminal emulator
+- `stow/claude/` - Claude Code MCP server configuration
 
 After editing any config:
 
@@ -359,7 +383,7 @@ dotfiles/
 │   ├── cloudflare/
 │   ├── infrastructure/
 │   └── kubernetes/
-├── claude/                # MCP server configs
+├── claude/                # MCP server configs (legacy - use stow/claude)
 ├── docs/                  # Documentation
 │   └── QUICK_REFERENCE.md
 └── hosts/                 # Host-specific configs

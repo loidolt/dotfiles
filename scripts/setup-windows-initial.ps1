@@ -1,4 +1,4 @@
-# Windows initial setup - installs bare minimum for Nix via WSL2
+# Windows initial setup - sets up WSL2 for dotfiles
 # This script sets up WSL2 and guides you to run the Linux setup inside WSL
 
 #Requires -RunAsAdministrator
@@ -9,7 +9,7 @@ Write-Host ""
 Write-Host "=== Windows Initial Setup ===" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "This script will prepare Windows for the dotfiles by setting up WSL2." -ForegroundColor Blue
-Write-Host "Nix does not run natively on Windows - it requires WSL2 (Windows Subsystem for Linux)." -ForegroundColor Yellow
+Write-Host "The dotfiles work best in WSL2 (Windows Subsystem for Linux)." -ForegroundColor Yellow
 Write-Host ""
 
 # Function to write colored output
@@ -168,10 +168,10 @@ Write-Host ""
 Write-Host "  3. Clone the dotfiles repository:" -ForegroundColor Yellow
 Write-Host "     git clone https://github.com/YOUR_USERNAME/dotfiles.git ~/dotfiles" -ForegroundColor White
 Write-Host ""
-Write-Host "  4. Run the initial setup script:" -ForegroundColor Yellow
-Write-Host "     bash ~/dotfiles/scripts/initial-setup.sh" -ForegroundColor White
+Write-Host "  4. Run the dotfiles installation:" -ForegroundColor Yellow
+Write-Host "     cd ~/dotfiles && ./install.sh" -ForegroundColor White
 Write-Host ""
-Write-Info "The initial-setup.sh script will detect your WSL distribution and install Nix"
+Write-Info "The install.sh script will set up all your configurations and tools"
 Write-Host ""
 
 # Offer to open WSL

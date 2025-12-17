@@ -7,6 +7,9 @@
 # Development
 --cask docker
 
+# AI Coding Tools
+--cask claude-code
+
 # Fonts
 --cask font-jetbrains-mono-nerd-font
 --cask font-fira-code-nerd-font

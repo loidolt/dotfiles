@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Initial setup script - detects OS and runs appropriate setup
-# This installs ONLY the bare minimum to get Nix working
+# Initial setup script - installs prerequisites for dotfiles installation
+# This installs git, curl, and basic tools needed to run install.sh
 
 set -euo pipefail
 
@@ -9,7 +9,7 @@ source "$SCRIPT_DIR/lib/utils.sh"
 
 section "Dotfiles Initial Setup"
 info "OS: $(detect_os)"
-info "This will install the bare minimum required for Nix to manage your environment"
+info "This will install the bare minimum prerequisites"
 echo ""
 
 # Detect OS and run appropriate setup script

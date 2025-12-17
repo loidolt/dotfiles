@@ -44,6 +44,9 @@ secrets/
 *.crt
 !*.example
 
+# Host-specific SSH configurations (private)
+hosts/*/ssh-config
+
 # Claude/AI tool configs (local only)
 .claude/
 

@@ -12,7 +12,19 @@ mv example-hostname $(hostname)
 ## Files
 
 - `host.sh` - Shell configuration sourced by .zshrc
+- `ssh-config.example` - Template for host-specific SSH config (copy to `ssh-config`)
 - `files/` - Any files to copy to $HOME (overriding stow packages)
+
+## SSH Configuration
+
+1. Copy the example SSH config:
+   ```bash
+   cp ssh-config.example ssh-config
+   ```
+
+2. Edit `ssh-config` with your host-specific SSH hosts and keys
+
+3. The `host.sh` script will copy it to `~/.ssh/config.local` when run
 
 ## Examples
 

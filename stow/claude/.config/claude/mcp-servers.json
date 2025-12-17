@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "sequentialthinking": {
+      "command": "docker",
+      "args": ["run", "--rm", "-i", "mcp/sequentialthinking"]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
+    },
+    "cloudflare": {
+      "command": "npx",
+      "args": ["mcp-remote", "https://docs.mcp.cloudflare.com/mcp"]
+    },
+    "mui": {
+      "command": "npx",
+      "args": ["-y", "@mui/mcp@latest"]
+    }
+  }
+}

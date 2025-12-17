@@ -150,7 +150,7 @@ Edit `devbox.json` to:
 - Add configuration management tools (e.g., `chef`, `puppet`)
 - Modify scripts for your workflow
 
-Search for packages at: https://search.nixos.org/packages
+Search for packages at: https://www.nixhub.io (Devbox package search)
 
 ## Security Notes
 

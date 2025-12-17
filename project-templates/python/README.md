@@ -121,4 +121,4 @@ Edit `devbox.json` to:
 - Add additional packages (e.g., `black`, `ipython`, `jupyter`)
 - Modify scripts for your workflow
 
-Search for packages at: https://search.nixos.org/packages
+Search for packages at: https://www.nixhub.io (Devbox package search)

@@ -68,4 +68,4 @@ Edit `devbox.json` to:
 - Add additional tools (e.g., `migrate`, `air`, `mockgen`)
 - Modify scripts for your workflow
 
-Search for packages at: https://search.nixos.org/packages
+Search for packages at: https://www.nixhub.io (Devbox package search)

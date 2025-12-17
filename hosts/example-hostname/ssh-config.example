@@ -1,0 +1,32 @@
+# Host-specific SSH configuration
+# Copy this file to ssh-config and customize for your machine
+
+# Example: GitHub with specific key
+# Host github.com
+#     HostName github.com
+#     User git
+#     IdentityFile ~/.ssh/id_rsa
+
+# Example: Internal server
+# Host myserver
+#     HostName myserver.local
+#     User myusername
+#     IdentityFile ~/.ssh/id_rsa
+
+# Example: Jump host configuration
+# Host jumphost
+#     HostName jump.example.com
+#     User admin
+#     IdentityFile ~/.ssh/jumphost_key
+#
+# Host internal-server
+#     HostName 10.0.0.50
+#     User developer
+#     ProxyJump jumphost
+#     IdentityFile ~/.ssh/internal_key
+
+# Example: Multiple hosts with similar config
+# Host web-*.example.com
+#     User deploy
+#     IdentityFile ~/.ssh/deploy_key
+#     Port 2222

@@ -44,4 +44,4 @@ devbox update
 ## Customization
 
 Edit `devbox.json` to add or remove packages. Search for packages at:
-https://search.nixos.org/packages
+https://www.nixhub.io (Devbox package search)
