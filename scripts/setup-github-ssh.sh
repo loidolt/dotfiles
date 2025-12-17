@@ -92,14 +92,29 @@ main() {
 generate_key() {
     local email="$1"
     info "Generating new ED25519 SSH key..."
-    info "Note: Generating key without passphrase for convenience."
-    info "For higher security, consider using a passphrase:"
-    info "  ssh-keygen -t $KEY_TYPE -C \"$email\" -f $KEY_FILE"
+    echo ""
+    warning "SSH Key Security:"
+    info "You should protect your SSH key with a passphrase for security."
+    info "If someone gains access to your computer, an unprotected key"
+    info "gives them immediate access to all connected services."
+    echo ""
+    info "Press Enter for no passphrase (NOT recommended)"
+    info "Or enter a strong passphrase when prompted"
+    echo ""
     
-    ssh-keygen -t "$KEY_TYPE" -C "$email" -f "$KEY_FILE" -N ""
+    # Let ssh-keygen handle the passphrase prompt interactively
+    ssh-keygen -t "$KEY_TYPE" -C "$email" -f "$KEY_FILE"
+    
     chmod 600 "$KEY_FILE"
     chmod 644 "${KEY_FILE}.pub"
     success "SSH key generated: $KEY_FILE"
+    
+    # If on macOS, offer to add passphrase to keychain
+    if is_macos && [ -f "$KEY_FILE" ]; then
+        echo ""
+        info "On macOS, you can add your key passphrase to the keychain"
+        info "so you won't need to re-enter it each time."
+    fi
 }
 
 configure_ssh() {

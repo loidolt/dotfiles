@@ -150,7 +150,10 @@ See [docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md) for complete cheatsheet.
 - Google Cloud SDK
 - Devbox (for per-project environments)
 
-[Full package list in home/packages.nix](home/packages.nix)
+See package lists in:
+- [packages/common.txt](packages/common.txt) - Cross-platform tools
+- [packages/macos.txt](packages/macos.txt) - macOS-specific tools  
+- [packages/linux.txt](packages/linux.txt) - Linux-specific tools
 
 ---
 

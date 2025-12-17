@@ -11,21 +11,24 @@ Thank you for your interest in contributing to this dotfiles repository! This gu
    cd dotfiles
    ```
 
-2. **Set up your user configuration**
+2. **Set up your environment**
    ```bash
-   # Copy and customize the user configuration
-   cp user.nix.example user.nix
-   # Edit user.nix with your details
+   # Install dotfiles
+   ./install.sh
+   
+   # Test the setup
+   ./scripts/health-check.sh
    ```
 
 3. **Test your changes locally**
    ```bash
-   # Validate the configuration
-   make check
-   make validate
+   # After making changes, restow packages
+   cd ~/dotfiles/stow
+   stow -R <package-name>
    
-   # Apply changes (in a safe way)
-   make switch
+   # Or restow everything
+   cd ~/dotfiles
+   ./stow-all.sh
    ```
 
 ## Development Workflow
@@ -38,26 +41,24 @@ Thank you for your interest in contributing to this dotfiles repository! This gu
    ```
 
 2. **Make your changes**
-   - Edit Nix files in `home/` or `configs/`
+   - Edit configurations in `stow/`
+   - Update package lists in `packages/`
    - Update documentation as needed
    - Test your changes locally
 
 3. **Validate your changes**
    ```bash
-   # Check syntax and formatting
-   make check
-   
-   # Run full validation
-   make validate
-   
    # Run health check
-   make health
+   ./scripts/health-check.sh
+   
+   # Test installation in clean environment (optional)
+   # Use a VM or container to test from scratch
    ```
 
 4. **Commit your changes**
    ```bash
    git add .
-   git commit -m "feat: add new tool to packages.nix"
+   git commit -m "feat: add new tool to package list"
    ```
 
 ### Commit Message Convention
@@ -82,21 +83,23 @@ refactor: extract common shell utilities to lib/utils.sh
 
 ## Code Style
 
-### Nix Files
-- Use 2-space indentation
-- Align attribute lists where practical
-- Add comments for non-obvious configurations
-- Use `lib.mkIf` for conditional expressions
-
 ### Shell Scripts
 - Follow the existing style in `scripts/lib/utils.sh`
 - Use the provided utility functions (`info`, `success`, `error`, etc.)
-- Add shellcheck directives when necessary
+- Use `set -euo pipefail` for safety
+- Add comments for non-obvious logic
+- Test scripts on both macOS and Linux when possible
+
+### Configuration Files
+- Use consistent indentation (2 spaces for YAML/JSON, 4 for Lua)
+- Add comments explaining non-obvious settings
+- Keep configurations minimal and well-documented
 
 ### Documentation
 - Use Markdown for all documentation
 - Keep README.md up to date
 - Update CHANGELOG.md for significant changes
+- Include examples in documentation
 
 ## Testing
 
@@ -104,75 +107,83 @@ refactor: extract common shell utilities to lib/utils.sh
 
 Before submitting a pull request:
 
-1. **Syntax checking**
+1. **Run health check**
    ```bash
-   make check  # Runs nix flake check
+   ./scripts/health-check.sh
    ```
 
-2. **Configuration validation**
+2. **Test package installation**
    ```bash
-   make validate  # Runs validate-nix.sh
+   ./packages/install.sh
    ```
 
-3. **Health check**
+3. **Verify stow operations**
    ```bash
-   make health  # Runs health-check.sh
+   cd ~/dotfiles/stow
+   stow -n -v <package>  # Dry run to preview changes
+   stow -R <package>     # Restow to apply changes
    ```
 
 4. **Test on clean system** (optional but recommended)
    ```bash
    # In a VM or container:
-   bash scripts/initial-setup.sh
-   bash scripts/install-dotfiles.sh
+   git clone <your-fork>
+   cd dotfiles
+   ./install.sh
    ```
 
 ### Platform Testing
 
 Test on both platforms if possible:
-- macOS (Intel and ARM)
-- Linux (Ubuntu, Fedora, Arch)
+- macOS (Intel and ARM if available)
+- Linux (Ubuntu, Fedora, or Arch)
 
 ## Areas of Contribution
 
 ### Welcome Contributions
 
-- **New program configurations** in `home/programs/`
+- **New program configurations** in `stow/`
 - **Additional project templates** in `project-templates/`
-- **Navi cheatsheets** in `configs/navi/cheats/`
+- **Package additions** to `packages/*.txt`
 - **Bug fixes** and **performance improvements**
 - **Documentation** improvements
+- **Shell script improvements**
 
 ### Examples
 
-#### Adding a New Program
+#### Adding a New Stow Package
 
-1. Create `home/programs/newtool.nix`:
-   ```nix
-   { pkgs, ... }:
-   {
-     programs.newtool = {
-       enable = true;
-       settings = {
-         # Configuration options
-       };
-     };
-   }
+1. Create directory structure:
+   ```bash
+   mkdir -p stow/newtool/.config/newtool
    ```
 
-2. Import in `home/default.nix`:
-   ```nix
-   imports = [
-     # ... existing imports
-     ./programs/newtool.nix
-   ];
+2. Add configuration files:
+   ```bash
+   # Files in stow/newtool/ mirror your home directory structure
+   stow/newtool/.config/newtool/config.toml
    ```
 
-3. Add to packages if needed:
-   ```nix
-   home.packages = with pkgs; [
-     # ... existing packages
-     newtool
-   ];
+3. Stow the package:
+   ```bash
+   cd ~/dotfiles/stow
+   stow newtool
+   ```
+
+#### Adding a Package
+
+1. Edit appropriate package list:
+   ```bash
+   # For cross-platform: packages/common.txt
+   echo "newtool" >> packages/common.txt
+   
+   # For macOS only: packages/macos.txt
+   echo "newtool" >> packages/macos.txt
+   ```
+
+2. Install:
+   ```bash
+   ./packages/install.sh
    ```
 
 #### Adding a Project Template
@@ -182,26 +193,6 @@ Test on both platforms if possible:
 3. Add `README.md` with usage instructions
 4. Update main README.md template list
 
-## Pre-commit Hooks
-
-We use pre-commit hooks to maintain code quality:
-
-```bash
-# Install hooks
-pre-commit install
-
-# Run hooks manually
-pre-commit run --all-files
-```
-
-The hooks check for:
-- Nix formatting (`nixfmt`)
-- Shell script linting (`shellcheck`)
-- JSON/YAML formatting (`prettier`)
-- Trailing whitespace
-- Large files
-- Commits to main/master
-
 ## Submitting Changes
 
 1. **Push to your fork**
@@ -210,7 +201,7 @@ The hooks check for:
    ```
 
 2. **Create a Pull Request**
-   - Use a descriptive title
+   - Use a descriptive title following conventional commits
    - Reference any related issues
    - Include screenshots if applicable
    - Describe testing performed

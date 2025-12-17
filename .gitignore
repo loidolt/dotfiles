@@ -15,20 +15,11 @@ Thumbs.db
 .idea/
 *.code-workspace
 
-# Nix build artifacts
-result
-result-*
+# Environment and local config
 .direnv/
 .envrc
-
-# Hardware configurations - tracked per-host for reproducibility
-# Each host's hardware-configuration.nix is generated with:
-#   sudo nixos-generate-config --show-hardware-config > hardware-configuration.nix
-# Then committed to the repo
-!hosts/*/hardware-configuration.nix
-
-# Neovim plugin lock file (generated at runtime)
-configs/neovim/lazy-lock.json
+.env
+.env.local
 
 # Home Manager backups
 *.backup
@@ -46,9 +37,12 @@ package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
-# Local secrets (not committed to repo)
-secrets.nix
-home/programs/ssh-hosts.nix
+# Local secrets and sensitive configs
+secrets/
+*.key
+*.pem
+*.crt
+!*.example
 
 # Claude/AI tool configs (local only)
 .claude/
@@ -58,8 +52,6 @@ notes/
 scratchpad/
 TODO.md
 NOTES.md
-
-NIXOS_HOST.yml
 
 # Python
 __pycache__/
@@ -99,11 +91,14 @@ kubeconfig
 # Environment files (except examples)
 .env
 .env.*
-!.env.example.config
-.fzf.zsh
-.gitconfig
-.ssh
-.tmux.conf
-.zshrc
+!.env.example
+
+# Root-level config files (to avoid accidentally committing local configs)
+# Stow package versions are tracked in stow/ directory
+/.gitconfig
+/.zshrc
+/.tmux.conf
+/.fzf.zsh
+/.ssh
 logs/
 result

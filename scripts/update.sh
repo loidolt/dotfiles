@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Update Nix flake inputs and rebuild
+# Update system packages and dotfiles
 #
 
 set -euo pipefail
@@ -12,64 +12,45 @@ source "$SCRIPT_DIR/lib/utils.sh"
 
 echo ""
 echo -e "${BLUE}╔════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║      Nix Flake Update & Rebuild       ║${NC}"
+echo -e "${BLUE}║       System & Package Update         ║${NC}"
 echo -e "${BLUE}╚════════════════════════════════════════╝${NC}"
 echo ""
 
 info "Dotfiles directory: $DOTFILES_DIR"
 cd "$DOTFILES_DIR"
 
-# Check if we're in a git repository
-if ! git rev-parse --git-dir > /dev/null 2>&1; then
-    error "Not in a git repository!"
-    exit 1
-fi
-
-# Check for uncommitted changes
-if [[ -n $(git status -s) ]]; then
-    warning "You have uncommitted changes:"
-    git status -s
-    echo ""
-    warning "It's recommended to commit changes before updating"
-    if ! ask "Continue anyway?"; then
-        info "Update cancelled"
-        exit 0
-    fi
-fi
-
 # Parse arguments
-UPDATE_SPECIFIC=""
-REBUILD=true
-COMMIT=false
+UPDATE_DOTFILES=true
+UPDATE_PACKAGES=true
+PULL_CHANGES=true
 
 while [[ $# -gt 0 ]]; do
     case $1 in
-        --input)
-            UPDATE_SPECIFIC="$2"
-            shift 2
-            ;;
-        --no-rebuild)
-            REBUILD=false
+        --no-dotfiles)
+            UPDATE_DOTFILES=false
             shift
             ;;
-        --commit)
-            COMMIT=true
+        --no-packages)
+            UPDATE_PACKAGES=false
+            shift
+            ;;
+        --no-pull)
+            PULL_CHANGES=false
             shift
             ;;
         --help|-h)
             echo "Usage: $0 [OPTIONS]"
             echo ""
             echo "Options:"
-            echo "  --input NAME     Update only specific input (e.g., nixpkgs, home-manager)"
-            echo "  --no-rebuild     Update flake.lock but don't rebuild"
-            echo "  --commit         Automatically commit the updated flake.lock"
+            echo "  --no-dotfiles    Don't update dotfiles from git"
+            echo "  --no-packages    Don't update system packages"
+            echo "  --no-pull        Don't pull latest changes from git"
             echo "  --help           Show this help message"
             echo ""
             echo "Examples:"
-            echo "  $0                           # Update all inputs and rebuild"
-            echo "  $0 --input nixpkgs          # Update only nixpkgs"
-            echo "  $0 --no-rebuild             # Update but don't rebuild yet"
-            echo "  $0 --commit                 # Update, rebuild, and commit changes"
+            echo "  $0                       # Update everything"
+            echo "  $0 --no-dotfiles        # Only update system packages"
+            echo "  $0 --no-packages        # Only update dotfiles"
             echo ""
             exit 0
             ;;
@@ -81,22 +62,104 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Show current flake info
-info "Current flake inputs:"
-echo ""
-nix flake metadata 2>/dev/null | grep -A 20 "Inputs:" || true
-echo ""
-
-# Update flake inputs
-if [[ -n "$UPDATE_SPECIFIC" ]]; then
-    info "Updating specific input: $UPDATE_SPECIFIC"
-    nix flake lock --update-input "$UPDATE_SPECIFIC"
-else
-    info "Updating all flake inputs..."
-    nix flake update
+# Update dotfiles from git
+if [ "$UPDATE_DOTFILES" = true ] && [ "$PULL_CHANGES" = true ]; then
+    section "Updating Dotfiles from Git"
+    
+    # Check if we're in a git repository
+    if ! git rev-parse --git-dir > /dev/null 2>&1; then
+        warning "Not in a git repository, skipping git pull"
+    else
+        # Check for uncommitted changes
+        if [[ -n $(git status -s) ]]; then
+            warning "You have uncommitted changes:"
+            git status -s
+            echo ""
+            if ! ask "Stash changes and pull?"; then
+                warning "Skipping git pull"
+            else
+                git stash
+                git pull
+                info "Run 'git stash pop' to restore your changes"
+            fi
+        else
+            info "Pulling latest changes..."
+            git pull
+            success "Dotfiles updated from git"
+        fi
+    fi
 fi
 
-success "Flake inputs updated!"
+# Update system packages
+if [ "$UPDATE_PACKAGES" = true ]; then
+    section "Updating System Packages"
+    
+    if is_macos; then
+        if command_exists brew; then
+            info "Updating Homebrew..."
+            brew update
+            
+            info "Upgrading Homebrew packages..."
+            brew upgrade
+            
+            info "Cleaning up..."
+            brew cleanup
+            
+            success "Homebrew packages updated"
+        else
+            warning "Homebrew not installed, skipping package updates"
+        fi
+    elif is_linux; then
+        # Detect Linux package manager
+        if command_exists apt-get; then
+            info "Updating apt package list..."
+            sudo apt-get update
+            
+            info "Upgrading packages..."
+            sudo apt-get upgrade -y
+            
+            info "Removing unused packages..."
+            sudo apt-get autoremove -y
+            
+            success "apt packages updated"
+        elif command_exists dnf; then
+            info "Updating dnf packages..."
+            sudo dnf upgrade -y
+            
+            success "dnf packages updated"
+        elif command_exists pacman; then
+            info "Updating pacman packages..."
+            sudo pacman -Syu --noconfirm
+            
+            success "pacman packages updated"
+        else
+            warning "No recognized package manager found, skipping system updates"
+        fi
+    else
+        warning "Unknown OS, skipping system package updates"
+    fi
+fi
+
+# Restow all packages to pick up any changes
+if [ "$UPDATE_DOTFILES" = true ]; then
+    section "Restowing Dotfiles"
+    
+    if [ -f "$DOTFILES_DIR/stow-all.sh" ]; then
+        info "Running stow-all.sh to apply any changes..."
+        bash "$DOTFILES_DIR/stow-all.sh"
+        success "Dotfiles restowed"
+    else
+        warning "stow-all.sh not found, skipping restow"
+    fi
+fi
+
+section "Update Complete!"
+echo ""
+success "System is up to date"
+echo ""
+info "Next steps:"
+echo "  1. Restart your shell: exec zsh"
+echo "  2. Run health check: ./scripts/health-check.sh"
 echo ""
 
 # Show what changed

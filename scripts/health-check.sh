@@ -9,25 +9,6 @@ set +e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/utils.sh"
 
-# OS detection
-is_macos() { [[ "$OSTYPE" == "darwin"* ]]; }
-is_linux() { [[ "$OSTYPE" == "linux-gnu"* ]]; }
-
-detect_os() {
-    if is_macos; then
-        echo "macOS"
-    elif is_linux; then
-        if [ -f /etc/os-release ]; then
-            . /etc/os-release
-            echo "Linux ($NAME)"
-        else
-            echo "Linux"
-        fi
-    else
-        echo "Unknown"
-    fi
-}
-
 command_exists() { command -v "$1" &>/dev/null; }
 
 # Track overall status
@@ -54,112 +35,161 @@ info "OS: $(detect_os)"
 info "User: $(whoami)"
 info "Shell: $SHELL"
 
-# Source nix if available (needed for non-login shells)
-if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
-    . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
-fi
+section "Package Manager"
 
-section "Nix Installation"
-
-# Check nix is installed
-if command_exists nix; then
-    check_pass "Nix is installed: $(nix --version)"
-else
-    check_fail "Nix is not installed"
-    echo "  Install with: curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install"
-fi
-
-# Check nix-daemon is running (Linux only)
-if is_linux; then
-    if systemctl is-active --quiet nix-daemon 2>/dev/null; then
-        check_pass "nix-daemon is running"
+if is_macos; then
+    if command_exists brew; then
+        check_pass "Homebrew is installed: $(brew --version | head -n1)"
     else
-        check_fail "nix-daemon is not running"
-        echo "  Fix with: sudo systemctl start nix-daemon"
+        check_fail "Homebrew is not installed"
+        echo "  Install with: /bin/bash -c '\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)'"
+    fi
+elif is_linux; then
+    if command_exists apt-get; then
+        check_pass "apt package manager available"
+    elif command_exists dnf; then
+        check_pass "dnf package manager available"
+    elif command_exists pacman; then
+        check_pass "pacman package manager available"
+    else
+        check_warn "No recognized package manager found"
     fi
 fi
 
-# Check trusted-users (Linux only)
-if is_linux && [ -f /etc/nix/nix.conf ]; then
-    if grep -q "trusted-users.*$(whoami)" /etc/nix/nix.conf 2>/dev/null; then
-        check_pass "User is trusted in nix.conf"
+section "GNU Stow"
+
+if command_exists stow; then
+    check_pass "GNU Stow is installed: $(stow --version | head -n1)"
+else
+    check_fail "GNU Stow is not installed"
+    if is_macos; then
+        echo "  Install with: brew install stow"
     else
-        check_warn "User is not a trusted user (cachix won't work)"
-        echo "  Fix with: echo 'trusted-users = root $(whoami)' | sudo tee -a /etc/nix/nix.conf && sudo systemctl restart nix-daemon"
+        echo "  Install with your package manager (apt/dnf/pacman)"
     fi
-fi
-
-section "Home Manager"
-
-# Check home-manager is available
-if bash -l -c 'command -v home-manager' &>/dev/null; then
-    check_pass "home-manager is available"
-else
-    check_fail "home-manager is not in PATH"
-fi
-
-# Check home-manager generation exists
-if [ -L "$HOME/.nix-profile" ]; then
-    check_pass "Nix profile exists: $(readlink "$HOME/.nix-profile")"
-else
-    check_fail "Nix profile symlink missing"
 fi
 
 section "PATH Configuration"
 
-# Check if nix-profile/bin is in PATH
-if echo "$PATH" | grep -q ".nix-profile/bin"; then
-    check_pass "~/.nix-profile/bin is in PATH"
-else
-    check_warn "~/.nix-profile/bin is NOT in PATH"
-    echo "  This may indicate zsh isn't sourcing nix-daemon.sh"
-    echo "  Try: source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
-fi
-
-# Check local bin directory (for manually installed tools like claude CLI)
+# Check local bin directory
 if echo "$PATH" | grep -q ".local/bin"; then
     check_pass "~/.local/bin is in PATH"
 else
     check_warn "~/.local/bin is NOT in PATH"
+    echo "  Add to ~/.zshrc: export PATH=\"\$HOME/.local/bin:\$PATH\""
+fi
+
+# Check Homebrew in PATH (macOS)
+if is_macos && command_exists brew; then
+    if echo "$PATH" | grep -q "homebrew"; then
+        check_pass "Homebrew is in PATH"
+    else
+        check_warn "Homebrew may not be properly configured in PATH"
+        echo "  Run: eval \"\$(brew shellenv)\""
+    fi
 fi
 
 section "Shell Configuration"
 
 # Check zsh config files
-for file in .zshenv .zshrc; do
-    if [ -L "$HOME/$file" ] || [ -f "$HOME/$file" ]; then
-        check_pass "$file exists"
+for file in .zshrc; do
+    if [ -L "$HOME/$file" ]; then
+        check_pass "$file is symlinked (managed by Stow)"
+    elif [ -f "$HOME/$file" ]; then
+        check_warn "$file exists but is not a symlink"
+        echo "  May need to backup and restow: mv ~/.zshrc ~/.zshrc.backup && cd ~/dotfiles/stow && stow zsh"
     else
         check_fail "$file is missing"
+        echo "  Run: cd ~/dotfiles && ./install.sh"
     fi
 done
 
-# Check if .zprofile exists (needed for nix PATH on Linux)
-if is_linux; then
-    if [ -L "$HOME/.zprofile" ] || [ -f "$HOME/.zprofile" ]; then
-        check_pass ".zprofile exists"
-    else
-        check_warn ".zprofile is missing (may need hm switch)"
-    fi
+# Check if shell is zsh
+if [[ "$SHELL" == *"zsh"* ]]; then
+    check_pass "Default shell is zsh"
+else
+    check_warn "Default shell is not zsh: $SHELL"
+    echo "  Change with: chsh -s \$(which zsh)"
 fi
 
-section "Key Nix-Managed Tools"
+section "Stow Packages"
 
-# Check essential tools from nix profile
-for tool in nvim git tmux fzf eza bat starship zoxide opencode claude; do
-    if bash -l -c "command -v $tool" &>/dev/null; then
-        check_pass "$tool is available"
+DOTFILES_DIR="$HOME/dotfiles"
+if [ ! -d "$DOTFILES_DIR" ]; then
+    DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
+fi
+
+if [ -d "$DOTFILES_DIR/stow" ]; then
+    check_pass "Dotfiles directory found: $DOTFILES_DIR"
+    
+    # Check key stow packages
+    for pkg in nvim git tmux starship zsh; do
+        if [ -d "$DOTFILES_DIR/stow/$pkg" ]; then
+            # Check if actually stowed (look for a key file)
+            case $pkg in
+                nvim)
+                    if [ -L "$HOME/.config/nvim/init.lua" ] || [ -f "$HOME/.config/nvim/init.lua" ]; then
+                        check_pass "$pkg is stowed"
+                    else
+                        check_warn "$pkg exists but may not be stowed"
+                    fi
+                    ;;
+                git)
+                    if [ -L "$HOME/.gitconfig" ] || [ -f "$HOME/.gitconfig" ]; then
+                        check_pass "$pkg is stowed"
+                    else
+                        check_warn "$pkg exists but may not be stowed"
+                    fi
+                    ;;
+                tmux)
+                    if [ -L "$HOME/.tmux.conf" ] || [ -f "$HOME/.tmux.conf" ]; then
+                        check_pass "$pkg is stowed"
+                    else
+                        check_warn "$pkg exists but may not be stowed"
+                    fi
+                    ;;
+                starship)
+                    if [ -L "$HOME/.config/starship.toml" ] || [ -f "$HOME/.config/starship.toml" ]; then
+                        check_pass "$pkg is stowed"
+                    else
+                        check_warn "$pkg exists but may not be stowed"
+                    fi
+                    ;;
+                zsh)
+                    if [ -L "$HOME/.zshrc" ] || [ -f "$HOME/.zshrc" ]; then
+                        check_pass "$pkg is stowed"
+                    else
+                        check_warn "$pkg exists but may not be stowed"
+                    fi
+                    ;;
+            esac
+        fi
+    done
+else
+    check_fail "Dotfiles directory not found at $DOTFILES_DIR"
+    echo "  Clone with: git clone https://github.com/loidolt/dotfiles.git ~/dotfiles"
+fi
+
+section "Essential Tools"
+
+# Check essential CLI tools
+for tool in git nvim tmux fzf eza bat ripgrep fd zoxide starship; do
+    if command_exists "$tool"; then
+        check_pass "$tool is installed"
     else
-        check_fail "$tool is NOT available (run hm to fix)"
+        check_warn "$tool is NOT installed"
+        echo "  Install via: cd ~/dotfiles && ./packages/install.sh"
     fi
 done
 
-# Check Python tools from nix profile
-for tool in black flake8 isort autopep8; do
-    if bash -l -c "command -v $tool" &>/dev/null; then
-        check_pass "Python tool $tool is available"
+section "Optional Tools"
+
+# Check optional tools
+for tool in lazygit gh delta jq yq; do
+    if command_exists "$tool"; then
+        check_pass "$tool is installed"
     else
-        check_warn "Python tool $tool is NOT available (run hm to fix)"
+        check_warn "$tool is NOT installed (optional)"
     fi
 done
 
@@ -174,8 +204,9 @@ else
     error "Found $ISSUES_FOUND critical issue(s) and $WARNINGS_FOUND warning(s)."
     echo ""
     info "Common fixes:"
-    echo "  1. Run 'hm' to apply home-manager configuration"
-    echo "  2. Start a new terminal session after changes"
+    echo "  1. Run: cd ~/dotfiles && ./install.sh"
+    echo "  2. Run: cd ~/dotfiles && ./packages/install.sh"
+    echo "  3. Restart your shell: exec zsh"
 fi
 
 exit $ISSUES_FOUND
