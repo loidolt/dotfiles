@@ -6,7 +6,13 @@
 # Usage:
 #   cp ssh-hosts.nix.example ssh-hosts.nix
 #   # Edit ssh-hosts.nix with your actual host configurations
-#   hm  # Rebuild to apply changes
+#   home-manager switch  # or your rebuild command
+#
+# Organization Tips:
+# - Group similar hosts together (dev machines, networks, cloud servers)
+# - Use descriptive names for named hosts
+# - Document IP ranges and their purposes
+# - Consider using jump hosts for internal networks
 #
 
 { pkgs, lib, ... }:
@@ -15,32 +21,139 @@
   # Define your SSH host configurations here
   # These will be merged with the base configuration in ssh.nix
   matchBlocks = {
-    # Example: Personal machine
-    # "my-server" = {
-    #   hostname = "my-server.local";
+    # ===================
+    # DEVELOPMENT MACHINES
+    # ===================
+    
+    # Example: Personal/work development machine
+    # "my-dev-machine" = {
+    #   hostname = "my-dev-machine.local";
     #   user = "myuser";
-    #   identityFile = "~/.ssh/my-key";
-    # };
-
-    # Example: Work network (IP range)
-    # "10.0.*.*" = {
-    #   user = "work-user";
-    #   identityFile = "~/.ssh/work-key";
-    # };
-
-    # Example: Cloud server
-    # "34.123.45.67" = {
-    #   user = "admin";
-    #   identityFile = "~/.ssh/cloud-key";
+    #   identityFile = "~/.ssh/personal_key";
     #   port = 22;
     # };
 
-    # Example: Jump host / bastion
+    # Example: Remote server with non-standard port
+    # "remote-server" = {
+    #   hostname = "remote.example.com";
+    #   user = "admin";
+    #   identityFile = "~/.ssh/server_key";
+    #   port = 2222;
+    # };
+
+    # ===================
+    # NETWORK RANGES
+    # ===================
+    
+    # Example: Work/corporate network range
+    # "10.0.*.*" = {
+    #   user = "work-user";
+    #   identityFile = "~/.ssh/work_key";
+    # };
+
+    # Example: Home lab network
+    # "192.168.1.*" = {
+    #   user = "homelab";
+    #   identityFile = "~/.ssh/homelab_key";
+    # };
+
+    # ===================
+    # CLOUD SERVERS
+    # ===================
+
+    # Example: AWS EC2 instance
+    # "aws-web-server" = {
+    #   hostname = "ec2-XX-XX-XX-XX.compute-1.amazonaws.com";
+    #   user = "ec2-user";  # or ubuntu, admin, etc.
+    #   identityFile = "~/.ssh/aws_key.pem";
+    # };
+
+    # Example: DigitalOcean droplet
+    # "do-api-server" = {
+    #   hostname = "api-server.yourdomain.com";
+    #   user = "root";
+    #   identityFile = "~/.ssh/digitalocean_key";
+    # };
+
+    # Example: Google Cloud instance
+    # "gcp-database" = {
+    #   hostname = "XX.XXX.XXX.XX";
+    #   user = "your-username";
+    #   identityFile = "~/.ssh/gcp_key";
+    # };
+
+    # ===================
+    # JUMP HOSTS / BASTIONS
+    # ===================
+
+    # Example: Internal server accessed through jump host
     # "internal-server" = {
     #   hostname = "internal.corp.example.com";
     #   user = "corp-user";
-    #   identityFile = "~/.ssh/corp-key";
-    #   proxyJump = "bastion.example.com";
+    #   identityFile = "~/.ssh/corp_key";
+    #   proxyJump = "bastion.corp.example.com";
+    # };
+
+    # Example: Bastion/jump host configuration
+    # "bastion" = {
+    #   hostname = "bastion.corp.example.com";
+    #   user = "bastion-user";
+    #   identityFile = "~/.ssh/bastion_key";
+    #   extraOptions = {
+    #     # Don't allocate TTY for jump host
+    #     RequestTTY = "no";
+    #     # Don't run remote commands
+    #     RemoteCommand = "none";
+    #   };
+    # };
+
+    # ===================
+    # SPECIAL CONFIGURATIONS
+    # ===================
+
+    # Example: Git server (self-hosted)
+    # "git.mycompany.com" = {
+    #   hostname = "git.mycompany.com";
+    #   user = "git";
+    #   identityFile = "~/.ssh/git_key";
+    #   extraOptions = {
+    #     Compression = "yes";
+    #   };
+    # };
+
+    # Example: Server with X11 forwarding
+    # "gui-server" = {
+    #   hostname = "gui.example.com";
+    #   user = "gui-user";
+    #   identityFile = "~/.ssh/gui_key";
+    #   forwardX11 = true;
+    #   forwardX11Trusted = true;
+    # };
+
+    # Example: Database server with port forwarding
+    # "db-server" = {
+    #   hostname = "database.internal.com";
+    #   user = "db-admin";
+    #   identityFile = "~/.ssh/db_key";
+    #   localForwards = [
+    #     {
+    #       bind.port = 5432;
+    #       host.address = "localhost";
+    #       host.port = 5432;
+    #     }
+    #   ];
+    # };
+
+    # Example: Host with dynamic port forwarding (SOCKS proxy)
+    # "socks-proxy" = {
+    #   hostname = "proxy.example.com";
+    #   user = "proxy-user";
+    #   identityFile = "~/.ssh/proxy_key";
+    #   dynamicForwards = [
+    #     {
+    #       port = 8080;
+    #     }
+    #   ];
     # };
   };
 }
