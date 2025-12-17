@@ -19,11 +19,11 @@
         "mcp/sequentialthinking"
       ]
     },
-    "playwright": {
+    "puppeteer": {
       "command": "npx",
       "args": [
         "-y",
-        "@playwright/mcp@latest"
+        "puppeteer-mcp-server"
       ]
     },
     "cloudflare": {
