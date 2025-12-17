@@ -163,8 +163,31 @@ MCP servers often require API keys or other environment variables. Claude Code s
 **Why this approach?**
 - ✅ Safe to commit `.mcp.json` to version control
 - ✅ Each team member uses their own API keys
-- ✅ No secrets stored in the repository
+- ✅ No secrets stored in repository
 - ✅ Follows Claude Code's documented best practices
+
+## Security Considerations
+
+⚠️ **Important**: MCP servers can execute arbitrary commands on your system. When approving MCP servers:
+
+1. **Review server configurations** before approving
+2. **Only enable servers you trust** from reputable sources
+3. **Check command arguments** - avoid servers with excessive permissions
+4. **Use environment variables** for API keys (never hardcode secrets)
+5. **Regularly audit** enabled servers in Claude Code settings
+
+### Server Types and Risks
+
+- **stdio servers**: Run locally with full system access
+- **remote servers**: Access external APIs (verify URLs are legitimate)
+- **docker servers**: Run in containers (more isolated, but still need review)
+
+### Best Practices
+
+- Use project-scoped `.mcp.json` files (team visibility)
+- Review changes to MCP configurations in pull requests
+- Prefer official or well-maintained MCP servers
+- Keep MCP server packages updated
 
 **Alternative (not recommended for committed configs):**
 - Put the actual API key directly in the config: `"YOUR_API_KEY": "actual_key_123"`

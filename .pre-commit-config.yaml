@@ -1,0 +1,47 @@
+# Pre-commit hooks for dotfiles repository
+# Install with: pre-commit install
+
+repos:
+  # Nix formatting
+  - repo: local
+    name: nixfmt
+    entry: nixfmt
+    language: system
+    files: '\.nix$'
+    
+  # Shell script linting
+  - repo: local
+    name: shellcheck
+    entry: shellcheck
+    language: system
+    files: '\.sh$'
+    exclude: '^scripts/lib/utils\.sh$'  # Has intentional shellcheck disable
+    
+  # JSON/YAML formatting
+  - repo: local
+    name: prettier
+    entry: prettier --write
+    language: system
+    files: '\.(json|ya?ml)$'
+    
+  # Check for trailing whitespace
+  - repo: local
+    name: trailing-whitespace
+    entry: trailing-whitespace-fixer
+    language: system
+    files: '\.(sh|nix|json|ya?ml|lua|md)$'
+    
+  # Check for large files
+  - repo: local
+    name: check-added-large-files
+    entry: check-added-large-files
+    language: system
+    args: ['--maxkb=1000']
+    
+  # Prevent commits to main branch
+  - repo: local
+    name: no-commit-to-main
+    entry: no-commit-to-main
+    language: system
+    always_run: true
+    args: ['--branch', 'main', '--branch', 'master']

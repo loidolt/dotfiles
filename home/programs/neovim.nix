@@ -25,6 +25,8 @@
       shfmt  # Shell script formatter
       
       # Tools
+      # Note: ripgrep and fd are installed globally in packages.nix
+      # They're required for telescope grep and file finder functionality
       ripgrep  # For telescope grep
       fd  # For telescope file finder
       tree-sitter  # For better syntax highlighting

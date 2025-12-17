@@ -8,11 +8,11 @@
 # Rebuild and switch (use alias)
 hm
 
-# Or full command
-home-manager switch --flake ~/Documents/GitHub/dotfiles#chrisloidolt --impure
+# Or full command (replace with your actual dotfiles path)
+home-manager switch --flake ~/dotfiles --impure
 
-# Linux version
-home-manager switch --flake ~/dotfiles#chrisloidolt-linux --impure
+# Linux version (same command, auto-detects platform)
+home-manager switch --flake ~/dotfiles --impure
 
 # List all generations
 home-manager generations
@@ -24,8 +24,8 @@ home-manager generations
 ### Nix Package Management
 
 ```bash
-# Update all packages
-cd ~/Documents/GitHub/dotfiles
+# Update all packages (replace with your actual dotfiles path)
+cd ~/dotfiles
 nix flake update
 hm
 
@@ -140,11 +140,11 @@ Ctrl-T  # Search files
 ## Quick Edits
 
 ```bash
-# Edit package list
-nvim ~/Documents/GitHub/dotfiles/home/packages.nix
+# Edit package list (replace with your actual dotfiles path)
+nvim ~/dotfiles/home/packages.nix
 
-# Edit zsh config
-nvim ~/Documents/GitHub/dotfiles/home/programs/zsh.nix
+# Edit zsh config (replace with your actual dotfiles path)
+nvim ~/dotfiles/home/programs/zsh.nix
 
 # Rebuild after changes
 hm

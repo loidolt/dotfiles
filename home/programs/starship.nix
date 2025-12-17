@@ -55,7 +55,8 @@
         format = "via [$symbol($version )]($style)";
       };
       
-      # Bun - disable to avoid timeout warnings
+      # Bun - disabled due to timeout issues when scanning large node_modules
+      # Can be re-enabled if you don't experience performance issues
       bun = {
         disabled = true;
       };

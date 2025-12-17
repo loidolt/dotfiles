@@ -42,9 +42,15 @@ function generateProjectMCP(targetDir) {
   const targetPath = path.join(targetDir, '.mcp.json');
   const exists = fs.existsSync(targetPath);
   
+  if (exists && !process.argv.includes('--force')) {
+    console.log(`\n⚠️  Warning: ${targetPath} already exists`);
+    console.log('   Use --force to overwrite.\n');
+    process.exit(1);
+  }
+
   if (exists) {
     console.log(`\n⚠️  Warning: ${targetPath} already exists`);
-    console.log('   This will overwrite the existing file.\n');
+    console.log('   Overwriting due to --force flag.\n');
   }
 
   writeJSON(targetPath, projectConfig);
@@ -56,8 +62,10 @@ function generateProjectMCP(targetDir) {
   });
   console.log('\nNext steps:');
   console.log('1. Restart Claude Code');
-  console.log('2. Approve the project MCP servers when prompted');
-  console.log('3. (Optional) Commit .mcp.json to version control for team sharing\n');
+  console.log('2. Approve project MCP servers when prompted');
+  console.log('3. (Optional) Commit .mcp.json to version control for team sharing');
+  console.log('\nUsage:');
+  console.log('  node generate-project-mcp.js [directory] [--force]');
 }
 
 // Get target directory from command line or use current directory

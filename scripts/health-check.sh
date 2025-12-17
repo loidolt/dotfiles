@@ -5,21 +5,9 @@
 # Don't exit on errors - we want to run all checks
 set +e
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-MAGENTA='\033[0;35m'
-CYAN='\033[0;36m'
-NC='\033[0m'
-
-# Logging functions
-info() { echo -e "${BLUE}i${NC} $*"; }
-success() { echo -e "${GREEN}✓${NC} $*"; }
-warning() { echo -e "${YELLOW}!${NC} $*"; }
-error() { echo -e "${RED}✗${NC} $*"; }
-section() { echo ""; echo -e "${CYAN}===${NC} ${MAGENTA}$*${NC}"; echo ""; }
+# Source utilities for consistent colors and functions
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib/utils.sh"
 
 # OS detection
 is_macos() { [[ "$OSTYPE" == "darwin"* ]]; }

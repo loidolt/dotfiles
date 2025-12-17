@@ -92,6 +92,10 @@ main() {
 generate_key() {
     local email="$1"
     info "Generating new ED25519 SSH key..."
+    info "Note: Generating key without passphrase for convenience."
+    info "For higher security, consider using a passphrase:"
+    info "  ssh-keygen -t $KEY_TYPE -C \"$email\" -f $KEY_FILE"
+    
     ssh-keygen -t "$KEY_TYPE" -C "$email" -f "$KEY_FILE" -N ""
     chmod 600 "$KEY_FILE"
     chmod 644 "${KEY_FILE}.pub"
@@ -128,12 +132,22 @@ EOF
     if is_macos; then
         # Check if UseKeychain is already set for github
         if ! grep -A5 "Host github.com" "$SSH_CONFIG" | grep -q "UseKeychain"; then
-            # Add UseKeychain to the GitHub block
-            sed -i.bak '/Host github.com/,/^Host\|^$/{
-                /AddKeysToAgent yes/a\
-\    UseKeychain yes
-            }' "$SSH_CONFIG" && rm -f "${SSH_CONFIG}.bak"
+            # Add UseKeychain to GitHub block using a more portable approach
+            # Create a temporary file with the new content
+            local temp_file=$(mktemp)
+            awk '
+                /^Host github\.com/ { in_github=1 }
+                /^Host/ && !/^Host github\.com/ { in_github=0 }
+                in_github && /AddKeysToAgent yes/ { 
+                    print $0
+                    print "    UseKeychain yes"
+                    next
+                }
+                { print $0 }
+            ' "$SSH_CONFIG" > "$temp_file"
+            mv "$temp_file" "$SSH_CONFIG"
         fi
+    fi
     fi
 
     success "SSH config updated"
@@ -155,6 +169,8 @@ setup_agent() {
     fi
 
     success "Key added to ssh-agent"
+    info "Note: The ssh-agent started here is for this session only."
+    info "Your shell profile should handle ssh-agent startup for new sessions."
 }
 
 copy_to_clipboard() {

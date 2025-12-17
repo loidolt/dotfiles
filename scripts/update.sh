@@ -110,12 +110,9 @@ if [[ "$REBUILD" == true ]]; then
     info "Rebuilding with updated inputs..."
     echo ""
     
-    # Detect platform and run home-manager switch
-    if [[ "$(uname -s)" == "Darwin" ]]; then
-        CONFIG="${USER}"
-    else
-        CONFIG="${USER}-linux"
-    fi
+    # Use same configuration approach as zsh.nix (just username)
+    # This matches the flake.nix which uses builtins.currentSystem for auto-detection
+    CONFIG="${USER}"
     
     # Note: --impure allows reading gitignored files like ssh-hosts.nix
     home-manager switch --flake "$DOTFILES_DIR#${CONFIG}" --impure

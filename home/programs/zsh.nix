@@ -112,7 +112,7 @@ in
     initContent = ''
       # Function for dotfiles management
       hm() {
-        home-manager switch --flake ~/dotfiles/#${userConfig.username} --impure
+        home-manager switch --flake "$DOTFILES" --impure
       }
       # Source nix-daemon.sh if it exists (adds ~/.nix-profile/bin to PATH)
       # This needs to run for all interactive shells, not just login shells

@@ -188,6 +188,7 @@ get_home() {
 
 # Ask yes/no question
 ask() {
+    # shellcheck disable=SC2162
     local prompt="$1"
     local default="${2:-n}"
     
@@ -209,10 +210,12 @@ ask() {
 
 # Check internet connection
 check_internet() {
-    if ping -c 1 8.8.8.8 &>/dev/null; then
+    local silent="${1:-false}"
+    # Try multiple DNS servers for better reliability
+    if ping -c 1 -W 2 8.8.8.8 &>/dev/null || ping -c 1 -W 2 1.1.1.1 &>/dev/null; then
         return 0
     else
-        error "No internet connection detected"
+        [[ "$silent" != "true" ]] && error "No internet connection detected"
         return 1
     fi
 }

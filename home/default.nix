@@ -35,6 +35,9 @@
   xdg.enable = true;
 
   # Nix settings for Home Manager standalone
+  # Note: This configuration requires --impure flag because:
+  # 1. ssh-hosts.nix is gitignored for privacy (conditional import)
+  # 2. builtins.pathExists is used for conditional imports
   nix = {
     package = pkgs.nix;
     settings = {
