@@ -1,16 +1,17 @@
 # Dotfiles
 
-> Cross-platform dotfiles using Nix and Home Manager
+> Cross-platform dotfiles using GNU Stow
 
-**Quick Navigation:** [Quick Start](#quick-start) | [Daily Usage](#daily-usage) | [Customization](#customization) | [Troubleshooting](#troubleshooting)
+**Quick Navigation:** [Quick Start](#quick-start) | [Daily Usage](#daily-usage) | [What's Included](#whats-included) | [Troubleshooting](#troubleshooting)
 
 ## Features
 
-- 🔄 Reproducible dev environment across macOS and Linux
-- 📦 100+ CLI tools managed declaratively  
-- ⚡ Fast rebuilds with Nix flakes
-- 🔙 Rollback to any previous generation
+- 🔗 Simple symlink-based configuration management
+- 📦 100+ modern CLI tools
+- 🚀 Fast, lightweight setup (no Nix required)
+- 💻 Works on macOS and Linux
 - 🎯 Project-specific environments with Devbox
+- 🛠️ Easy to customize and maintain
 
 ---
 
@@ -18,49 +19,55 @@
 
 ### Prerequisites
 
-- macOS (ARM/Intel) or Linux (x86/WSL2)
-- 30 minutes for initial setup
+- macOS or Linux
+- 10-15 minutes for installation
 - Internet connection
 
 ### Installation
 
-**Step 1: Bootstrap Nix** (5-10 minutes)
+**One-command install:**
 
 ```bash
 git clone https://github.com/loidolt/dotfiles.git ~/dotfiles
 cd ~/dotfiles
-bash scripts/initial-setup.sh
+./install.sh
 ```
 
-**Important:** Close your terminal and open a new one after this step.
+The script will:
+1. Install Homebrew (macOS) or system packages (Linux)
+2. Install GNU Stow
+3. Symlink all configurations to your home directory
+4. Install essential packages
 
-**Step 2: Install Dotfiles** (10-20 minutes)
-
-```bash
-cd ~/dotfiles
-bash scripts/install-dotfiles.sh
-```
-
-**That's it!** Your environment is ready.
+**That's it!** Restart your shell: `exec zsh`
 
 ---
 
 ## Daily Usage
 
-### Rebuilding After Changes
+### Managing Dotfiles
 
 ```bash
-# Apply configuration changes
-hm
+# Install/update all configs
+cd ~/dotfiles
+./stow-all.sh
 
-# Update packages
-hm-update
+# Install specific package
+cd ~/dotfiles/stow
+stow nvim     # Install neovim config
+stow zsh      # Install zsh config
 
-# Verify setup
-hm-validate
+# Remove specific package
+stow -D nvim  # Unlink neovim config
+
+# Reinstall (useful after updates)
+stow -R nvim
 
 # Run health check
-hm-health
+./scripts/health-check.sh
+
+# Update packages
+./scripts/update.sh
 ```
 
 ### Essential Commands
@@ -149,62 +156,67 @@ See [docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md) for complete cheatsheet.
 
 ## Customization
 
-### Adding Packages
+### Modifying Configurations
 
-Edit `home/packages.nix`:
+All configurations are in the `stow/` directory:
 
-```nix
-home.packages = with pkgs; [
-  # Add your packages here
-  your-package-name
-];
-```
+- `stow/nvim/` - Neovim configuration
+- `stow/zsh/` - Zsh shell, aliases, functions
+- `stow/git/` - Git settings and aliases
+- `stow/tmux/` - Tmux terminal multiplexer
+- `stow/starship/` - Shell prompt styling
+- `stow/ghostty/` - Ghostty terminal emulator
 
-Search for packages:
+After editing any config:
+
 ```bash
-nix search nixpkgs <package-name>
+cd ~/dotfiles
+stow -R <package-name>  # Restow to pick up changes
 ```
 
-Apply changes:
+### Adding New Packages
+
+**macOS:**
 ```bash
-hm
+# Add to packages/macos.txt
+echo "your-package" >> packages/macos.txt
+
+# Install
+brew install your-package
 ```
 
-### Modifying Program Configs
+**Linux:**
+```bash
+# Add to packages/linux.txt or packages/common.txt
+echo "your-package" >> packages/common.txt
 
-Program configurations live in `home/programs/`:
+# Install with your package manager
+apt install your-package  # Debian/Ubuntu
+dnf install your-package  # Fedora
+pacman -S your-package    # Arch
+```
 
-- `zsh.nix` - Shell configuration, aliases, functions
-- `git.nix` - Git settings and aliases
-- `neovim.nix` - Editor packages and LSP servers
-- `tmux.nix` - Terminal multiplexer settings
-- `starship.nix` - Prompt styling and modules
+### Creating New Stow Packages
 
-After editing any config, run `hm` to apply changes.
+```bash
+cd ~/dotfiles/stow
+mkdir my-package
+mkdir -p my-package/.config/my-app
+echo "config content" > my-package/.config/my-app/config
 
-### User Configuration
-
-Edit `user.nix` to customize:
-
-```nix
-{
-  username = "yourname";
-  
-  git = {
-    name = "Your Name";
-    email = "your.email@example.com";
-  };
-}
+# Install it
+stow my-package
 ```
 
 ---
 
 ## Package Management Philosophy
 
-**Global (Nix):** Core tools used across all projects
-- CLI utilities (ripgrep, fd, bat, eza)
+**Global (System Package Manager):** Core tools used across all projects
+- CLI utilities (ripgrep, fd, bat, eza, fzf)
 - Development tools (git, tmux, neovim)
 - Universal languages (Node.js LTS, Python 3)
+- Installed via Homebrew (macOS) or apt/dnf/pacman (Linux)
 
 **Project-specific (Devbox):** Project dependencies
 - Specific language versions (Python 3.12, Go 1.21)
@@ -240,98 +252,68 @@ cd myproject && devbox shell
 
 ## Troubleshooting
 
-### Build Fails
+### Symlink Conflicts
 
-**Check syntax errors:**
+**Error: "already exists and is not a symlink"**
+
+Solution:
 ```bash
-nix flake check
+# Backup existing config
+mv ~/.config/nvim ~/.config/nvim.backup
+
+# Restow
+cd ~/dotfiles/stow
+stow nvim
 ```
-
-**Build with detailed trace:**
-```bash
-nix build .#homeConfigurations.default.activationPackage --show-trace --impure
-```
-
-**Common build errors:**
-
-- **"experimental features not enabled"**  
-  → Re-run setup scripts, they configure flakes support
-
-- **"builder for ... failed"**  
-  → Check internet connection, try `nix flake update`
-
-- **"collision between ... and ..."**  
-  → Duplicate packages in packages.nix, remove one
 
 ### Programs Not Found After Install
 
 **Restart your shell:**
 ```bash
-exec $SHELL
+exec zsh
 ```
 
-**Check PATH includes Nix:**
+**Check if Homebrew is in PATH (macOS):**
 ```bash
-echo $PATH | grep nix-profile
+echo $PATH | grep homebrew
 ```
 
-**Re-apply configuration:**
+**Reload shell config:**
 ```bash
-hm
+source ~/.zshrc
 ```
 
-### Rollback to Previous Version
+### Update Issues
 
-If a change breaks something, you can rollback instantly:
-
+**Update Homebrew packages (macOS):**
 ```bash
-# List all generations
-home-manager generations
-
-# Activate a previous generation
-/nix/store/HASH-home-manager-generation/activate
+brew update
+brew upgrade
 ```
 
-### Nix Daemon Issues (Linux)
-
-**Check daemon status:**
+**Update system packages (Linux):**
 ```bash
-systemctl status nix-daemon
+# Ubuntu/Debian
+sudo apt update && sudo apt upgrade
+
+# Fedora
+sudo dnf upgrade
+
+# Arch
+sudo pacman -Syu
 ```
 
-**Restart daemon:**
-```bash
-sudo systemctl restart nix-daemon
-sudo systemctl enable nix-daemon
-```
+### Remove All Dotfiles
 
-**Verify group membership:**
-```bash
-groups | grep nix-users
-```
-
-If not in nix-users group:
-```bash
-sudo usermod -aG nix-users $(whoami)
-# Log out and back in
-```
-
-### Update Fails
-
-**Update flake inputs:**
 ```bash
 cd ~/dotfiles
-nix flake update
-hm
+./uninstall.sh
 ```
 
-**Clear old generations (free up space):**
+Or manually:
 ```bash
-# Remove generations older than 30 days
-nix-collect-garbage --delete-older-than 30d
-
-# Or remove all old generations
-nix-collect-garbage -d
+cd ~/dotfiles/stow
+for pkg in */; do stow -D "${pkg%/}"; done
 ```
 
 ---
@@ -340,115 +322,117 @@ nix-collect-garbage -d
 
 ```
 dotfiles/
-├── flake.nix              # Nix flake entry point
-├── flake.lock             # Locked dependency versions
-├── user.nix               # Your user configuration
-├── home/
-│   ├── default.nix        # Main home configuration
-│   ├── packages.nix       # Package list
-│   ├── dotfiles.nix       # Environment variables
-│   └── programs/          # Program-specific configs
-│       ├── zsh.nix
-│       ├── git.nix
-│       ├── neovim.nix
-│       ├── tmux.nix
-│       ├── starship.nix
-│       ├── fzf.nix
-│       ├── direnv.nix
-│       ├── navi.nix
-│       └── ssh.nix
-├── configs/
-│   ├── neovim/            # Neovim config (Lua)
+├── install.sh             # Main installation script
+├── stow-all.sh            # Stow all packages at once
+├── uninstall.sh           # Remove all dotfiles
+├── stow/                  # Dotfile packages (managed by Stow)
+│   ├── nvim/              # Neovim config
+│   ├── zsh/               # Zsh shell config
+│   ├── git/               # Git config
+│   ├── tmux/              # Tmux config
+│   ├── starship/          # Starship prompt
+│   ├── ghostty/           # Ghostty terminal
+│   ├── navi/              # Navi cheatsheets
 │   ├── opencode/          # OpenCode AI config
-│   ├── ghostty/           # Ghostty terminal config
-│   └── navi/cheats/       # Command cheatsheets
-├── project-templates/     # Devbox project templates
+│   ├── ssh/               # SSH config
+│   ├── fzf/               # FZF fuzzy finder
+│   └── direnv/            # Direnv config
+├── packages/              # Package lists
+│   ├── common.txt         # Cross-platform packages
+│   ├── macos.txt          # macOS-specific (Homebrew)
+│   └── linux.txt          # Linux-specific
+├── scripts/               # Utility scripts
+│   ├── initial-setup.sh   # First-time setup
+│   ├── setup-macos-initial.sh
+│   ├── setup-linux-initial.sh
+│   ├── setup-github-ssh.sh
+│   ├── health-check.sh
+│   ├── update.sh
+│   └── lib/utils.sh
+├── project-templates/     # Devbox templates
 │   ├── python/
 │   ├── nodejs/
 │   ├── golang/
 │   ├── cloudflare/
 │   ├── infrastructure/
 │   └── kubernetes/
-├── scripts/               # Setup & maintenance scripts
-│   ├── initial-setup.sh
-│   ├── install-dotfiles.sh
-│   ├── update.sh
-│   ├── health-check.sh
-│   └── validate-nix.sh
-└── docs/
-    └── QUICK_REFERENCE.md # Command cheatsheet
+├── claude/                # MCP server configs
+├── docs/                  # Documentation
+│   └── QUICK_REFERENCE.md
+└── hosts/                 # Host-specific configs
+    └── example-hostname/
 ```
+
+---
+
+## How Stow Works
+
+GNU Stow creates symlinks from your home directory to files in the dotfiles repo:
+
+```bash
+# Before stow
+~/dotfiles/stow/nvim/.config/nvim/init.lua  # Your actual file
+
+# After running: stow nvim
+~/.config/nvim/init.lua -> ~/dotfiles/stow/nvim/.config/nvim/init.lua  # Symlink
+```
+
+**Benefits:**
+- Edit files directly in the repo
+- Changes are immediately active
+- Easy to version control
+- Simple to understand and debug
 
 ---
 
 ## Philosophy
 
-1. **Declarative** - Describe what you want, Nix handles how
-2. **Reproducible** - Same config = same result, always
-3. **Atomic** - Changes are all-or-nothing, no partial states
-4. **Rollback** - Revert to any previous state instantly
-5. **Minimal** - Home Manager only, no system-level complexity
+1. **Simple** - Symlinks, not complex abstractions
+2. **Portable** - Works on any Unix-like system
+3. **Transparent** - You can see exactly what's happening
+4. **Maintainable** - Easy to add, remove, or modify configs
+5. **Fast** - No build steps, no compilation
 
 ---
 
 ## Advanced
 
-### Manual Installation
+### Installing on a New Machine
 
-If automated scripts don't work, you can install manually:
-
-**macOS:**
 ```bash
-# Install Nix
-curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
-
-# Clone dotfiles
+# Quick install
 git clone https://github.com/loidolt/dotfiles.git ~/dotfiles
-
-# Install with Home Manager
-nix run home-manager/master -- switch --flake ~/dotfiles --impure
-
-# Install fonts via Homebrew
-brew install --cask font-fira-code-nerd-font font-jetbrains-mono-nerd-font font-meslo-lg-nerd-font
-```
-
-**Linux:**
-```bash
-# Install Nix
-curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
-
-# Clone dotfiles
-git clone https://github.com/loidolt/dotfiles.git ~/dotfiles
-
-# Install with Home Manager
-nix run home-manager/master -- switch --flake ~/dotfiles --impure
-```
-
-### Updating Flake Inputs
-
-```bash
-# Update all inputs (nixpkgs, home-manager)
 cd ~/dotfiles
-nix flake update
-
-# Update specific input
-nix flake lock --update-input nixpkgs
-
-# Rebuild with new inputs
-hm
+./install.sh
 ```
 
-### Building for Different Platforms
-
-The flake auto-detects your platform, but you can explicitly target others:
+### Selective Installation
 
 ```bash
-# Build for specific platform
-home-manager switch --flake ~/dotfiles#aarch64-darwin --impure
-home-manager switch --flake ~/dotfiles#x86_64-linux --impure
+# Install only specific packages
+cd ~/dotfiles/stow
+stow nvim zsh git tmux
 ```
 
-Available targets: `aarch64-darwin`, `x86_64-darwin`, `x86_64-linux`, `aarch64-linux`
+### Host-Specific Overrides
+
+Create host-specific configs in `hosts/$(hostname)/`:
+
+```bash
+mkdir -p ~/dotfiles/hosts/$(hostname)
+echo "# Host-specific aliases" > ~/dotfiles/hosts/$(hostname)/host.sh
+```
+
+This file is automatically sourced by the Zsh configuration.
+
+### Keeping Dotfiles Updated
+
+```bash
+cd ~/dotfiles
+git pull
+./stow-all.sh  # Restow all packages
+./scripts/update.sh  # Update system packages
+```
 
 ---
 

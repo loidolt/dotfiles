@@ -1,0 +1,45 @@
+# Common packages for all systems
+# One package per line, comments allowed
+
+# Shell & Terminal
+zsh
+tmux
+starship
+
+# Modern CLI replacements
+eza         # Modern ls
+bat         # Modern cat
+fd          # Modern find
+ripgrep     # Modern grep
+zoxide      # Modern cd
+fzf         # Fuzzy finder
+
+# Git tools
+git
+lazygit
+gh          # GitHub CLI
+delta       # Git diff viewer
+
+# Editors
+neovim
+
+# Development tools
+direnv
+jq          # JSON processor
+yq          # YAML processor
+
+# Network tools
+httpie      # or xh on some systems
+curl
+wget
+
+# System utilities
+htop
+tree
+tldr
+navi
+
+# Modern utilities
+dust        # Modern du
+duf         # Modern df
+procs       # Modern ps

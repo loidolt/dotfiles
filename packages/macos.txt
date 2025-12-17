@@ -1,0 +1,15 @@
+# macOS-specific packages
+# Installed via Homebrew
+
+# Terminal emulator
+--cask ghostty
+
+# Development
+--cask docker
+
+# Fonts
+--cask font-jetbrains-mono-nerd-font
+--cask font-fira-code-nerd-font
+
+# Mac-specific tools
+mas             # Mac App Store CLI
