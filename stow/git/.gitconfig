@@ -1,9 +1,11 @@
 # Git configuration
-# Edit this file with your personal details
+# User-specific settings (name, email) are loaded from ~/.gitconfig.local
+# Create this file with:
+#   git config --file ~/.gitconfig.local user.name "Your Name"
+#   git config --file ~/.gitconfig.local user.email "your@email.com"
 
-[user]
-	name = YOUR_NAME
-	email = YOUR_EMAIL
+[include]
+	path = ~/.gitconfig.local
 
 [init]
 	defaultBranch = main

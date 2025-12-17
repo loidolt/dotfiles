@@ -1,6 +1,7 @@
 # ZSH Configuration
 
 # Path configuration
+# ~/.local/bin is for user-installed binaries (pip install --user, cargo install, etc.)
 export PATH="$HOME/.local/bin:$PATH"
 
 # Homebrew (macOS)
@@ -95,3 +96,8 @@ export VISUAL='nvim'
 
 # Load local customizations if they exist
 [ -f ~/.zshrc.local ] && source ~/.zshrc.local
+
+# Load host-specific configuration from dotfiles
+# Create hosts/$(hostname)/host.sh for machine-specific settings
+DOTFILES_HOST_DIR="$HOME/dotfiles/hosts/$(hostname)"
+[ -f "$DOTFILES_HOST_DIR/host.sh" ] && source "$DOTFILES_HOST_DIR/host.sh"

@@ -119,48 +119,53 @@ if [ ! -d "$DOTFILES_DIR" ]; then
     DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
 fi
 
+# Helper function to verify symlink points to dotfiles
+verify_stow_symlink() {
+    local target="$1"
+    local pkg="$2"
+    
+    if [ -L "$target" ]; then
+        local link_target
+        link_target=$(readlink "$target")
+        if [[ "$link_target" == *"dotfiles/stow/$pkg"* ]] || [[ "$link_target" == *"dotfiles/stow/$pkg"* ]]; then
+            check_pass "$pkg is correctly stowed"
+            return 0
+        else
+            check_warn "$pkg is symlinked but not to dotfiles repo"
+            echo "    Points to: $link_target"
+            return 1
+        fi
+    elif [ -f "$target" ] || [ -d "$target" ]; then
+        check_warn "$pkg exists but is not a symlink (not managed by stow)"
+        echo "    Consider: mv $target ${target}.backup && cd ~/dotfiles && stow -R $pkg"
+        return 1
+    else
+        check_warn "$pkg is not installed"
+        return 1
+    fi
+}
+
 if [ -d "$DOTFILES_DIR/stow" ]; then
     check_pass "Dotfiles directory found: $DOTFILES_DIR"
     
-    # Check key stow packages
+    # Check key stow packages with proper symlink verification
     for pkg in nvim git tmux starship zsh; do
         if [ -d "$DOTFILES_DIR/stow/$pkg" ]; then
-            # Check if actually stowed (look for a key file)
             case $pkg in
                 nvim)
-                    if [ -L "$HOME/.config/nvim/init.lua" ] || [ -f "$HOME/.config/nvim/init.lua" ]; then
-                        check_pass "$pkg is stowed"
-                    else
-                        check_warn "$pkg exists but may not be stowed"
-                    fi
+                    verify_stow_symlink "$HOME/.config/nvim/init.lua" "$pkg"
                     ;;
                 git)
-                    if [ -L "$HOME/.gitconfig" ] || [ -f "$HOME/.gitconfig" ]; then
-                        check_pass "$pkg is stowed"
-                    else
-                        check_warn "$pkg exists but may not be stowed"
-                    fi
+                    verify_stow_symlink "$HOME/.gitconfig" "$pkg"
                     ;;
                 tmux)
-                    if [ -L "$HOME/.tmux.conf" ] || [ -f "$HOME/.tmux.conf" ]; then
-                        check_pass "$pkg is stowed"
-                    else
-                        check_warn "$pkg exists but may not be stowed"
-                    fi
+                    verify_stow_symlink "$HOME/.tmux.conf" "$pkg"
                     ;;
                 starship)
-                    if [ -L "$HOME/.config/starship.toml" ] || [ -f "$HOME/.config/starship.toml" ]; then
-                        check_pass "$pkg is stowed"
-                    else
-                        check_warn "$pkg exists but may not be stowed"
-                    fi
+                    verify_stow_symlink "$HOME/.config/starship.toml" "$pkg"
                     ;;
                 zsh)
-                    if [ -L "$HOME/.zshrc" ] || [ -f "$HOME/.zshrc" ]; then
-                        check_pass "$pkg is stowed"
-                    else
-                        check_warn "$pkg exists but may not be stowed"
-                    fi
+                    verify_stow_symlink "$HOME/.zshrc" "$pkg"
                     ;;
             esac
         fi

@@ -4,24 +4,17 @@
 
 set -euo pipefail
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
-
-info() { echo -e "${BLUE}[INFO]${NC} $*"; }
-success() { echo -e "${GREEN}[✓]${NC} $*"; }
-warning() { echo -e "${YELLOW}[!]${NC} $*"; }
-error() { echo -e "${RED}[✗]${NC} $*"; }
-
 PACKAGES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILES_DIR="$(dirname "$PACKAGES_DIR")"
 
-# Detect OS
-detect_os() {
-    if [[ "$OSTYPE" == "darwin"* ]]; then
+# Source shared utilities
+source "$DOTFILES_DIR/scripts/lib/utils.sh"
+
+# Detect OS (wrapper for utils.sh functions)
+get_os_type() {
+    if is_macos; then
         echo "macos"
-    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    elif is_linux; then
         echo "linux"
     else
         echo "unknown"
@@ -46,10 +39,20 @@ detect_package_manager() {
 # Read packages from file (ignoring comments and empty lines)
 read_packages() {
     local file=$1
-    if [[ -f "$file" ]]; then
-        # Remove comments (anything after #), trim whitespace, and filter empty lines
-        grep -v '^#' "$file" | sed 's/#.*//' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | grep -v '^[[:space:]]*$' || true
+    if [[ ! -f "$file" ]]; then
+        return 0
     fi
+    
+    # Remove comments (anything after #), trim whitespace, and filter empty lines
+    grep -v '^#' "$file" | sed 's/#.*//' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | grep -v '^[[:space:]]*$' | \
+    while read -r pkg; do
+        # Basic validation: allow --cask prefix, alphanumeric, dash, underscore, @, /
+        if [[ "$pkg" =~ ^(--cask[[:space:]]+)?[a-zA-Z0-9@/_-]+$ ]]; then
+            echo "$pkg"
+        else
+            warning "Skipping invalid package name: $pkg" >&2
+        fi
+    done
 }
 
 # Install packages via Homebrew (macOS)
@@ -58,26 +61,52 @@ install_brew() {
     
     if ! command -v brew &> /dev/null; then
         warning "Homebrew not found. Installing..."
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        if ! /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; then
+            error "Homebrew installation failed"
+            return 1
+        fi
         
-        # Add brew to PATH for Apple Silicon
+        # Add brew to PATH for Apple Silicon or Intel
         if [[ -f "/opt/homebrew/bin/brew" ]]; then
             eval "$(/opt/homebrew/bin/brew shellenv)"
+        elif [[ -f "/usr/local/bin/brew" ]]; then
+            eval "$(/usr/local/bin/brew shellenv)"
         fi
+        
+        # Verify installation
+        if ! command -v brew &> /dev/null; then
+            error "Homebrew installed but not found in PATH"
+            return 1
+        fi
+        
+        success "Homebrew installed successfully"
     fi
     
     info "Updating Homebrew..."
     brew update
     
     for package in "${packages[@]}"; do
-        if brew list "$package" &>/dev/null; then
-            success "$package already installed"
+        local pkg_name="$package"
+        local is_cask=false
+        local install_cmd="brew install"
+        local check_cmd="brew list"
+        
+        # Handle --cask prefix
+        if [[ "$package" == "--cask "* ]]; then
+            pkg_name="${package#--cask }"
+            is_cask=true
+            install_cmd="brew install --cask"
+            check_cmd="brew list --cask"
+        fi
+        
+        if $check_cmd "$pkg_name" &>/dev/null; then
+            success "$pkg_name already installed"
         else
-            info "Installing $package..."
-            if brew install "$package"; then
-                success "$package installed"
+            info "Installing $pkg_name${is_cask:+ (cask)}..."
+            if $install_cmd "$pkg_name"; then
+                success "$pkg_name installed"
             else
-                warning "Failed to install $package"
+                warning "Failed to install $pkg_name"
             fi
         fi
     done
@@ -145,7 +174,7 @@ install_pacman() {
 
 # Main installation
 main() {
-    local os=$(detect_os)
+    local os=$(get_os_type)
     local pm=$(detect_package_manager)
     
     info "Detected OS: $os"

@@ -1,86 +1,58 @@
 # Starship prompt configuration
-# https://starship.rs/config/
+# Minimal and clean theme
 
 format = """
-[](#9A348E)\
-$os\
-$username\
-[](bg:#DA627D fg:#9A348E)\
 $directory\
-[](fg:#DA627D bg:#FCA17D)\
 $git_branch\
 $git_status\
-[](fg:#FCA17D bg:#86BBD8)\
-$nodejs\
-$rust\
-$golang\
 $python\
+$nodejs\
+$golang\
+$rust\
 $docker_context\
-[](fg:#86BBD8 bg:#06969A)\
-$time\
-[ ](fg:#06969A)\
 $line_break\
 $character"""
 
-[os]
-disabled = false
-style = "bg:#9A348E fg:#ffffff"
-
-[username]
-show_always = true
-style_user = "bg:#9A348E fg:#ffffff"
-style_root = "bg:#9A348E fg:#ffffff"
-format = '[$user ]($style)'
-
 [directory]
-style = "bg:#DA627D fg:#ffffff"
-format = "[ $path ]($style)"
+style = "blue"
+format = "[$path]($style) "
 truncation_length = 3
 truncation_symbol = "…/"
 
 [git_branch]
 symbol = ""
-style = "bg:#FCA17D"
-format = '[[ $symbol $branch ](bg:#FCA17D fg:#000000)]($style)'
+style = "purple"
+format = "[$symbol $branch]($style) "
 
 [git_status]
-style = "bg:#FCA17D"
-format = '[[($all_status$ahead_behind )](bg:#FCA17D fg:#000000)]($style)'
+style = "red"
+format = "[$all_status$ahead_behind]($style)"
 
 [nodejs]
-symbol = ""
-style = "bg:#86BBD8"
-format = '[[ $symbol ($version) ](bg:#86BBD8 fg:#000000)]($style)'
+symbol = "node"
+style = "green"
+format = "[$symbol $version]($style) "
 
 [rust]
-symbol = ""
-style = "bg:#86BBD8"
-format = '[[ $symbol ($version) ](bg:#86BBD8 fg:#000000)]($style)'
+symbol = "rs"
+style = "red"
+format = "[$symbol $version]($style) "
 
 [golang]
-symbol = ""
-style = "bg:#86BBD8"
-format = '[[ $symbol ($version) ](bg:#86BBD8 fg:#000000)]($style)'
+symbol = "go"
+style = "cyan"
+format = "[$symbol $version]($style) "
 
 [python]
-symbol = ""
-style = "bg:#86BBD8"
-format = '[[ $symbol ($version) ](bg:#86BBD8 fg:#000000)]($style)'
+symbol = "py"
+style = "yellow"
+format = "[$symbol $version]($style) "
 
 [docker_context]
-symbol = ""
-style = "bg:#86BBD8"
-format = '[[ $symbol $context ](bg:#86BBD8 fg:#000000)]($style)'
-
-[time]
-disabled = false
-time_format = "%R"
-style = "bg:#06969A"
-format = '[[  $time ](bg:#06969A fg:#ffffff)]($style)'
-
-[line_break]
-disabled = false
+symbol = "docker"
+style = "blue"
+format = "[$symbol $context]($style) "
 
 [character]
-success_symbol = '[➜](bold green)'
-error_symbol = '[➜](bold red)'
+success_symbol = "[❯](green)"
+error_symbol = "[❯](red)"

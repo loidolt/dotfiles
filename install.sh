@@ -4,39 +4,29 @@
 
 set -euo pipefail
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
-
-# Logging functions
-info() { echo -e "${BLUE}[INFO]${NC} $*"; }
-success() { echo -e "${GREEN}[✓]${NC} $*"; }
-warning() { echo -e "${YELLOW}[!]${NC} $*"; }
-error() { echo -e "${RED}[✗]${NC} $*"; }
-
 # Get script directory
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STOW_DIR="$DOTFILES_DIR/stow"
 HOST_DIR="$DOTFILES_DIR/hosts/$(hostname)"
 
+# Source shared utilities
+source "$DOTFILES_DIR/scripts/lib/utils.sh"
+
 info "Dotfiles installation starting..."
 info "Dotfiles directory: $DOTFILES_DIR"
 
-# Detect OS
-detect_os() {
-    if [[ "$OSTYPE" == "darwin"* ]]; then
+# Detect OS (wrapper for utils.sh functions)
+get_os_type() {
+    if is_macos; then
         echo "macos"
-    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    elif is_linux; then
         echo "linux"
     else
         echo "unknown"
     fi
 }
 
-OS=$(detect_os)
+OS=$(get_os_type)
 info "Detected OS: $OS"
 
 # Check prerequisites
@@ -131,25 +121,45 @@ stow_packages() {
     
     cd "$STOW_DIR"
     
+    local failed_packages=()
+    
     # Find all packages (directories in stow/)
     for package in */; do
         package=${package%/}  # Remove trailing slash
         
         info "Installing $package..."
         
-        # Backup conflicts before stowing
-        # This prevents stow from failing on existing files
-        while IFS= read -r file; do
-            backup_existing "$file"
-        done < <(stow -n -v "$package" 2>&1 | grep "existing target is" | sed 's/.*existing target is neither a link nor a directory: //' || true)
+        # Dry-run to detect conflicts
+        local stow_output
+        stow_output=$(stow -n -v -t "$HOME" "$package" 2>&1) || true
         
-        # Now stow the package
-        if stow -v "$package" 2>&1 | grep -v "BUG in find_stowed_path"; then
+        # Backup conflicts before stowing
+        echo "$stow_output" | grep "existing target is neither a link nor a directory" | \
+            sed 's/.*existing target is neither a link nor a directory: //' | \
+            while IFS= read -r file; do
+                [[ -n "$file" ]] && backup_existing "$file"
+            done
+        
+        # Now stow the package (use -R for restow to handle already-stowed packages)
+        if stow -R -v -t "$HOME" "$package" 2>&1 | grep -v "BUG in find_stowed_path"; then
             success "$package configured"
         else
-            error "Failed to stow $package"
+            # Check if it actually failed or just had no output
+            if stow -n -t "$HOME" "$package" 2>&1 | grep -q "ERROR\|CONFLICT"; then
+                error "Failed to stow $package"
+                failed_packages+=("$package")
+            else
+                success "$package configured"
+            fi
         fi
     done
+    
+    # Report any failures
+    if [[ ${#failed_packages[@]} -gt 0 ]]; then
+        echo ""
+        warning "Some packages failed to stow: ${failed_packages[*]}"
+        warning "Try manually fixing conflicts and re-running ./stow-all.sh"
+    fi
 }
 
 # Apply host-specific overrides
@@ -163,16 +173,9 @@ apply_host_overrides() {
             success "Host-specific files applied"
         fi
         
-        # Source host-specific shell config if it exists
+        # Note: host.sh is automatically sourced by .zshrc
         if [[ -f "$HOST_DIR/host.sh" ]]; then
-            # Add source line to .zshrc if not already there
-            local source_line="[ -f \"$HOST_DIR/host.sh\" ] && source \"$HOST_DIR/host.sh\""
-            if [[ -f "$HOME/.zshrc" ]] && ! grep -q "host.sh" "$HOME/.zshrc"; then
-                echo "" >> "$HOME/.zshrc"
-                echo "# Host-specific configuration" >> "$HOME/.zshrc"
-                echo "$source_line" >> "$HOME/.zshrc"
-                success "Host-specific shell config linked"
-            fi
+            success "Host-specific shell config found (auto-sourced by .zshrc)"
         fi
     else
         info "No host-specific overrides found for $(hostname)"
