@@ -78,8 +78,7 @@ in
       # HTTP/API tools
       http = "xh";             # Simpler curl alternative
 
-      # Dotfiles management - works on all platforms!
-      hm = "home-manager switch --flake $DOTFILES --impure";
+      # Dotfiles management - handled by function in initContent
       hm-update = "$DOTFILES/scripts/update.sh";
       hm-validate = "$DOTFILES/scripts/validate-nix.sh";
       hm-health = "$DOTFILES/scripts/health-check.sh";
@@ -111,6 +110,10 @@ in
 
     # Additional initialization (runs for ALL interactive shells)
     initContent = ''
+      # Function for dotfiles management
+      hm() {
+        home-manager switch --flake ~/dotfiles/#${userConfig.username} --impure
+      }
       # Source nix-daemon.sh if it exists (adds ~/.nix-profile/bin to PATH)
       # This needs to run for all interactive shells, not just login shells
       # Check multiple possible locations for different Nix installer types:
