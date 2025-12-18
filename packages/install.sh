@@ -204,8 +204,8 @@ configure_devpod_provider() {
         return 0
     fi
     
-    # Check if docker provider exists
-    if ! devpod provider list 2>/dev/null | grep -q "^docker"; then
+    # Check if docker provider exists (strip ANSI codes and handle table formatting)
+    if ! devpod provider list 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' | grep -q "docker"; then
         info "Adding devpod docker provider..."
         if devpod provider add docker; then
             success "docker provider added"

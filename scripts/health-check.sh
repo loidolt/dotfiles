@@ -190,7 +190,7 @@ done
 section "Optional Tools"
 
 # Check optional tools
-for tool in lazygit lazydocker gh delta jq yq; do
+for tool in lazygit lazydocker lazysql gh delta jq yq; do
     if command_exists "$tool"; then
         check_pass "$tool is installed"
     else
