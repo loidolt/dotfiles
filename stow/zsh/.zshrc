@@ -15,15 +15,7 @@ fi
 # ~/.local/bin is for user-installed binaries (pip install --user, cargo install, etc.)
 export PATH="$HOME/.local/bin:$PATH"
 
-# Homebrew (macOS)
-if [[ -f "/opt/homebrew/bin/brew" ]]; then
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-fi
-
-# Linuxbrew (Linux)
-if [[ -d "/home/linuxbrew/.linuxbrew" ]]; then
-    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-fi
+# Homebrew/Linuxbrew PATH is set in .zshenv (sourced for all shell types)
 
 # History configuration
 HISTFILE=~/.zsh_history
