@@ -4,9 +4,6 @@
 # Note: zsh should be installed via system package manager (apt/dnf/pacman),
 # not brew. This avoids PATH and terminfo issues. See docs/LINUX_MIGRATION.md
 
-# Terminal (formula, not cask - cask is macOS only)
-kitty
-
 # Build tools
 gcc
 make
