@@ -20,6 +20,9 @@ lazygit
 gh          # GitHub CLI
 delta       # Git diff viewer
 
+# Docker tools
+lazydocker
+
 # Editors
 neovim
 
@@ -27,6 +30,7 @@ neovim
 direnv
 jq          # JSON processor
 yq          # YAML processor
+devpod      # Dev environments (devcontainer-compatible)
 
 # Network tools
 httpie      # or xh on some systems
