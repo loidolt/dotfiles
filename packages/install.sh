@@ -195,9 +195,18 @@ main() {
             [[ -n "$line" ]] && os_packages+=("$line")
         done < <(read_packages "$PACKAGES_DIR/macos.txt")
     elif [[ "$os" == "linux" ]]; then
-        while IFS= read -r line; do
-            [[ -n "$line" ]] && os_packages+=("$line")
-        done < <(read_packages "$PACKAGES_DIR/linux.txt")
+        # Use different package list depending on package manager
+        if [[ "$pm" == "brew" ]]; then
+            # Linuxbrew - use linux-brew.txt
+            while IFS= read -r line; do
+                [[ -n "$line" ]] && os_packages+=("$line")
+            done < <(read_packages "$PACKAGES_DIR/linux-brew.txt")
+        else
+            # Native package managers (apt, dnf, pacman) - use linux.txt
+            while IFS= read -r line; do
+                [[ -n "$line" ]] && os_packages+=("$line")
+            done < <(read_packages "$PACKAGES_DIR/linux.txt")
+        fi
     fi
     
     # Combine package lists
@@ -232,7 +241,8 @@ main() {
             if [[ "$os" == "macos" ]]; then
                 echo "  - $PACKAGES_DIR/macos.txt"
             elif [[ "$os" == "linux" ]]; then
-                echo "  - $PACKAGES_DIR/linux.txt"
+                echo "  - $PACKAGES_DIR/linux.txt (for apt/dnf/pacman)"
+                echo "  - $PACKAGES_DIR/linux-brew.txt (for Linuxbrew)"
             fi
             exit 1
             ;;

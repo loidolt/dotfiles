@@ -1,0 +1,12 @@
+# Linux packages for Homebrew (Linuxbrew)
+# Used when brew is the package manager on Linux
+
+# Terminal (formula, not cask - cask is macOS only)
+kitty
+
+# Build tools (gcc and make are in common brew)
+gcc
+make
+
+# Note: python3 is in common.txt
+# pip comes with brew's python3
