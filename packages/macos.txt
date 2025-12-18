@@ -6,6 +6,7 @@
 
 # Development
 --cask docker
+--cask devpod       # Dev environments (devcontainer-compatible)
 
 # AI Coding Tools
 --cask claude-code

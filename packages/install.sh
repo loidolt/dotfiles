@@ -172,6 +172,29 @@ install_pacman() {
     done
 }
 
+# Install devpod CLI (not available via package managers on Linux)
+install_devpod() {
+    if command -v devpod &> /dev/null; then
+        success "devpod already installed"
+        return 0
+    fi
+    
+    info "Installing devpod CLI..."
+    local arch=$(uname -m)
+    local devpod_arch="amd64"
+    if [[ "$arch" == "aarch64" || "$arch" == "arm64" ]]; then
+        devpod_arch="arm64"
+    fi
+    
+    if curl -L -o /tmp/devpod "https://github.com/loft-sh/devpod/releases/latest/download/devpod-linux-${devpod_arch}" && \
+       sudo install -c -m 0755 /tmp/devpod /usr/local/bin && \
+       rm -f /tmp/devpod; then
+        success "devpod installed"
+    else
+        warning "Failed to install devpod"
+    fi
+}
+
 # Main installation
 main() {
     local os=$(get_os_type)
@@ -247,6 +270,13 @@ main() {
             exit 1
             ;;
     esac
+    
+    # Install tools that require special installation on Linux
+    if [[ "$os" == "linux" ]]; then
+        echo ""
+        info "Installing additional Linux tools..."
+        install_devpod
+    fi
     
     echo ""
     success "Package installation complete!"

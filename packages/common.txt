@@ -30,7 +30,7 @@ neovim
 direnv
 jq          # JSON processor
 yq          # YAML processor
-devpod      # Dev environments (devcontainer-compatible)
+# Note: devpod CLI installed separately on Linux (see packages/install.sh)
 
 # Network tools
 httpie      # or xh on some systems
