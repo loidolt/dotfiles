@@ -2,7 +2,7 @@
 # One package per line, comments allowed
 
 # Shell & Terminal
-zsh
+# Note: zsh is managed by the system, not brew (see linux.txt for Linux installs)
 tmux
 starship
 

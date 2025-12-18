@@ -1,6 +1,12 @@
 # Linux packages for apt (Debian/Ubuntu)
 # Used when apt is the package manager
 
+# Shell (use system zsh, not brew)
+zsh
+
+# Terminal
+kitty
+
 # Build essentials
 build-essential
 gcc

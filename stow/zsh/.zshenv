@@ -8,6 +8,10 @@ if [[ -d "/home/linuxbrew/.linuxbrew" ]]; then
     if [[ -d "/home/linuxbrew/.linuxbrew/share/terminfo" ]]; then
         export TERMINFO="/home/linuxbrew/.linuxbrew/share/terminfo"
     fi
+    # Ensure TERM is set for interactive sessions (fallback for SSH)
+    if [[ -z "$TERM" || "$TERM" == "dumb" ]]; then
+        export TERM="xterm-256color"
+    fi
 fi
 
 # Homebrew (macOS) - needed early for all shell types  

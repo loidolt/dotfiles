@@ -20,22 +20,24 @@ git clone https://github.com/loidolt/dotfiles.git ~/dotfiles
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
-# 3. Install stow and essential packages
-brew install stow zsh tmux starship eza bat fd ripgrep zoxide fzf git gh delta direnv jq yq httpie curl wget htop tree tlrc navi dust duf procs neovim lazygit
+# 3. Install zsh via system package manager (NOT brew - avoids PATH/terminfo issues)
+sudo apt install -y zsh
 
-# 4. Backup and remove conflicting configs
+# 4. Install stow and essential packages via brew
+brew install stow tmux starship eza bat fd ripgrep zoxide fzf git gh delta direnv jq yq httpie curl wget htop tree tlrc navi dust duf procs neovim lazygit
+
+# 5. Backup and remove conflicting configs
 mv ~/.config/nvim ~/.config/nvim.backup 2>/dev/null || true
 mv ~/.config/navi ~/.config/navi.backup 2>/dev/null || true
 
-# 5. Stow all configs
+# 6. Stow all configs
 cd ~/dotfiles/stow
 for pkg in */; do stow -R -t "$HOME" "${pkg%/}"; done
 
-# 6. Set Homebrew zsh as login shell
-echo '/home/linuxbrew/.linuxbrew/bin/zsh' | sudo tee -a /etc/shells
-chsh -s /home/linuxbrew/.linuxbrew/bin/zsh
+# 7. Set system zsh as login shell
+chsh -s $(which zsh)
 
-# 7. Create host-specific directory (optional)
+# 8. Create host-specific directory (optional)
 mkdir -p ~/dotfiles/hosts/$(hostname)
 ```
 
@@ -70,15 +72,30 @@ brew --version
 
 **Note:** The `.zshrc` automatically adds Linuxbrew to PATH, so this only needs to be done for the initial session.
 
-### Step 3: Install Stow and Packages
+### Step 3: Install Zsh (System Package Manager)
+
+**Important:** Install zsh via your system's package manager, NOT brew. This avoids PATH initialization and terminfo issues.
+
+```bash
+# Debian/Ubuntu/Pop!_OS
+sudo apt install -y zsh
+
+# Fedora/RHEL
+sudo dnf install -y zsh
+
+# Arch
+sudo pacman -S --noconfirm zsh
+```
+
+### Step 4: Install Stow and Packages (Homebrew)
 
 ```bash
 # Install stow first
 brew install stow
 
-# Install all common packages
+# Install all common packages (note: zsh is NOT included)
 brew install \
-  zsh tmux starship \
+  tmux starship \
   eza bat fd ripgrep zoxide fzf \
   git lazygit gh delta \
   neovim direnv jq yq \
@@ -87,7 +104,7 @@ brew install \
 ```
 
 **Package Categories:**
-- **Shell & Terminal:** zsh, tmux, starship
+- **Shell & Terminal:** tmux, starship (zsh via system)
 - **Modern CLI replacements:** eza (ls), bat (cat), fd (find), ripgrep (grep), zoxide (cd), fzf (fuzzy finder)
 - **Git tools:** git, lazygit, gh (GitHub CLI), delta (diff viewer)
 - **Editors:** neovim
@@ -95,7 +112,7 @@ brew install \
 - **Network:** httpie, curl, wget
 - **System utilities:** htop, tree, tlrc (tldr), navi, dust, duf, procs
 
-### Step 4: Backup Existing Configurations
+### Step 5: Backup Existing Configurations
 
 Check for and backup any existing configs that would conflict with stow:
 
@@ -113,7 +130,7 @@ for config in ~/.config/nvim ~/.config/navi ~/.config/direnv ~/.config/starship.
 done
 ```
 
-### Step 5: Stow All Configurations
+### Step 6: Stow All Configurations
 
 ```bash
 cd ~/dotfiles/stow
@@ -137,21 +154,18 @@ ls -la ~/.zshrc ~/.gitconfig ~/.tmux.conf ~/.config/nvim ~/.config/starship.toml
 
 All should be symlinks pointing to `~/dotfiles/stow/...`
 
-### Step 6: Set Homebrew ZSH as Login Shell
+### Step 7: Set System ZSH as Login Shell
 
 ```bash
-# Add Homebrew zsh to allowed shells
-echo '/home/linuxbrew/.linuxbrew/bin/zsh' | sudo tee -a /etc/shells
-
-# Change login shell
-chsh -s /home/linuxbrew/.linuxbrew/bin/zsh
+# Change login shell to system zsh
+chsh -s $(which zsh)
 
 # Verify
 grep $USER /etc/passwd | cut -d: -f7
-# Should show: /home/linuxbrew/.linuxbrew/bin/zsh
+# Should show: /bin/zsh or /usr/bin/zsh
 ```
 
-### Step 7: Create Host-Specific Configuration (Optional)
+### Step 8: Create Host-Specific Configuration (Optional)
 
 For machine-specific settings:
 
@@ -202,6 +216,77 @@ cd ~/dotfiles
 git add hosts/$(hostname)
 git commit -m "Add host configuration for $(hostname)"
 git push
+```
+
+---
+
+## Migrating from Brew ZSH to System ZSH
+
+If your host is currently using Homebrew's zsh (`/home/linuxbrew/.linuxbrew/bin/zsh`), follow these steps to migrate to system zsh. This fixes PATH initialization and terminfo issues (e.g., tmux "open terminal failed" errors).
+
+### Step 1: Install System ZSH
+
+```bash
+# Debian/Ubuntu/Pop!_OS
+sudo apt install -y zsh
+
+# Fedora/RHEL
+sudo dnf install -y zsh
+
+# Arch
+sudo pacman -S --noconfirm zsh
+```
+
+### Step 2: Change Login Shell
+
+```bash
+# Verify system zsh path
+which zsh
+# Should show: /bin/zsh or /usr/bin/zsh
+
+# Add to /etc/shells if needed
+which zsh | sudo tee -a /etc/shells
+
+# Change login shell
+chsh -s $(which zsh)
+```
+
+### Step 3: Remove Brew ZSH from /etc/shells
+
+```bash
+# Remove brew zsh from allowed shells
+sudo sed -i '/linuxbrew.*zsh/d' /etc/shells
+```
+
+### Step 4: Update Dotfiles and Re-stow
+
+```bash
+cd ~/dotfiles
+git pull
+
+# Re-stow zsh config to ensure .zshenv is linked
+cd stow
+stow -R -t "$HOME" zsh
+```
+
+### Step 5: Verify
+
+```bash
+# Log out and back in, then verify:
+echo $SHELL
+# Expected: /bin/zsh or /usr/bin/zsh
+
+which zsh
+# Expected: /bin/zsh or /usr/bin/zsh
+
+# Test tmux
+tmux
+```
+
+### Step 6: (Optional) Uninstall Brew ZSH
+
+```bash
+brew uninstall zsh
 ```
 
 ---
@@ -378,11 +463,11 @@ If `chsh` doesn't work:
 # Verify zsh is in /etc/shells
 cat /etc/shells | grep zsh
 
-# If not, add it
-echo '/home/linuxbrew/.linuxbrew/bin/zsh' | sudo tee -a /etc/shells
+# If system zsh is not listed, add it
+which zsh | sudo tee -a /etc/shells
 
 # Try chsh again
-chsh -s /home/linuxbrew/.linuxbrew/bin/zsh
+chsh -s $(which zsh)
 ```
 
 ### SSH key not working for GitHub
@@ -401,16 +486,20 @@ git remote set-url origin https://github.com/loidolt/dotfiles.git
 Run these commands to verify everything is working:
 
 ```bash
-# Check shell
+# Check shell (should be system zsh, NOT brew zsh)
 echo $SHELL
-# Expected: /home/linuxbrew/.linuxbrew/bin/zsh
+# Expected: /bin/zsh or /usr/bin/zsh
 
-# Check key tools
+# Check zsh is system version
+which zsh
+# Expected: /bin/zsh or /usr/bin/zsh (NOT /home/linuxbrew/.linuxbrew/bin/zsh)
+
+# Check key tools (these should be from brew)
 which brew starship nvim eza bat rg fzf git gh
 # All should point to /home/linuxbrew/.linuxbrew/bin/
 
 # Check symlinks
-ls -la ~/.zshrc ~/.gitconfig ~/.config/nvim
+ls -la ~/.zshrc ~/.zshenv ~/.gitconfig ~/.config/nvim
 # All should be symlinks to ~/dotfiles/stow/...
 
 # Test starship prompt
@@ -418,6 +507,9 @@ starship --version
 
 # Test neovim
 nvim --version
+
+# Test tmux
+tmux new -d -s test && echo "tmux works" && tmux kill-session -t test
 ```
 
 ---

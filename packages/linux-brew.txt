@@ -1,7 +1,13 @@
 # Linux packages for Homebrew (Linuxbrew)
 # Used when brew is the package manager on Linux
+#
+# Note: zsh should be installed via system package manager (apt/dnf/pacman),
+# not brew. This avoids PATH and terminfo issues. See docs/LINUX_MIGRATION.md
 
-# Build tools (gcc and make are in common brew)
+# Terminal (formula, not cask - cask is macOS only)
+kitty
+
+# Build tools
 gcc
 make
 
