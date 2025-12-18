@@ -176,22 +176,53 @@ install_pacman() {
 install_devpod() {
     if command -v devpod &> /dev/null; then
         success "devpod already installed"
+    else
+        info "Installing devpod CLI..."
+        local arch=$(uname -m)
+        local devpod_arch="amd64"
+        if [[ "$arch" == "aarch64" || "$arch" == "arm64" ]]; then
+            devpod_arch="arm64"
+        fi
+        
+        if curl -L -o /tmp/devpod "https://github.com/loft-sh/devpod/releases/latest/download/devpod-linux-${devpod_arch}" && \
+           sudo install -c -m 0755 /tmp/devpod /usr/local/bin && \
+           rm -f /tmp/devpod; then
+            success "devpod installed"
+        else
+            warning "Failed to install devpod"
+            return 1
+        fi
+    fi
+    
+    # Configure docker provider as default
+    configure_devpod_provider
+}
+
+# Configure devpod docker provider
+configure_devpod_provider() {
+    if ! command -v devpod &> /dev/null; then
         return 0
     fi
     
-    info "Installing devpod CLI..."
-    local arch=$(uname -m)
-    local devpod_arch="amd64"
-    if [[ "$arch" == "aarch64" || "$arch" == "arm64" ]]; then
-        devpod_arch="arm64"
+    # Check if docker provider exists
+    if ! devpod provider list 2>/dev/null | grep -q "^docker"; then
+        info "Adding devpod docker provider..."
+        if devpod provider add docker; then
+            success "docker provider added"
+        else
+            warning "Failed to add docker provider"
+            return 1
+        fi
+    else
+        success "docker provider already exists"
     fi
     
-    if curl -L -o /tmp/devpod "https://github.com/loft-sh/devpod/releases/latest/download/devpod-linux-${devpod_arch}" && \
-       sudo install -c -m 0755 /tmp/devpod /usr/local/bin && \
-       rm -f /tmp/devpod; then
-        success "devpod installed"
+    # Set docker as default provider
+    info "Setting docker as default devpod provider..."
+    if devpod provider use docker; then
+        success "docker set as default provider"
     else
-        warning "Failed to install devpod"
+        warning "Failed to set docker as default provider"
     fi
 }
 
@@ -276,6 +307,13 @@ main() {
         echo ""
         info "Installing additional Linux tools..."
         install_devpod
+    fi
+    
+    # Configure devpod provider on macOS (devpod installed via Homebrew)
+    if [[ "$os" == "macos" ]] && command -v devpod &> /dev/null; then
+        echo ""
+        info "Configuring devpod..."
+        configure_devpod_provider
     fi
     
     echo ""
