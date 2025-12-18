@@ -286,6 +286,61 @@ sudo pacman -S --noconfirm base-devel procps-ng curl file git
 
 ---
 
+## Headless/Remote Desktop Setup (RustDesk)
+
+If you need to access the machine remotely via RustDesk without a physical display attached, you'll need to configure a virtual display using the X11 dummy driver.
+
+### Step 1: Install the Dummy Video Driver
+
+```bash
+sudo apt-get install xserver-xorg-video-dummy
+```
+
+### Step 2: Create the Headless X11 Configuration
+
+```bash
+sudo tee /etc/X11/xorg.conf.d/10-headless.conf << 'EOF'
+Section "Device"
+    Identifier "Dummy"
+    Driver "dummy"
+    VideoRam 256000
+EndSection
+
+Section "Screen"
+    Identifier "Screen0"
+    Device "Dummy"
+    DefaultDepth 24
+    SubSection "Display"
+        Depth 24
+        Modes "1920x1080"
+    EndSubSection
+EndSection
+EOF
+```
+
+### Step 3: Restart the Display Manager
+
+```bash
+# For GNOME (Pop!_OS, Ubuntu)
+sudo systemctl restart gdm3
+
+# For LightDM (Kali, some Ubuntu variants)
+sudo systemctl restart lightdm
+```
+
+### Step 4: Verify
+
+After restarting, you should be able to connect via RustDesk even without a physical monitor attached. The virtual display will present a 1920x1080 resolution.
+
+**Note:** If you later attach a physical monitor and want to use it instead, you may need to remove or rename the headless config:
+
+```bash
+sudo mv /etc/X11/xorg.conf.d/10-headless.conf /etc/X11/xorg.conf.d/10-headless.conf.disabled
+sudo systemctl restart gdm3
+```
+
+---
+
 ## Troubleshooting
 
 ### Homebrew not in PATH
