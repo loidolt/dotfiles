@@ -1,5 +1,8 @@
 # ZSH Configuration
 
+# Dotfiles location (override in ~/.zshrc.local if needed)
+export DOTFILES_DIR="${DOTFILES_DIR:-$HOME/Documents/GitHub/dotfiles}"
+
 # Path configuration
 # ~/.local/bin is for user-installed binaries (pip install --user, cargo install, etc.)
 export PATH="$HOME/.local/bin:$PATH"
@@ -99,5 +102,8 @@ export VISUAL='nvim'
 
 # Load host-specific configuration from dotfiles
 # Create hosts/$(hostname)/host.sh for machine-specific settings
-DOTFILES_HOST_DIR="$HOME/dotfiles/hosts/$(hostname)"
+# Note: hostname may include .local suffix on macOS, so we strip it
+_HOSTNAME="${$(hostname)%.local}"
+DOTFILES_HOST_DIR="${DOTFILES_DIR:-$HOME/Documents/GitHub/dotfiles}/hosts/$_HOSTNAME"
 [ -f "$DOTFILES_HOST_DIR/host.sh" ] && source "$DOTFILES_HOST_DIR/host.sh"
+unset _HOSTNAME
