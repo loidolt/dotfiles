@@ -7,7 +7,17 @@ set -euo pipefail
 # Get script directory
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STOW_DIR="$DOTFILES_DIR/stow"
-HOST_DIR="$DOTFILES_DIR/hosts/$(hostname)"
+
+# Determine host directory (try full hostname first, then short hostname without domain)
+HOSTNAME_FULL="$(hostname)"
+HOSTNAME_SHORT="${HOSTNAME_FULL%%.*}"
+if [[ -d "$DOTFILES_DIR/hosts/$HOSTNAME_FULL" ]]; then
+    HOST_DIR="$DOTFILES_DIR/hosts/$HOSTNAME_FULL"
+elif [[ -d "$DOTFILES_DIR/hosts/$HOSTNAME_SHORT" ]]; then
+    HOST_DIR="$DOTFILES_DIR/hosts/$HOSTNAME_SHORT"
+else
+    HOST_DIR="$DOTFILES_DIR/hosts/$HOSTNAME_SHORT"
+fi
 
 # Source shared utilities
 source "$DOTFILES_DIR/scripts/lib/utils.sh"
@@ -173,9 +183,11 @@ apply_host_overrides() {
             success "Host-specific files applied"
         fi
         
-        # Note: host.sh is automatically sourced by .zshrc
+        # Run host.sh to apply host-specific configuration
         if [[ -f "$HOST_DIR/host.sh" ]]; then
-            success "Host-specific shell config found (auto-sourced by .zshrc)"
+            info "Running host-specific setup script..."
+            bash "$HOST_DIR/host.sh"
+            success "Host-specific setup complete"
         fi
     else
         info "No host-specific overrides found for $(hostname)"
