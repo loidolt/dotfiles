@@ -1,7 +1,15 @@
 # ZSH Configuration
 
-# Dotfiles location (override in ~/.zshrc.local if needed)
-export DOTFILES_DIR="${DOTFILES_DIR:-$HOME/Documents/GitHub/dotfiles}"
+# Dotfiles location - auto-detect common locations
+if [[ -z "$DOTFILES_DIR" ]]; then
+    if [[ -d "$HOME/dotfiles" ]]; then
+        export DOTFILES_DIR="$HOME/dotfiles"
+    elif [[ -d "$HOME/Documents/GitHub/dotfiles" ]]; then
+        export DOTFILES_DIR="$HOME/Documents/GitHub/dotfiles"
+    else
+        export DOTFILES_DIR="$HOME/dotfiles"
+    fi
+fi
 
 # Path configuration
 # ~/.local/bin is for user-installed binaries (pip install --user, cargo install, etc.)
@@ -10,6 +18,11 @@ export PATH="$HOME/.local/bin:$PATH"
 # Homebrew (macOS)
 if [[ -f "/opt/homebrew/bin/brew" ]]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
+# Linuxbrew (Linux)
+if [[ -d "/home/linuxbrew/.linuxbrew" ]]; then
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 fi
 
 # History configuration
@@ -104,6 +117,6 @@ export VISUAL='nvim'
 # Create hosts/$(hostname)/host.sh for machine-specific settings
 # Note: hostname may include .local suffix on macOS, so we strip it
 _HOSTNAME="${$(hostname)%.local}"
-DOTFILES_HOST_DIR="${DOTFILES_DIR:-$HOME/Documents/GitHub/dotfiles}/hosts/$_HOSTNAME"
+DOTFILES_HOST_DIR="$DOTFILES_DIR/hosts/$_HOSTNAME"
 [ -f "$DOTFILES_HOST_DIR/host.sh" ] && source "$DOTFILES_HOST_DIR/host.sh"
 unset _HOSTNAME
