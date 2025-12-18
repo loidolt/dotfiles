@@ -12,10 +12,16 @@ if [[ -z "$DOTFILES_DIR" ]]; then
 fi
 
 # Path configuration
+# Homebrew/Linuxbrew - re-add to PATH here because /etc/profile may reset PATH
+# after .zshenv runs (common on Debian/Kali/Ubuntu login shells)
+if [[ -d "/home/linuxbrew/.linuxbrew" ]]; then
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+elif [[ -f "/opt/homebrew/bin/brew" ]]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
 # ~/.local/bin is for user-installed binaries (pip install --user, cargo install, etc.)
 export PATH="$HOME/.local/bin:$PATH"
-
-# Homebrew/Linuxbrew PATH is set in .zshenv (sourced for all shell types)
 
 # History configuration
 HISTFILE=~/.zsh_history
