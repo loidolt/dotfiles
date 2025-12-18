@@ -1,9 +1,6 @@
 # Linux packages for apt (Debian/Ubuntu)
 # Used when apt is the package manager
 
-# Terminal
-kitty
-
 # Build essentials
 build-essential
 gcc
