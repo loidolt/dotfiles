@@ -2,12 +2,13 @@
 # Health check script for dotfiles installation
 # Run this to diagnose issues with your dotfiles setup
 
-# Don't exit on errors - we want to run all checks
-set +e
-
 # Source utilities for consistent colors and functions
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/utils.sh"
+
+# Don't exit on errors - we want to run all checks
+# Must be set AFTER sourcing utils.sh which sets -e
+set +e
 
 command_exists() { command -v "$1" &>/dev/null; }
 
@@ -197,6 +198,66 @@ for tool in lazygit lazydocker lazysql gh delta jq yq; do
         check_warn "$tool is NOT installed (optional)"
     fi
 done
+
+section "MCP Servers"
+
+# Check Node.js/npx for MCP servers
+if command_exists npx; then
+    check_pass "npx is installed: $(npx --version 2>/dev/null || echo 'version unknown')"
+else
+    check_warn "npx is NOT installed (required for MCP servers like Playwright)"
+    echo "  Install Node.js via: brew install node (macOS) or apt install nodejs npm (Linux)"
+fi
+
+# Check Docker for MCP servers that require it
+if command_exists docker; then
+    if docker info &>/dev/null 2>&1; then
+        check_pass "Docker is installed and running"
+        
+        # Check for sequentialthinking image
+        if docker images mcp/sequentialthinking --format '{{.Repository}}' 2>/dev/null | grep -q "mcp/sequentialthinking"; then
+            check_pass "Docker image mcp/sequentialthinking is available"
+        else
+            check_warn "Docker image mcp/sequentialthinking is NOT installed"
+            echo "  Pull with: docker pull mcp/sequentialthinking"
+        fi
+    else
+        check_warn "Docker is installed but not running"
+        echo "  Start Docker daemon to use containerized MCP servers"
+    fi
+else
+    check_warn "Docker is NOT installed (required for some MCP servers)"
+    echo "  Install Docker: https://docs.docker.com/get-docker/"
+fi
+
+# Check Playwright browser installation
+# macOS uses ~/Library/Caches/ms-playwright, Linux uses ~/.cache/ms-playwright
+if is_macos; then
+    PLAYWRIGHT_CACHE="$HOME/Library/Caches/ms-playwright"
+else
+    PLAYWRIGHT_CACHE="$HOME/.cache/ms-playwright"
+fi
+
+if [ -d "$PLAYWRIGHT_CACHE" ]; then
+    CHROMIUM_COUNT=$(find "$PLAYWRIGHT_CACHE" -maxdepth 1 -type d -name "chromium*" 2>/dev/null | wc -l)
+    if [ "$CHROMIUM_COUNT" -gt 0 ]; then
+        check_pass "Playwright Chromium browsers installed ($CHROMIUM_COUNT version(s))"
+    else
+        check_warn "Playwright browsers NOT installed"
+        echo "  Install with: npx playwright install chromium"
+    fi
+else
+    check_warn "Playwright browsers NOT installed"
+    echo "  Install with: npx playwright install chromium"
+fi
+
+# Check MCP configuration files
+if [ -f "$HOME/.config/opencode/opencode.json" ]; then
+    check_pass "OpenCode MCP config is installed"
+else
+    check_warn "OpenCode MCP config is NOT installed"
+    echo "  Run: cd ~/dotfiles && ./stow-all.sh"
+fi
 
 section "Summary"
 

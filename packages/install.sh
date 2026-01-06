@@ -226,6 +226,53 @@ configure_devpod_provider() {
     fi
 }
 
+# Install Chromium browser for Playwright MCP server
+# The @playwright/mcp package bundles a specific Playwright version that requires matching browser binaries
+install_playwright_browsers() {
+    if ! command -v npx &> /dev/null; then
+        warning "npx not found, skipping Playwright MCP browser installation"
+        return 0
+    fi
+    
+    info "Installing Chromium browser for Playwright MCP..."
+    
+    # Get the Playwright version that @playwright/mcp depends on
+    local pw_version
+    pw_version=$(npm show @playwright/mcp dependencies.playwright 2>/dev/null | tr -d '"' || echo "")
+    
+    if [[ -z "$pw_version" ]]; then
+        warning "Could not determine Playwright version for @playwright/mcp"
+        # Fallback: try installing with latest playwright
+        pw_version="latest"
+    fi
+    
+    info "Using Playwright version: $pw_version"
+    
+    # Determine the correct Playwright browser cache location based on OS
+    # macOS: ~/Library/Caches/ms-playwright
+    # Linux: ~/.cache/ms-playwright
+    local playwright_cache
+    if is_macos; then
+        playwright_cache="$HOME/Library/Caches/ms-playwright"
+    else
+        playwright_cache="$HOME/.cache/ms-playwright"
+    fi
+    
+    # Install chromium to the standard Playwright browser cache location
+    # This ensures @playwright/mcp can find the browsers at runtime
+    if PLAYWRIGHT_BROWSERS_PATH="$playwright_cache" npx -y "playwright@$pw_version" install chromium 2>&1; then
+        success "Chromium browser installed for Playwright MCP"
+    else
+        warning "Failed to install Chromium browser for Playwright MCP"
+        return 1
+    fi
+    
+    # Also cache the MCP package itself
+    if npx -y @playwright/mcp@latest --help &>/dev/null; then
+        success "Playwright MCP package cached"
+    fi
+}
+
 # Main installation
 main() {
     local os=$(get_os_type)
@@ -307,6 +354,7 @@ main() {
         echo ""
         info "Installing additional Linux tools..."
         install_devpod
+        install_playwright_browsers
     fi
     
     # Configure devpod provider on macOS (devpod installed via Homebrew)
@@ -314,6 +362,13 @@ main() {
         echo ""
         info "Configuring devpod..."
         configure_devpod_provider
+    fi
+    
+    # Install Playwright browsers (for MCP server)
+    if [[ "$os" == "macos" ]]; then
+        echo ""
+        info "Installing Playwright browsers..."
+        install_playwright_browsers
     fi
     
     echo ""

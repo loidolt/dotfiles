@@ -83,13 +83,62 @@ See [`agent/README.md`](agent/README.md) for detailed documentation on each agen
 
 This configuration includes the following MCP servers:
 
-- **context7** - AI-powered code context and search (disabled by default)
-- **ref** - Reference documentation lookup (enabled)
 - **sequentialthinking** - Advanced reasoning capabilities (enabled, requires Docker)
 - **memory** - Persistent memory across conversations (disabled by default, requires Docker)
 - **playwright** - Browser automation (enabled, requires npx)
 - **github** - GitHub Copilot integration (disabled by default)
-- **cloudflare** - Cloudflare documentation and tools (enabled)
-- **mui** - Material-UI component documentation (enabled, requires npx)
-- **airtable** - Airtable database integration (enabled, requires npx)
-- **mapbox** - Mapbox mapping and location services (enabled, requires npx)
+
+### Playwright MCP Setup
+
+The Playwright MCP server enables browser automation capabilities. It requires:
+
+1. **Node.js/npx** - For running the MCP server
+2. **Chromium browser** - Pre-installed for faster startup
+
+**Automatic Installation:**
+
+The dotfiles package installer automatically sets up Playwright:
+
+```bash
+cd ~/dotfiles && ./packages/install.sh
+```
+
+**Manual Installation:**
+
+If you need to install Playwright browsers manually:
+
+```bash
+# Install Chromium for Playwright
+npx -y playwright install chromium
+```
+
+**Verify Installation:**
+
+Run the health check to verify MCP dependencies:
+
+```bash
+./scripts/health-check.sh
+```
+
+**Troubleshooting:**
+
+If Playwright fails to start:
+
+1. Check browsers are installed:
+   - **macOS**: `ls ~/Library/Caches/ms-playwright`
+   - **Linux**: `ls ~/.cache/ms-playwright`
+2. Reinstall browsers: `npx -y playwright install chromium`
+3. On Linux, install system dependencies: `npx playwright install-deps chromium`
+4. On macOS, ensure Xcode Command Line Tools are installed: `xcode-select --install`
+
+### Docker-based MCP Servers
+
+Some MCP servers run in Docker containers:
+
+```bash
+# Pull sequentialthinking image
+docker pull mcp/sequentialthinking
+
+# Pull memory image (if needed)
+docker pull mcp/memory
+```

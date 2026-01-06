@@ -12,13 +12,10 @@
       "enabled": false,
       "command": ["docker", "run", "-i", "-v", "claude-memory:/app/dist", "--rm", "mcp/memory"]
     },
-    "puppeteer": {
+    "playwright": {
       "type": "local",
       "enabled": true,
-      "command": ["npx", "-y", "puppeteer-mcp-server"],
-      "environment": {
-        "DISPLAY": ":1"
-      }
+      "command": ["npx", "-y", "@playwright/mcp@latest", "--headless", "--browser", "chromium"]
     },
     "github": {
       "type": "remote",
