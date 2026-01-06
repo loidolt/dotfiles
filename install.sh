@@ -148,7 +148,7 @@ stow_packages() {
             sed 's/.*existing target is neither a link nor a directory: //' | \
             while IFS= read -r file; do
                 [[ -n "$file" ]] && backup_existing "$file"
-            done
+            done || true  # grep returns 1 when no matches found
         
         # Now stow the package (use -R for restow to handle already-stowed packages)
         if stow -R -v -t "$HOME" "$package" 2>&1 | grep -v "BUG in find_stowed_path"; then
