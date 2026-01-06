@@ -6,7 +6,10 @@
     },
     "playwright": {
       "command": "npx",
-      "args": ["-y", "@playwright/mcp@latest"]
+      "args": ["-y", "@playwright/mcp@latest"],
+      "env": {
+        "DISPLAY": ":1"
+      }
     },
     "cloudflare": {
       "command": "npx",

@@ -15,7 +15,10 @@
     "puppeteer": {
       "type": "local",
       "enabled": true,
-      "command": ["npx", "-y", "puppeteer-mcp-server"]
+      "command": ["npx", "-y", "puppeteer-mcp-server"],
+      "environment": {
+        "DISPLAY": ":1"
+      }
     },
     "github": {
       "type": "remote",

@@ -24,7 +24,10 @@
       "args": [
         "-y",
         "puppeteer-mcp-server"
-      ]
+      ],
+      "env": {
+        "DISPLAY": ":1"
+      }
     },
     "cloudflare": {
       "command": "npx",

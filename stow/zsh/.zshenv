@@ -18,3 +18,15 @@ fi
 if [[ -f "/opt/homebrew/bin/brew" ]]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
+
+# Linux X11 DISPLAY - auto-detect if not set (needed for GUI apps like Chrome)
+if [[ "$(uname)" == "Linux" && -z "$DISPLAY" && -d "/tmp/.X11-unix" ]]; then
+    # Find available X socket and set DISPLAY
+    for sock in /tmp/.X11-unix/X*; do
+        if [[ -e "$sock" ]]; then
+            display_num="${sock##*/tmp/.X11-unix/X}"
+            export DISPLAY=":${display_num}"
+            break
+        fi
+    done
+fi
