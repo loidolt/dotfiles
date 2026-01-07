@@ -20,6 +20,7 @@ The `mcp-servers.json` file defines MCP servers that can be deployed to your pro
 | **playwright** | stdio | Browser automation and testing |
 | **cloudflare** | remote | Cloudflare documentation access |
 | **mui** | stdio | Material-UI documentation |
+| **looker** | stdio | Looker BI platform integration |
 
 ### Usage
 
@@ -43,6 +44,34 @@ node ~/.config/claude/sync-mcp-servers.js
 ```
 
 Restart Claude Code to load the servers.
+
+### Looker MCP Setup
+
+The Looker MCP server requires the Google MCP Toolbox binary and API credentials.
+
+**Installation:**
+
+```bash
+# macOS (Apple Silicon)
+curl -O https://storage.googleapis.com/genai-toolbox/v0.24.0/darwin/arm64/toolbox
+chmod +x toolbox && mv toolbox /usr/local/bin/
+
+# macOS (Intel)
+curl -O https://storage.googleapis.com/genai-toolbox/v0.24.0/darwin/amd64/toolbox
+chmod +x toolbox && mv toolbox /usr/local/bin/
+```
+
+**Environment Variables:**
+
+Add to your shell profile (`~/.zshrc`):
+
+```bash
+export LOOKER_BASE_URL="https://looker.example.com"
+export LOOKER_CLIENT_ID="your_client_id"
+export LOOKER_CLIENT_SECRET="your_client_secret"
+```
+
+See [Looker API authentication guide](https://cloud.google.com/looker/docs/api-auth#authentication_with_an_sdk) for credentials.
 
 ### Adding New MCP Servers
 

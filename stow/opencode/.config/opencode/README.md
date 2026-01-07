@@ -87,6 +87,7 @@ This configuration includes the following MCP servers:
 - **memory** - Persistent memory across conversations (disabled by default, requires Docker)
 - **playwright** - Browser automation (enabled, requires npx)
 - **github** - GitHub Copilot integration (disabled by default)
+- **looker** - Looker BI platform integration (enabled, requires toolbox binary)
 
 ### Playwright MCP Setup
 
@@ -142,3 +143,53 @@ docker pull mcp/sequentialthinking
 # Pull memory image (if needed)
 docker pull mcp/memory
 ```
+
+### Looker MCP Setup
+
+The Looker MCP server enables integration with Looker BI platform for querying models, explores, dimensions, measures, and saved content.
+
+**Prerequisites:**
+
+1. **Google MCP Toolbox** - Download the toolbox binary from [GitHub releases](https://github.com/googleapis/genai-toolbox/releases)
+2. **Looker API Credentials** - Get Client ID and Secret from your Looker instance
+
+**Installation:**
+
+```bash
+# macOS (Apple Silicon)
+curl -O https://storage.googleapis.com/genai-toolbox/v0.24.0/darwin/arm64/toolbox
+chmod +x toolbox
+mv toolbox /usr/local/bin/
+
+# macOS (Intel)
+curl -O https://storage.googleapis.com/genai-toolbox/v0.24.0/darwin/amd64/toolbox
+chmod +x toolbox
+mv toolbox /usr/local/bin/
+
+# Linux (amd64)
+curl -O https://storage.googleapis.com/genai-toolbox/v0.24.0/linux/amd64/toolbox
+chmod +x toolbox
+sudo mv toolbox /usr/local/bin/
+```
+
+**Configuration:**
+
+Add these environment variables to your shell profile (`~/.zshrc` or `~/.bashrc`):
+
+```bash
+export LOOKER_BASE_URL="https://looker.example.com"
+export LOOKER_CLIENT_ID="your_client_id"
+export LOOKER_CLIENT_SECRET="your_client_secret"
+```
+
+**Getting Looker API Credentials:**
+
+Follow the [Looker API authentication guide](https://cloud.google.com/looker/docs/api-auth#authentication_with_an_sdk) to generate API credentials.
+
+**Available Tools:**
+
+- Query models, explores, dimensions, and measures
+- Run queries and retrieve SQL
+- Manage Looks and Dashboards
+- LookML authoring and project file management
+- Instance health monitoring

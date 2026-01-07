@@ -10,3 +10,6 @@ make
 
 # Note: python3 is in common.txt
 # pip comes with brew's python3
+
+# AI Tools
+mcp-toolbox      # Google MCP Toolbox for Databases (for Looker MCP, etc.)

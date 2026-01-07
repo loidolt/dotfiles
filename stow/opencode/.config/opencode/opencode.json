@@ -21,6 +21,11 @@
       "type": "remote",
       "enabled": false,
       "url": "https://api.githubcopilot.com/mcp/"
+    },
+    "looker": {
+      "type": "local",
+      "enabled": true,
+      "command": ["toolbox", "--stdio", "--prebuilt", "looker"]
     }
   }
 }

@@ -108,6 +108,9 @@ alias ....='cd ../../..'
 export EDITOR='nvim'
 export VISUAL='nvim'
 
+# Load secrets (API keys, etc.) - never commit this file
+[ -f ~/.secrets.env ] && source ~/.secrets.env
+
 # Load local customizations if they exist
 [ -f ~/.zshrc.local ] && source ~/.zshrc.local
 

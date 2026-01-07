@@ -10,6 +10,7 @@
 
 # AI Coding Tools
 --cask claude-code
+mcp-toolbox      # Google MCP Toolbox for Databases (for Looker MCP, etc.)
 
 # Fonts
 --cask font-jetbrains-mono-nerd-font
