@@ -172,6 +172,24 @@ install_pacman() {
     done
 }
 
+# Install uv (Python package manager) - not available via apt/dnf/pacman
+install_uv() {
+    if command -v uv &> /dev/null; then
+        success "uv already installed"
+        return 0
+    fi
+    
+    info "Installing uv (Python package manager)..."
+    if curl -LsSf https://astral.sh/uv/install.sh | sh; then
+        success "uv installed"
+        # Add to PATH for current session
+        export PATH="$HOME/.local/bin:$PATH"
+    else
+        warning "Failed to install uv"
+        return 1
+    fi
+}
+
 # Install devpod CLI (not available via package managers on Linux)
 install_devpod() {
     if command -v devpod &> /dev/null; then
@@ -353,6 +371,10 @@ main() {
     if [[ "$os" == "linux" ]]; then
         echo ""
         info "Installing additional Linux tools..."
+        # Install uv via curl script if not using Homebrew (not in apt/dnf/pacman repos)
+        if [[ "$pm" != "brew" ]]; then
+            install_uv
+        fi
         install_devpod
         install_playwright_browsers
     fi

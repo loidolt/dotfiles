@@ -33,6 +33,7 @@ neovim
 direnv
 jq          # JSON processor
 yq          # YAML processor
+uv          # Fast Python package manager (provides uvx for MCP servers)
 # Note: devpod CLI installed separately on Linux (see packages/install.sh)
 
 # Infrastructure & Automation

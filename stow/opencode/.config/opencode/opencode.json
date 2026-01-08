@@ -26,6 +26,11 @@
       "type": "local",
       "enabled": true,
       "command": ["toolbox", "--stdio", "--prebuilt", "looker"]
+    },
+    "excel": {
+      "type": "local",
+      "enabled": true,
+      "command": ["uvx", "excel-mcp-server", "stdio"]
     }
   }
 }

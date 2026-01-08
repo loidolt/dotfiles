@@ -15,6 +15,10 @@
     "mui": {
       "command": "npx",
       "args": ["-y", "@mui/mcp@latest"]
+    },
+    "excel": {
+      "command": "uvx",
+      "args": ["excel-mcp-server", "stdio"]
     }
   }
 }
