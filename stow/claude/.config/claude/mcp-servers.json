@@ -10,24 +10,6 @@
       "env": {
         "DISPLAY": ":1"
       }
-    },
-    "cloudflare": {
-      "command": "npx",
-      "args": ["mcp-remote", "https://docs.mcp.cloudflare.com/mcp"]
-    },
-    "mui": {
-      "command": "npx",
-      "args": ["-y", "@mui/mcp@latest"]
-    },
-    "looker": {
-      "command": "toolbox",
-      "args": ["--stdio", "--prebuilt", "looker"],
-      "env": {
-        "LOOKER_BASE_URL": "${LOOKER_BASE_URL}",
-        "LOOKER_CLIENT_ID": "${LOOKER_CLIENT_ID}",
-        "LOOKER_CLIENT_SECRET": "${LOOKER_CLIENT_SECRET}",
-        "LOOKER_VERIFY_SSL": "true"
-      }
     }
   }
 }

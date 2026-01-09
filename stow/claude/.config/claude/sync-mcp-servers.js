@@ -68,9 +68,9 @@ function syncMCPServers() {
     }
   }
 
-  // Initialize globalMcpServers if it doesn't exist
-  if (!claudeConfig.globalMcpServers) {
-    claudeConfig.globalMcpServers = {};
+  // Initialize mcpServers if it doesn't exist
+  if (!claudeConfig.mcpServers) {
+    claudeConfig.mcpServers = {};
   }
 
   // Track changes
@@ -80,7 +80,7 @@ function syncMCPServers() {
 
   // Merge MCP servers
   for (const [serverName, serverConfig] of Object.entries(dotfilesConfig.mcpServers)) {
-    const existing = claudeConfig.globalMcpServers[serverName];
+    const existing = claudeConfig.mcpServers[serverName];
     const configString = JSON.stringify(serverConfig);
     const existingString = existing ? JSON.stringify(existing) : null;
 
@@ -92,7 +92,7 @@ function syncMCPServers() {
       unchanged.push(serverName);
     }
 
-    claudeConfig.globalMcpServers[serverName] = serverConfig;
+    claudeConfig.mcpServers[serverName] = serverConfig;
   }
 
   // Write back to Claude config
