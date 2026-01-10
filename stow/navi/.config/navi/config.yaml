@@ -1,6 +1,6 @@
 cheats:
   paths:
-    - /Users/chrisloidolt/.config/navi/cheats
+    - ~/.config/navi/cheats
 
 shell:
   command: zsh

@@ -16,6 +16,17 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/utils.sh"
 
+# Track temp files for cleanup
+TEMP_FILES=()
+
+# Cleanup function to remove temp files on exit
+cleanup() {
+    for temp_file in "${TEMP_FILES[@]:-}"; do
+        [[ -f "$temp_file" ]] && rm -f "$temp_file"
+    done
+}
+trap cleanup EXIT
+
 # Configuration
 KEY_TYPE="ed25519"
 KEY_FILE="$HOME/.ssh/id_${KEY_TYPE}_github"
@@ -149,7 +160,9 @@ EOF
         if ! grep -A5 "Host github.com" "$SSH_CONFIG" | grep -q "UseKeychain"; then
             # Add UseKeychain to GitHub block using a more portable approach
             # Create a temporary file with the new content
-            local temp_file=$(mktemp)
+            local temp_file
+            temp_file=$(mktemp)
+            TEMP_FILES+=("$temp_file")
             awk '
                 /^Host github\.com/ { in_github=1 }
                 /^Host/ && !/^Host github\.com/ { in_github=0 }
@@ -162,7 +175,6 @@ EOF
             ' "$SSH_CONFIG" > "$temp_file"
             mv "$temp_file" "$SSH_CONFIG"
         fi
-    fi
     fi
 
     success "SSH config updated"

@@ -67,11 +67,10 @@ fi
 
 # FZF
 if command -v fzf &> /dev/null; then
+    # Load key bindings and completion
     source <(fzf --zsh)
-    export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border'
-    if command -v fd &> /dev/null; then
-        export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
-    fi
+    # Load custom FZF config (colors, fd integration) if stowed
+    [[ -f ~/.fzf.zsh ]] && source ~/.fzf.zsh
 fi
 
 # Direnv

@@ -10,30 +10,58 @@ DOTFILES_DIR="$(dirname "$PACKAGES_DIR")"
 # Source shared utilities
 source "$DOTFILES_DIR/scripts/lib/utils.sh"
 
-# Detect OS (wrapper for utils.sh functions)
-get_os_type() {
-    if is_macos; then
-        echo "macos"
-    elif is_linux; then
-        echo "linux"
+# Detect package manager
+detect_package_manager() {
+    if command_exists brew; then
+        echo "brew"
+    elif command_exists apt-get; then
+        echo "apt"
+    elif command_exists dnf; then
+        echo "dnf"
+    elif command_exists pacman; then
+        echo "pacman"
     else
         echo "unknown"
     fi
 }
 
-# Detect package manager
-detect_package_manager() {
-    if command -v brew &> /dev/null; then
-        echo "brew"
-    elif command -v apt-get &> /dev/null; then
-        echo "apt"
-    elif command -v dnf &> /dev/null; then
-        echo "dnf"
-    elif command -v pacman &> /dev/null; then
-        echo "pacman"
+# Pre-flight checks before installation
+preflight_checks() {
+    local pm="$1"
+    local errors=0
+
+    info "Running pre-flight checks..."
+
+    # Check internet connectivity for package managers that need it
+    if ! check_internet true; then
+        error "No internet connection. Package installation requires network access."
+        ((errors++))
     else
-        echo "unknown"
+        success "Internet connectivity OK"
     fi
+
+    # Check sudo access for Linux package managers
+    if [[ "$pm" != "brew" ]] && is_linux; then
+        if ! sudo -n true 2>/dev/null; then
+            info "Sudo access required for package installation"
+            # Prompt for password now rather than mid-install
+            if ! sudo true; then
+                error "Failed to obtain sudo access"
+                ((errors++))
+            else
+                success "Sudo access OK"
+            fi
+        else
+            success "Sudo access OK"
+        fi
+    fi
+
+    if [[ $errors -gt 0 ]]; then
+        error "Pre-flight checks failed. Please fix the issues above and try again."
+        exit 1
+    fi
+
+    echo ""
 }
 
 # Read packages from file (ignoring comments and empty lines)
@@ -59,22 +87,18 @@ read_packages() {
 install_brew() {
     local packages=("$@")
     
-    if ! command -v brew &> /dev/null; then
+    if ! command_exists brew; then
         warning "Homebrew not found. Installing..."
         if ! /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; then
             error "Homebrew installation failed"
             return 1
         fi
         
-        # Add brew to PATH for Apple Silicon or Intel
-        if [[ -f "/opt/homebrew/bin/brew" ]]; then
-            eval "$(/opt/homebrew/bin/brew shellenv)"
-        elif [[ -f "/usr/local/bin/brew" ]]; then
-            eval "$(/usr/local/bin/brew shellenv)"
-        fi
-        
+        # Add brew to PATH
+        setup_homebrew_path || true
+
         # Verify installation
-        if ! command -v brew &> /dev/null; then
+        if ! command_exists brew; then
             error "Homebrew installed but not found in PATH"
             return 1
         fi
@@ -102,7 +126,11 @@ install_brew() {
         if $check_cmd "$pkg_name" &>/dev/null; then
             success "$pkg_name already installed"
         else
-            info "Installing $pkg_name${is_cask:+ (cask)}..."
+            if $is_cask; then
+                info "Installing $pkg_name (cask)..."
+            else
+                info "Installing $pkg_name..."
+            fi
             if $install_cmd "$pkg_name"; then
                 success "$pkg_name installed"
             else
@@ -115,12 +143,13 @@ install_brew() {
 # Install packages via apt (Debian/Ubuntu)
 install_apt() {
     local packages=("$@")
-    
+
     info "Updating package list..."
     sudo apt-get update
-    
+
     for package in "${packages[@]}"; do
-        if dpkg -l | grep -q "^ii  $package "; then
+        # Use dpkg-query for reliable package status check
+        if dpkg-query -W -f='${Status}' "$package" 2>/dev/null | grep -q "install ok installed"; then
             success "$package already installed"
         else
             info "Installing $package..."
@@ -174,7 +203,7 @@ install_pacman() {
 
 # Install uv (Python package manager) - not available via apt/dnf/pacman
 install_uv() {
-    if command -v uv &> /dev/null; then
+    if command_exists uv; then
         success "uv already installed"
         return 0
     fi
@@ -192,7 +221,7 @@ install_uv() {
 
 # Install devpod CLI (not available via package managers on Linux)
 install_devpod() {
-    if command -v devpod &> /dev/null; then
+    if command_exists devpod; then
         success "devpod already installed"
     else
         info "Installing devpod CLI..."
@@ -218,7 +247,7 @@ install_devpod() {
 
 # Configure devpod docker provider
 configure_devpod_provider() {
-    if ! command -v devpod &> /dev/null; then
+    if ! command_exists devpod; then
         return 0
     fi
     
@@ -247,23 +276,41 @@ configure_devpod_provider() {
 # Install Chromium browser for Playwright MCP server
 # The @playwright/mcp package bundles a specific Playwright version that requires matching browser binaries
 install_playwright_browsers() {
-    if ! command -v npx &> /dev/null; then
+    if ! command_exists npx; then
         warning "npx not found, skipping Playwright MCP browser installation"
         return 0
     fi
-    
-    info "Installing Chromium browser for Playwright MCP..."
-    
-    # Get the Playwright version that @playwright/mcp depends on
-    local pw_version
-    pw_version=$(npm show @playwright/mcp dependencies.playwright 2>/dev/null | tr -d '"' || echo "")
-    
-    if [[ -z "$pw_version" ]]; then
-        warning "Could not determine Playwright version for @playwright/mcp"
-        # Fallback: try installing with latest playwright
-        pw_version="latest"
+
+    if ! command_exists npm; then
+        warning "npm not found, skipping Playwright MCP browser installation"
+        return 0
     fi
-    
+
+    info "Installing Chromium browser for Playwright MCP..."
+
+    # Get the Playwright version that @playwright/mcp depends on
+    local pw_version_raw
+    pw_version_raw=$(npm show @playwright/mcp dependencies.playwright 2>/dev/null | tr -d '"' || echo "")
+
+    local pw_version="latest"
+
+    if [[ -n "$pw_version_raw" ]]; then
+        # Extract clean version number, handling semver ranges like ^1.40.0, >=1.50.0, ~1.40.0
+        # Remove leading ^, ~, >=, >, <=, <, = and any trailing modifiers
+        local clean_version
+        clean_version=$(echo "$pw_version_raw" | sed -E 's/^[\^~><=]+//' | sed -E 's/[[:space:]].*//')
+
+        # Validate it looks like a semver version (e.g., 1.40.0, 1.40.0-beta.1)
+        if [[ "$clean_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+            pw_version="$clean_version"
+            info "Detected Playwright version: $pw_version (from: $pw_version_raw)"
+        else
+            warning "Could not parse Playwright version '$pw_version_raw', using 'latest'"
+        fi
+    else
+        warning "Could not determine Playwright version for @playwright/mcp, using 'latest'"
+    fi
+
     info "Using Playwright version: $pw_version"
     
     # Determine the correct Playwright browser cache location based on OS
@@ -295,11 +342,14 @@ install_playwright_browsers() {
 main() {
     local os=$(get_os_type)
     local pm=$(detect_package_manager)
-    
+
     info "Detected OS: $os"
     info "Package manager: $pm"
     echo ""
-    
+
+    # Run pre-flight checks before proceeding
+    preflight_checks "$pm"
+
     # Read package lists
     local common_packages=()
     local os_packages=()
@@ -380,7 +430,7 @@ main() {
     fi
     
     # Configure devpod provider on macOS (devpod installed via Homebrew)
-    if [[ "$os" == "macos" ]] && command -v devpod &> /dev/null; then
+    if [[ "$os" == "macos" ]] && command_exists devpod; then
         echo ""
         info "Configuring devpod..."
         configure_devpod_provider

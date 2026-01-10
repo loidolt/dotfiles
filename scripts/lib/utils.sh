@@ -32,11 +32,11 @@ success() {
 }
 
 warning() {
-    echo -e "${YELLOW}⚠${NC} $*"
+    echo -e "${YELLOW}⚠${NC} $*" >&2
 }
 
 error() {
-    echo -e "${RED}✗${NC} $*"
+    echo -e "${RED}✗${NC} $*" >&2
 }
 
 section() {
@@ -56,6 +56,17 @@ is_linux() {
 
 is_arm() {
     [[ "$(uname -m)" == "arm64" ]] || [[ "$(uname -m)" == "aarch64" ]]
+}
+
+# Get simple OS type string (macos, linux, unknown)
+get_os_type() {
+    if is_macos; then
+        echo "macos"
+    elif is_linux; then
+        echo "linux"
+    else
+        echo "unknown"
+    fi
 }
 
 detect_os() {
@@ -163,6 +174,41 @@ command_exists() {
     command -v "$1" &>/dev/null
 }
 
+# Setup Homebrew PATH if not already in PATH
+# Works for both macOS (Intel and Apple Silicon) and Linux (Linuxbrew)
+setup_homebrew_path() {
+    # Skip if brew is already in PATH
+    if command_exists brew; then
+        return 0
+    fi
+
+    # macOS Apple Silicon
+    if [[ -f "/opt/homebrew/bin/brew" ]]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+        return 0
+    fi
+
+    # macOS Intel
+    if [[ -f "/usr/local/bin/brew" ]]; then
+        eval "$(/usr/local/bin/brew shellenv)"
+        return 0
+    fi
+
+    # Linuxbrew
+    if [[ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
+        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+        return 0
+    fi
+
+    # User-local Linuxbrew
+    if [[ -f "$HOME/.linuxbrew/bin/brew" ]]; then
+        eval "$("$HOME/.linuxbrew/bin/brew" shellenv)"
+        return 0
+    fi
+
+    return 1
+}
+
 # Check if running with sudo
 is_sudo() {
     [ "$EUID" -eq 0 ]
@@ -225,9 +271,31 @@ pause() {
     read -p "Press Enter to continue..."
 }
 
+# Run stow command and filter known bugs while preserving real errors
+# Usage: run_stow <package> [mode]
+#   package: The stow package directory name
+#   mode: Optional stow mode, defaults to -R (restow)
+run_stow() {
+    local pkg="$1"
+    local mode="${2:--R}"  # Default to restow mode
+    local output
+    local exit_code=0
+
+    # Capture output and exit code separately
+    output=$(stow "$mode" -v -t "$HOME" "$pkg" 2>&1) || exit_code=$?
+
+    # Filter known stow bug message but show everything else
+    if [[ -n "$output" ]]; then
+        echo "$output" | grep -v "BUG in find_stowed_path" || true
+    fi
+
+    # Return the actual stow exit code
+    return $exit_code
+}
+
 # Export functions so they're available in subshells
 export -f debug info success warning error section
-export -f is_macos is_linux is_arm detect_os
+export -f is_macos is_linux is_arm get_os_type detect_os
 export -f detect_distro_family is_debian_based is_fedora_based is_arch_based
-export -f command_exists is_sudo get_user get_home
-export -f ask check_internet pause
+export -f command_exists setup_homebrew_path is_sudo get_user get_home
+export -f ask check_internet pause run_stow

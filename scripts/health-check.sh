@@ -10,8 +10,6 @@ source "$SCRIPT_DIR/lib/utils.sh"
 # Must be set AFTER sourcing utils.sh which sets -e
 set +e
 
-command_exists() { command -v "$1" &>/dev/null; }
-
 # Track overall status
 ISSUES_FOUND=0
 WARNINGS_FOUND=0
@@ -128,7 +126,7 @@ verify_stow_symlink() {
     if [ -L "$target" ]; then
         local link_target
         link_target=$(readlink "$target")
-        if [[ "$link_target" == *"dotfiles/stow/$pkg"* ]] || [[ "$link_target" == *"dotfiles/stow/$pkg"* ]]; then
+        if [[ "$link_target" == *"dotfiles/stow/$pkg"* ]]; then
             check_pass "$pkg is correctly stowed"
             return 0
         else

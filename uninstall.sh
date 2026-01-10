@@ -34,7 +34,7 @@ cd "$STOW_DIR"
 for package in */; do
     package=${package%/}
     info "Removing $package..."
-    if stow -D -v "$package" 2>&1 | grep -v "BUG in find_stowed_path"; then
+    if stow -D -v -t "$HOME" "$package" 2>&1 | grep -v "BUG in find_stowed_path"; then
         success "$package removed"
     else
         warning "Failed to remove $package (may not have been installed)"

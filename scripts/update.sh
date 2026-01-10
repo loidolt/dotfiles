@@ -79,8 +79,18 @@ if [ "$UPDATE_DOTFILES" = true ] && [ "$PULL_CHANGES" = true ]; then
                 warning "Skipping git pull"
             else
                 git stash
-                git pull
-                info "Run 'git stash pop' to restore your changes"
+                if git pull; then
+                    info "Restoring stashed changes..."
+                    if git stash pop; then
+                        success "Changes restored successfully"
+                    else
+                        warning "Could not auto-restore changes. Run 'git stash pop' manually"
+                        warning "You may need to resolve conflicts"
+                    fi
+                else
+                    warning "Pull failed. Your changes are still stashed"
+                    info "Run 'git stash pop' to restore your changes"
+                fi
             fi
         else
             info "Pulling latest changes..."

@@ -6,10 +6,7 @@
     },
     "playwright": {
       "command": "npx",
-      "args": ["-y", "@playwright/mcp@latest", "--headless", "--browser", "chromium"],
-      "env": {
-        "DISPLAY": ":1"
-      }
+      "args": ["-y", "@playwright/mcp@latest", "--headless", "--browser", "chromium"]
     }
   }
 }

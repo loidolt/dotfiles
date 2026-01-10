@@ -52,6 +52,7 @@
 
 [rerere]
 	enabled = true
-[user]
-	name = loidolt
-	email = loidolt@gmail.com
+
+# User identity should be set in ~/.gitconfig.local
+# Run: git config --file ~/.gitconfig.local user.name "Your Name"
+# Run: git config --file ~/.gitconfig.local user.email "your@email.com"

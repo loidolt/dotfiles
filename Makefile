@@ -1,7 +1,7 @@
 # Dotfiles Makefile
 # Provides a consistent interface for common operations
 
-.PHONY: install update health-check stow-all uninstall packages help setup-git
+.PHONY: install update health-check stow-all uninstall packages help setup-git ssh
 
 # Default target
 help:
@@ -17,6 +17,7 @@ help:
 	@echo "  uninstall    - Remove all symlinks"
 	@echo "  packages     - Install packages only"
 	@echo "  setup-git    - Configure git user name and email"
+	@echo "  ssh          - Setup GitHub SSH key"
 	@echo ""
 	@echo "Examples:"
 	@echo "  make install      # First-time setup"
@@ -53,3 +54,7 @@ setup-git:
 	@echo "Your git identity:"
 	@git config user.name
 	@git config user.email
+
+# Setup GitHub SSH key
+ssh:
+	@./scripts/setup-github-ssh.sh
