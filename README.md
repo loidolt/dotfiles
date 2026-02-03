@@ -48,9 +48,17 @@ The script will:
 ### Managing Dotfiles
 
 ```bash
-# Install/update all configs
 cd ~/dotfiles
-./stow-all.sh
+
+# See all available commands
+make help
+
+# Common operations
+make stow-all      # Restow all packages
+make update        # Update packages and restow
+make health-check  # Diagnose issues
+make setup-git     # Configure git identity
+make ssh           # Setup GitHub SSH key
 
 # Install specific package
 cd ~/dotfiles/stow
@@ -62,12 +70,6 @@ stow -D nvim  # Unlink neovim config
 
 # Reinstall (useful after updates)
 stow -R nvim
-
-# Run health check
-./scripts/health-check.sh
-
-# Update packages
-./scripts/update.sh
 ```
 
 ### Essential Commands
@@ -137,7 +139,6 @@ See [docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md) for complete cheatsheet.
 - `hyperfine` - Command benchmarking tool
 
 **AI Coding Tools:**
-- `opencode` - AI coding agent for the terminal
 - `claude-code` - Claude Code CLI
 
 **Languages & Runtimes:**
@@ -360,7 +361,6 @@ dotfiles/
 │   ├── starship/          # Starship prompt
 │   ├── ghostty/           # Ghostty terminal
 │   ├── navi/              # Navi cheatsheets
-│   ├── opencode/          # OpenCode AI config
 │   ├── ssh/               # SSH config
 │   ├── fzf/               # FZF fuzzy finder
 │   └── direnv/            # Direnv config
@@ -457,8 +457,7 @@ This file is automatically sourced by the Zsh configuration.
 ```bash
 cd ~/dotfiles
 git pull
-./stow-all.sh  # Restow all packages
-./scripts/update.sh  # Update system packages
+make update  # Updates packages and restows all configs
 ```
 
 ---
