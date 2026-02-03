@@ -178,6 +178,9 @@ apply_host_overrides() {
 post_install() {
     info "Running post-install tasks..."
 
+    # Setup git credentials if not configured
+    setup_git_credentials
+
     # Sync Claude Code MCP servers if the config exists
     if [[ -f "$HOME/.config/claude/sync-mcp-servers.js" ]]; then
         info "Syncing Claude Code MCP servers..."

@@ -293,9 +293,54 @@ run_stow() {
     return $exit_code
 }
 
+# Check and setup git credentials if not configured
+# Creates ~/.gitconfig.local with user.name and user.email
+setup_git_credentials() {
+    local gitconfig_local="$HOME/.gitconfig.local"
+    local needs_setup=false
+
+    # Check if gitconfig.local exists and has required fields
+    if [[ ! -f "$gitconfig_local" ]]; then
+        needs_setup=true
+    else
+        # Check if user.name and user.email are set
+        local name email
+        name=$(git config --file "$gitconfig_local" user.name 2>/dev/null || true)
+        email=$(git config --file "$gitconfig_local" user.email 2>/dev/null || true)
+
+        if [[ -z "$name" ]] || [[ -z "$email" ]]; then
+            needs_setup=true
+        fi
+    fi
+
+    if [[ "$needs_setup" == "true" ]]; then
+        echo ""
+        warning "Git user credentials not configured"
+        info "Git needs your name and email for commits."
+        echo ""
+
+        if ask "Configure git credentials now?"; then
+            local name email
+            read -p "Enter your name: " name
+            read -p "Enter your email: " email
+
+            if [[ -n "$name" ]] && [[ -n "$email" ]]; then
+                git config --file "$gitconfig_local" user.name "$name"
+                git config --file "$gitconfig_local" user.email "$email"
+                success "Git credentials saved to ~/.gitconfig.local"
+            else
+                warning "Skipped - name or email was empty"
+                info "Run 'make setup-git' later to configure"
+            fi
+        else
+            info "Skipped. Run 'make setup-git' later to configure git credentials."
+        fi
+    fi
+}
+
 # Export functions so they're available in subshells
 export -f debug info success warning error section
 export -f is_macos is_linux is_arm get_os_type detect_os
 export -f detect_distro_family is_debian_based is_fedora_based is_arch_based
 export -f command_exists setup_homebrew_path is_sudo get_user get_home
-export -f ask check_internet pause run_stow
+export -f ask check_internet pause run_stow setup_git_credentials

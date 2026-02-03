@@ -34,5 +34,9 @@ fi
 
 echo ""
 success "All packages stowed!"
+
+# Check git credentials after stowing (gitconfig is now linked)
+setup_git_credentials
+
 echo ""
 info "Restart your shell: exec zsh"
