@@ -10,6 +10,8 @@
 
 # AI Coding Tools
 --cask claude-code
+--cask codex     # OpenAI's Codex coding agent
+gemini-cli       # Google Gemini CLI
 mcp-toolbox      # Google MCP Toolbox for Databases (for Looker MCP, etc.)
 
 # Fonts

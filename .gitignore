@@ -107,3 +107,23 @@ logs/
 result
 
 /tmp
+.playwright-mcp
+
+# AI Tools - sensitive and temporary files
+# Codex
+stow/codex/.codex/auth.json
+stow/codex/.codex/sessions/
+stow/codex/.codex/log/
+stow/codex/.codex/history.jsonl
+stow/codex/.codex/tmp/
+stow/codex/.codex/models_cache.json
+
+# Gemini
+stow/gemini/.gemini/google_accounts.json
+stow/gemini/.gemini/oauth_creds.json
+stow/gemini/.gemini/installation_id
+stow/gemini/.gemini/state.json
+stow/gemini/.gemini/tmp/
+
+# Navi
+stow/navi/.config/navi/navi.log

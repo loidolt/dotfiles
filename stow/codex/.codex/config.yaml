@@ -1,0 +1,21 @@
+# Codex CLI Configuration
+# https://github.com/openai/codex
+
+# Model to use (o4-mini is the default, faster and cheaper)
+# Options: o4-mini, o3, gpt-4.1, gpt-4.1-mini
+model: o4-mini
+
+# Approval mode for operations
+# Options: suggest (show changes), auto-edit (apply file changes), full-auto (full autonomy)
+approval_mode: suggest
+
+# Enable/disable specific providers
+providers:
+  openai: true
+
+# Sandbox settings
+sandbox:
+  # Run commands in a sandboxed environment when possible
+  enabled: true
+  # Network access in sandbox
+  network: false

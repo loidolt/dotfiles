@@ -139,7 +139,9 @@ See [docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md) for complete cheatsheet.
 - `hyperfine` - Command benchmarking tool
 
 **AI Coding Tools:**
-- `claude-code` - Claude Code CLI
+- `claude-code` - Claude Code CLI (Anthropic)
+- `codex` - OpenAI Codex coding agent
+- `gemini-cli` - Google Gemini CLI
 
 **Languages & Runtimes:**
 - Node.js 20 (LTS)
@@ -181,6 +183,44 @@ See [stow/claude/.config/claude/README.md](stow/claude/.config/claude/README.md)
 
 ---
 
+## AI Coding Tools (Codex & Gemini)
+
+In addition to Claude Code, this dotfiles repo includes configuration for OpenAI Codex and Google Gemini CLI.
+
+### OpenAI Codex
+
+Codex is OpenAI's terminal-based coding agent. Configuration is stored in `~/.codex/`.
+
+```bash
+# First-time setup - authenticate with OpenAI
+codex auth
+
+# Start coding
+codex "refactor this function"
+```
+
+Configuration files:
+- `~/.codex/config.yaml` - Model settings, approval mode, sandbox config
+- `~/.codex/instructions.md` - Custom instructions for Codex
+
+### Google Gemini CLI
+
+Gemini CLI provides terminal access to Google's Gemini models. Configuration is stored in `~/.gemini/`.
+
+```bash
+# First-time setup - authenticate
+gemini
+
+# Start coding
+gemini "explain this code"
+```
+
+Configuration files:
+- `~/.gemini/settings.json` - Theme, auth type, tool permissions
+- `~/.gemini/GEMINI.md` - Custom instructions for Gemini
+
+---
+
 ## Customization
 
 ### Modifying Configurations
@@ -194,6 +234,8 @@ All configurations are in the `stow/` directory:
 - `stow/starship/` - Shell prompt styling
 - `stow/ghostty/` - Ghostty terminal emulator
 - `stow/claude/` - Claude Code MCP server configuration
+- `stow/codex/` - OpenAI Codex configuration
+- `stow/gemini/` - Google Gemini CLI configuration
 
 After editing any config:
 
@@ -363,7 +405,9 @@ dotfiles/
 │   ├── navi/              # Navi cheatsheets
 │   ├── ssh/               # SSH config
 │   ├── fzf/               # FZF fuzzy finder
-│   └── direnv/            # Direnv config
+│   ├── direnv/            # Direnv config
+│   ├── codex/             # OpenAI Codex config
+│   └── gemini/            # Google Gemini CLI config
 ├── packages/              # Package lists
 │   ├── common.txt         # Cross-platform packages
 │   ├── macos.txt          # macOS-specific (Homebrew)
