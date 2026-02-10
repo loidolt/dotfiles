@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git branch:*)",
+      "Bash(git remote:*)",
+      "Bash(git show:*)",
+      "Bash(ls:*)",
+      "Bash(which:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(file:*)",
+      "Bash(cat:*)",
+      "Bash(tree:*)",
+      "Bash(readlink:*)",
+      "Bash(stow:*)",
+      "Bash(brew list:*)",
+      "Bash(brew search:*)",
+      "Bash(brew info:*)",
+      "Bash(brew --prefix:*)",
+      "Bash(make help:*)",
+      "Bash(make stow-all:*)",
+      "Bash(make health-check:*)",
+      "Bash(claude config list:*)",
+      "Bash(claude mcp list:*)",
+      "Bash(node:*)",
+      "Bash(npm list:*)",
+      "Bash(npx:*)"
+    ]
+  },
+  "disabledMcpjsonServers": [
+    "ref",
+    "sequentialthinking",
+    "cloudflare",
+    "mui"
+  ]
+}

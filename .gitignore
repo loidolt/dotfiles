@@ -47,8 +47,9 @@ secrets/
 # Host-specific SSH configurations (private)
 hosts/*/ssh-config
 
-# Claude/AI tool configs (local only)
-.claude/
+# Claude/AI tool configs (local only - ignore root, allow stow package)
+/.claude/
+!stow/claude/.claude/
 
 # Personal notes/scratchpad (if you create these)
 notes/
