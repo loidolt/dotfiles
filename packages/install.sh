@@ -273,6 +273,48 @@ configure_devpod_provider() {
     fi
 }
 
+# Install codex (OpenAI Codex CLI) - not available via apt/dnf/pacman
+install_codex() {
+    if command_exists codex; then
+        success "codex already installed"
+        return 0
+    fi
+
+    if ! command_exists npm; then
+        warning "npm not found, cannot install codex"
+        return 1
+    fi
+
+    info "Installing codex (OpenAI Codex CLI)..."
+    if sudo npm install -g @openai/codex; then
+        success "codex installed"
+    else
+        warning "Failed to install codex"
+        return 1
+    fi
+}
+
+# Install gemini-cli (Google Gemini CLI) - not available via apt/dnf/pacman
+install_gemini_cli() {
+    if command_exists gemini; then
+        success "gemini-cli already installed"
+        return 0
+    fi
+
+    if ! command_exists npm; then
+        warning "npm not found, cannot install gemini-cli"
+        return 1
+    fi
+
+    info "Installing gemini-cli (Google Gemini CLI)..."
+    if sudo npm install -g @google/gemini-cli; then
+        success "gemini-cli installed"
+    else
+        warning "Failed to install gemini-cli"
+        return 1
+    fi
+}
+
 # Install Chromium browser for Playwright MCP server
 # The @playwright/mcp package bundles a specific Playwright version that requires matching browser binaries
 install_playwright_browsers() {
@@ -421,9 +463,11 @@ main() {
     if [[ "$os" == "linux" ]]; then
         echo ""
         info "Installing additional Linux tools..."
-        # Install uv via curl script if not using Homebrew (not in apt/dnf/pacman repos)
+        # Install tools via curl/npm when not using Homebrew (not in apt/dnf/pacman repos)
         if [[ "$pm" != "brew" ]]; then
             install_uv
+            install_codex
+            install_gemini_cli
         fi
         install_devpod
         install_playwright_browsers

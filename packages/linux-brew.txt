@@ -12,5 +12,6 @@ make
 # pip comes with brew's python3
 
 # AI Tools
+codex            # OpenAI's Codex coding agent
 gemini-cli       # Google Gemini CLI
 mcp-toolbox      # Google MCP Toolbox for Databases (for Looker MCP, etc.)
