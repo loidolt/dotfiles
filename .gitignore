@@ -18,10 +18,8 @@ Thumbs.db
 # Environment and local config
 .direnv/
 .envrc
-.env
-.env.local
 
-# Home Manager backups
+# Backups
 *.backup
 *.backup.*
 *.bak
@@ -95,6 +93,7 @@ kubeconfig
 # Environment files (except examples)
 .env
 .env.*
+.env.local
 !.env.example
 
 # Root-level config files (to avoid accidentally committing local configs)
@@ -110,14 +109,43 @@ result
 /tmp
 .playwright-mcp
 
-# AI Tools - sensitive and temporary files
-# Codex
+# AI Tools - sensitive and runtime files
+
+# Codex - secrets and credentials
 stow/codex/.codex/auth.json
-stow/codex/.codex/sessions/
-stow/codex/.codex/log/
-stow/codex/.codex/history.jsonl
-stow/codex/.codex/tmp/
+
+# Codex - per-machine runtime state (codex rewrites these constantly)
+stow/codex/.codex/config.toml
+stow/codex/.codex/version.json
+stow/codex/.codex/.personality_migration
+stow/codex/.codex/.codex-global-state.json
+stow/codex/.codex/AGENTS.md
+stow/codex/.codex/installation_id
+stow/codex/.codex/session_index.jsonl
 stow/codex/.codex/models_cache.json
+stow/codex/.codex/history.jsonl
+
+# Codex - runtime data directories
+stow/codex/.codex/sessions/
+stow/codex/.codex/archived_sessions/
+stow/codex/.codex/log/
+stow/codex/.codex/tmp/
+stow/codex/.codex/cache/
+stow/codex/.codex/sqlite/
+stow/codex/.codex/plugins/
+stow/codex/.codex/shell_snapshots/
+stow/codex/.codex/ambient-suggestions/
+stow/codex/.codex/computer-use/
+stow/codex/.codex/vendor_imports/
+
+# Codex - sqlite log/state files (e.g. logs_2.sqlite, state_5.sqlite-wal)
+stow/codex/.codex/logs_*.sqlite*
+stow/codex/.codex/state_*.sqlite*
+
+# Codex - bundled system skills and runtime-installed skills
+# (auto-updated by codex installer, not user-managed)
+stow/codex/.codex/skills/.system/
+stow/codex/.codex/skills/pdf/
 
 # Gemini
 stow/gemini/.gemini/google_accounts.json

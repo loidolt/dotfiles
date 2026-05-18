@@ -121,3 +121,7 @@ _HOSTNAME="${$(hostname)%.local}"
 DOTFILES_HOST_DIR="$DOTFILES_DIR/hosts/$_HOSTNAME"
 [ -f "$DOTFILES_HOST_DIR/host.sh" ] && source "$DOTFILES_HOST_DIR/host.sh"
 unset _HOSTNAME
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
