@@ -11,18 +11,18 @@ cd ~/dotfiles
 
 # Install specific package
 cd ~/dotfiles/stow
-stow nvim        # Install neovim config
 stow zsh         # Install zsh config
 stow git         # Install git config
+stow tmux        # Install tmux config
 
 # Uninstall specific package
-stow -D nvim     # Remove neovim symlinks
+stow -D zsh      # Remove zsh symlinks
 
 # Reinstall (useful after updates)
-stow -R nvim     # Restow neovim config
+stow -R zsh      # Restow zsh config
 
 # List what would be stowed (dry run)
-stow -n -v nvim
+stow -n -v zsh
 ```
 
 ### Maintenance
@@ -153,7 +153,6 @@ Alt-C   # Change directory
 ```
 ~/dotfiles/
 ├── stow/              # All configuration files
-│   ├── nvim/          # → ~/.config/nvim/
 │   ├── zsh/           # → ~/.zshrc, etc.
 │   ├── git/           # → ~/.gitconfig
 │   ├── tmux/          # → ~/.tmux.conf
@@ -167,7 +166,6 @@ Alt-C   # Change directory
 
 ### Configuration Files (After Stowing)
 
-- Neovim: `~/.config/nvim/` → `~/dotfiles/stow/nvim/.config/nvim/`
 - Zsh: `~/.zshrc` → `~/dotfiles/stow/zsh/.zshrc`
 - Git: `~/.gitconfig` → `~/dotfiles/stow/git/.gitconfig`
 - Tmux: `~/.tmux.conf` → `~/dotfiles/stow/tmux/.tmux.conf`
@@ -188,20 +186,15 @@ Alt-C   # Change directory
 - `Ctrl-A` - Jump to beginning of line
 - `Ctrl-E` - Jump to end of line
 
-### Neovim (Custom)
-
-See [stow/nvim/.config/nvim/KEYBINDINGS.md](../stow/nvim/.config/nvim/KEYBINDINGS.md) for full list.
-
 ---
 
 ## Quick Edits
 
 ```bash
 # Edit specific dotfiles
-nvim ~/dotfiles/stow/zsh/.zshrc
-nvim ~/dotfiles/stow/git/.gitconfig
-nvim ~/dotfiles/stow/nvim/.config/nvim/init.lua
-nvim ~/dotfiles/stow/tmux/.tmux.conf
+$EDITOR ~/dotfiles/stow/zsh/.zshrc
+$EDITOR ~/dotfiles/stow/git/.gitconfig
+$EDITOR ~/dotfiles/stow/tmux/.tmux.conf
 
 # After editing, restow to apply changes
 cd ~/dotfiles/stow
@@ -241,16 +234,16 @@ devbox services stop   # Stop services
 
 ```bash
 # Check if config is properly symlinked
-ls -la ~/.config/nvim
 ls -la ~/.zshrc
+ls -la ~/.gitconfig
 
 # Remove broken symlinks
 find ~ -xtype l -delete
 
 # Restow package
 cd ~/dotfiles/stow
-stow -D nvim  # Unlink
-stow nvim     # Relink
+stow -D zsh   # Unlink
+stow zsh      # Relink
 ```
 
 ### Shell Not Loading Config

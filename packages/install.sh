@@ -273,6 +273,26 @@ configure_devpod_provider() {
     fi
 }
 
+# Configure npm to install globals into ~/.npm-global without sudo
+# Idempotent: only writes config if not already pointing at the user prefix
+ensure_user_npm_prefix() {
+    local user_prefix="$HOME/.npm-global"
+    local current_prefix
+    current_prefix=$(npm config get prefix 2>/dev/null || echo "")
+
+    if [[ "$current_prefix" != "$user_prefix" ]]; then
+        mkdir -p "$user_prefix"
+        npm config set prefix "$user_prefix"
+        info "Set npm global prefix to $user_prefix"
+    fi
+
+    # Ensure prefix bin is in PATH for this script's child commands
+    case ":$PATH:" in
+        *":$user_prefix/bin:"*) ;;
+        *) export PATH="$user_prefix/bin:$PATH" ;;
+    esac
+}
+
 # Install codex (OpenAI Codex CLI) - not available via apt/dnf/pacman
 install_codex() {
     if command_exists codex; then
@@ -285,8 +305,10 @@ install_codex() {
         return 1
     fi
 
+    ensure_user_npm_prefix
+
     info "Installing codex (OpenAI Codex CLI)..."
-    if sudo npm install -g @openai/codex; then
+    if npm install -g @openai/codex; then
         success "codex installed"
     else
         warning "Failed to install codex"
@@ -306,8 +328,10 @@ install_gemini_cli() {
         return 1
     fi
 
+    ensure_user_npm_prefix
+
     info "Installing gemini-cli (Google Gemini CLI)..."
-    if sudo npm install -g @google/gemini-cli; then
+    if npm install -g @google/gemini-cli; then
         success "gemini-cli installed"
     else
         warning "Failed to install gemini-cli"

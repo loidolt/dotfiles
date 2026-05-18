@@ -23,6 +23,9 @@ fi
 # ~/.local/bin is for user-installed binaries (pip install --user, cargo install, etc.)
 export PATH="$HOME/.local/bin:$PATH"
 
+# ~/.npm-global/bin is for npm globals installed without sudo (see packages/install.sh)
+export PATH="$HOME/.npm-global/bin:$PATH"
+
 # History configuration
 HISTFILE=~/.zsh_history
 HISTSIZE=50000
@@ -84,9 +87,7 @@ if command -v starship &> /dev/null; then
 fi
 
 # Aliases
-alias vim='nvim'
-alias vi='nvim'
-alias v='nvim'
+alias v='vim'
 
 # Git aliases
 alias gs='git status'
@@ -104,8 +105,8 @@ alias ...='cd ../..'
 alias ....='cd ../../..'
 
 # Editor
-export EDITOR='nvim'
-export VISUAL='nvim'
+export EDITOR='vim'
+export VISUAL='vim'
 
 # Load secrets (API keys, etc.) - never commit this file
 [ -f ~/.secrets.env ] && source ~/.secrets.env

@@ -17,7 +17,3 @@ python3-venv
 # System tools
 net-tools
 software-properties-common
-
-# Infrastructure & Automation
-ansible     # IT automation & configuration management
-ansible-lint  # Linter for Ansible playbooks

@@ -62,14 +62,14 @@ make ssh           # Setup GitHub SSH key
 
 # Install specific package
 cd ~/dotfiles/stow
-stow nvim     # Install neovim config
 stow zsh      # Install zsh config
+stow git      # Install git config
 
 # Remove specific package
-stow -D nvim  # Unlink neovim config
+stow -D zsh   # Unlink zsh config
 
 # Reinstall (useful after updates)
-stow -R nvim
+stow -R zsh
 ```
 
 ### Essential Commands
@@ -106,7 +106,6 @@ See [docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md) for complete cheatsheet.
 
 ### Core Programs
 
-- **Neovim** - Modern text editor with LSP support
 - **Zsh** - Shell with oh-my-zsh, autosuggestions, syntax highlighting
 - **Starship** - Fast prompt with git integration
 - **Tmux** - Terminal multiplexer with truecolor support
@@ -227,7 +226,6 @@ Configuration files:
 
 All configurations are in the `stow/` directory:
 
-- `stow/nvim/` - Neovim configuration
 - `stow/zsh/` - Zsh shell, aliases, functions
 - `stow/git/` - Git settings and aliases
 - `stow/tmux/` - Tmux terminal multiplexer
@@ -284,7 +282,7 @@ stow my-package
 
 **Global (System Package Manager):** Core tools used across all projects
 - CLI utilities (ripgrep, fd, bat, eza, fzf)
-- Development tools (git, tmux, neovim)
+- Development tools (git, tmux)
 - Universal languages (Node.js LTS, Python 3)
 - Installed via Homebrew (macOS) or apt/dnf/pacman (Linux)
 
@@ -329,11 +327,11 @@ cd myproject && devbox shell
 Solution:
 ```bash
 # Backup existing config
-mv ~/.config/nvim ~/.config/nvim.backup
+mv ~/.zshrc ~/.zshrc.backup
 
 # Restow
 cd ~/dotfiles/stow
-stow nvim
+stow zsh
 ```
 
 ### Programs Not Found After Install
@@ -396,7 +394,6 @@ dotfiles/
 ├── stow-all.sh            # Stow all packages at once
 ├── uninstall.sh           # Remove all dotfiles
 ├── stow/                  # Dotfile packages (managed by Stow)
-│   ├── nvim/              # Neovim config
 │   ├── zsh/               # Zsh shell config
 │   ├── git/               # Git config
 │   ├── tmux/              # Tmux config
@@ -442,10 +439,10 @@ GNU Stow creates symlinks from your home directory to files in the dotfiles repo
 
 ```bash
 # Before stow
-~/dotfiles/stow/nvim/.config/nvim/init.lua  # Your actual file
+~/dotfiles/stow/zsh/.zshrc  # Your actual file
 
-# After running: stow nvim
-~/.config/nvim/init.lua -> ~/dotfiles/stow/nvim/.config/nvim/init.lua  # Symlink
+# After running: stow zsh
+~/.zshrc -> ~/dotfiles/stow/zsh/.zshrc  # Symlink
 ```
 
 **Benefits:**
@@ -482,7 +479,7 @@ cd ~/dotfiles
 ```bash
 # Install only specific packages
 cd ~/dotfiles/stow
-stow nvim zsh git tmux
+stow zsh git tmux
 ```
 
 ### Host-Specific Overrides
