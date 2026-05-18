@@ -35,11 +35,10 @@ fi
 case "$DISTRO_FAMILY" in
     debian)
         PKG_MGR="apt-get"
-        PKG_CHECK_CMD="dpkg -l"
-        PKG_UPDATE_CMD="apt-get update"
-        PKG_INSTALL_CMD="apt-get install -y"
         CA_PACKAGE="ca-certificates"
-        CA_CHECK_CMD="dpkg -l ca-certificates"
+        ca_installed() { dpkg -l ca-certificates &>/dev/null; }
+        pkg_update() { apt-get update; }
+        pkg_install() { apt-get install -y "$@"; }
         ;;
     fedora)
         # Detect dnf vs yum
@@ -51,19 +50,17 @@ case "$DISTRO_FAMILY" in
             error "Neither dnf nor yum found on Fedora-based system"
             exit 1
         fi
-        PKG_CHECK_CMD="rpm -q"
-        PKG_UPDATE_CMD="$PKG_MGR check-update || true"  # Returns non-zero if updates available
-        PKG_INSTALL_CMD="$PKG_MGR install -y"
         CA_PACKAGE="ca-certificates"
-        CA_CHECK_CMD="rpm -q ca-certificates"
+        ca_installed() { rpm -q ca-certificates &>/dev/null; }
+        pkg_update() { "$PKG_MGR" check-update || true; }  # Returns non-zero if updates available
+        pkg_install() { "$PKG_MGR" install -y "$@"; }
         ;;
     arch)
         PKG_MGR="pacman"
-        PKG_CHECK_CMD="pacman -Qi"
-        PKG_UPDATE_CMD="pacman -Sy"
-        PKG_INSTALL_CMD="pacman -S --noconfirm"
         CA_PACKAGE="ca-certificates-utils"
-        CA_CHECK_CMD="pacman -Qi ca-certificates-utils"
+        ca_installed() { pacman -Qi ca-certificates-utils &>/dev/null; }
+        pkg_update() { pacman -Sy; }
+        pkg_install() { pacman -S --noconfirm "$@"; }
         ;;
     *)
         error "Unsupported distribution family: ${DISTRO_FAMILY}"
@@ -101,7 +98,7 @@ if ! command_exists curl; then
 fi
 
 # Always ensure ca-certificates is installed (needed for HTTPS)
-if ! eval "$CA_CHECK_CMD" &>/dev/null; then
+if ! ca_installed; then
     PACKAGES_TO_INSTALL+=("$CA_PACKAGE")
 fi
 
@@ -109,13 +106,11 @@ if [ ${#PACKAGES_TO_INSTALL[@]} -gt 0 ]; then
     info "Installing: ${PACKAGES_TO_INSTALL[*]}"
 
     if is_sudo; then
-        # Update package database
-        eval "$PKG_UPDATE_CMD"
-        eval "$PKG_INSTALL_CMD ${PACKAGES_TO_INSTALL[*]}"
+        pkg_update
+        pkg_install "${PACKAGES_TO_INSTALL[@]}"
     else
-        # Update package database
-        sudo bash -c "$PKG_UPDATE_CMD"
-        sudo bash -c "$PKG_INSTALL_CMD ${PACKAGES_TO_INSTALL[*]}"
+        sudo -E bash -c "$(declare -f pkg_update pkg_install); PKG_MGR='$PKG_MGR' pkg_update"
+        sudo -E bash -c "$(declare -f pkg_update pkg_install); PKG_MGR='$PKG_MGR' pkg_install \"\$@\"" _ "${PACKAGES_TO_INSTALL[@]}"
     fi
 
     success "Prerequisites installed"

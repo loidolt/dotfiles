@@ -148,12 +148,9 @@ if [ -d "$DOTFILES_DIR/stow" ]; then
     check_pass "Dotfiles directory found: $DOTFILES_DIR"
     
     # Check key stow packages with proper symlink verification
-    for pkg in nvim git tmux starship zsh; do
+    for pkg in git tmux starship zsh; do
         if [ -d "$DOTFILES_DIR/stow/$pkg" ]; then
             case $pkg in
-                nvim)
-                    verify_stow_symlink "$HOME/.config/nvim/init.lua" "$pkg"
-                    ;;
                 git)
                     verify_stow_symlink "$HOME/.gitconfig" "$pkg"
                     ;;
@@ -177,7 +174,7 @@ fi
 section "Essential Tools"
 
 # Check essential CLI tools
-for tool in git nvim tmux fzf eza bat ripgrep fd zoxide starship; do
+for tool in git tmux fzf eza bat ripgrep fd zoxide starship; do
     if command_exists "$tool"; then
         check_pass "$tool is installed"
     else

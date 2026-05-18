@@ -26,9 +26,6 @@ lazydocker
 # Database tools
 lazysql
 
-# Editors
-neovim
-
 # Development tools
 direnv
 jq          # JSON processor

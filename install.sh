@@ -208,18 +208,12 @@ post_install() {
             fi
         fi
     fi
-    
-    # Install Neovim plugins if nvim is available
-    if command_exists nvim; then
-        info "Neovim will install plugins on first launch"
-    fi
-    
+
     success "Installation complete!"
     echo ""
     info "Next steps:"
     echo "  1. Restart your shell or run: exec zsh"
-    echo "  2. Run 'nvim' to let plugins install"
-    echo "  3. Enjoy your dotfiles!"
+    echo "  2. Enjoy your dotfiles!"
     echo ""
     info "Host-specific config: $HOST_DIR"
 }

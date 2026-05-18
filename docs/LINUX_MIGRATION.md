@@ -24,10 +24,9 @@ eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 sudo apt install -y zsh
 
 # 4. Install stow and essential packages via brew
-brew install stow tmux starship eza bat fd ripgrep zoxide fzf git gh delta direnv jq yq httpie curl wget htop tree tlrc navi dust duf procs neovim lazygit
+brew install stow tmux starship eza bat fd ripgrep zoxide fzf git gh delta direnv jq yq httpie curl wget htop tree tlrc navi dust duf procs lazygit
 
 # 5. Backup and remove conflicting configs
-mv ~/.config/nvim ~/.config/nvim.backup 2>/dev/null || true
 mv ~/.config/navi ~/.config/navi.backup 2>/dev/null || true
 
 # 6. Stow all configs
@@ -98,7 +97,7 @@ brew install \
   tmux starship \
   eza bat fd ripgrep zoxide fzf \
   git lazygit gh delta \
-  neovim direnv jq yq \
+  direnv jq yq \
   httpie curl wget \
   htop tree tlrc navi dust duf procs
 ```
@@ -107,7 +106,6 @@ brew install \
 - **Shell & Terminal:** tmux, starship (zsh via system)
 - **Modern CLI replacements:** eza (ls), bat (cat), fd (find), ripgrep (grep), zoxide (cd), fzf (fuzzy finder)
 - **Git tools:** git, lazygit, gh (GitHub CLI), delta (diff viewer)
-- **Editors:** neovim
 - **Development:** direnv, jq, yq
 - **Network:** httpie, curl, wget
 - **System utilities:** htop, tree, tlrc (tldr), navi, dust, duf, procs
@@ -118,14 +116,14 @@ Check for and backup any existing configs that would conflict with stow:
 
 ```bash
 # Check what exists
-ls -la ~/.zshrc ~/.gitconfig ~/.tmux.conf ~/.config/nvim ~/.config/starship.toml 2>/dev/null
+ls -la ~/.zshrc ~/.gitconfig ~/.tmux.conf ~/.config/starship.toml 2>/dev/null
 
 # Backup any existing configs
 for config in ~/.zshrc ~/.gitconfig ~/.tmux.conf ~/.fzf.zsh; do
   [ -f "$config" ] && [ ! -L "$config" ] && mv "$config" "${config}.backup-$(date +%Y%m%d)"
 done
 
-for config in ~/.config/nvim ~/.config/navi ~/.config/direnv ~/.config/starship.toml ~/.config/ghostty ~/.config/opencode ~/.config/claude; do
+for config in ~/.config/navi ~/.config/direnv ~/.config/starship.toml ~/.config/ghostty ~/.config/opencode ~/.config/claude; do
   [ -e "$config" ] && [ ! -L "$config" ] && mv "$config" "${config}.backup-$(date +%Y%m%d)"
 done
 ```
@@ -149,7 +147,7 @@ cd ~/dotfiles
 
 **Verify symlinks:**
 ```bash
-ls -la ~/.zshrc ~/.gitconfig ~/.tmux.conf ~/.config/nvim ~/.config/starship.toml
+ls -la ~/.zshrc ~/.gitconfig ~/.tmux.conf ~/.config/starship.toml
 ```
 
 All should be symlinks pointing to `~/dotfiles/stow/...`
@@ -495,18 +493,15 @@ which zsh
 # Expected: /bin/zsh or /usr/bin/zsh (NOT /home/linuxbrew/.linuxbrew/bin/zsh)
 
 # Check key tools (these should be from brew)
-which brew starship nvim eza bat rg fzf git gh
+which brew starship eza bat rg fzf git gh
 # All should point to /home/linuxbrew/.linuxbrew/bin/
 
 # Check symlinks
-ls -la ~/.zshrc ~/.zshenv ~/.gitconfig ~/.config/nvim
+ls -la ~/.zshrc ~/.zshenv ~/.gitconfig
 # All should be symlinks to ~/dotfiles/stow/...
 
 # Test starship prompt
 starship --version
-
-# Test neovim
-nvim --version
 
 # Test tmux
 tmux new -d -s test && echo "tmux works" && tmux kill-session -t test

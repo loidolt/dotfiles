@@ -234,7 +234,6 @@ get_home() {
 
 # Ask yes/no question
 ask() {
-    # shellcheck disable=SC2162
     local prompt="$1"
     local default="${2:-n}"
     
