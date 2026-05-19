@@ -141,13 +141,31 @@ install_brew() {
 }
 
 # Install packages via apt (Debian/Ubuntu)
+# Translates generic names to apt names and skips packages handled by custom
+# installers (lazydocker, lazysql, navi, tldr, uv).
 install_apt() {
     local packages=("$@")
+    local apt_packages=()
+    local skipped=()
+    local pkg apt_name
+
+    for pkg in "${packages[@]}"; do
+        case "$pkg" in
+            fd)    apt_name="fd-find" ;;
+            dust)  apt_name="du-dust" ;;
+            uv|lazydocker|lazysql|navi|tldr)
+                skipped+=("$pkg")
+                continue
+                ;;
+            *)     apt_name="$pkg" ;;
+        esac
+        apt_packages+=("$apt_name")
+    done
 
     info "Updating package list..."
     sudo apt-get update
 
-    for package in "${packages[@]}"; do
+    for package in "${apt_packages[@]}"; do
         # Use dpkg-query for reliable package status check
         if dpkg-query -W -f='${Status}' "$package" 2>/dev/null | grep -q "install ok installed"; then
             success "$package already installed"
@@ -160,6 +178,31 @@ install_apt() {
             fi
         fi
     done
+
+    if [[ ${#skipped[@]} -gt 0 ]]; then
+        info "Skipping apt for: ${skipped[*]} (handled by custom installers)"
+    fi
+
+    # fd ships as `fdfind` on Debian/Ubuntu; create user-local `fd` shim
+    post_install_fd_symlink
+}
+
+# Symlink `fdfind` -> `~/.local/bin/fd` so `fd` works as expected
+post_install_fd_symlink() {
+    if command_exists fdfind && ! command_exists fd; then
+        mkdir -p "$HOME/.local/bin"
+        ln -sf "$(command -v fdfind)" "$HOME/.local/bin/fd"
+        info "Linked fdfind → ~/.local/bin/fd"
+    fi
+}
+
+# Resolve latest GitHub release tag for a repo (e.g., owner/name)
+gh_latest_version() {
+    local repo="$1"
+    curl -fsSL "https://api.github.com/repos/$repo/releases/latest" 2>/dev/null \
+        | grep -oE '"tag_name"[[:space:]]*:[[:space:]]*"[^"]+"' \
+        | head -n1 \
+        | sed -E 's/.*"([^"]+)"$/\1/'
 }
 
 # Install packages via dnf (Fedora/RHEL)
@@ -219,6 +262,129 @@ install_uv() {
     fi
 }
 
+# Install lazydocker via GitHub release (not in apt/dnf/pacman)
+install_lazydocker() {
+    if command_exists lazydocker; then
+        success "lazydocker already installed"
+        return 0
+    fi
+
+    info "Installing lazydocker..."
+    local arch="x86_64"
+    case "$(uname -m)" in
+        aarch64|arm64) arch="arm64" ;;
+    esac
+
+    local ver
+    ver=$(gh_latest_version jesseduffield/lazydocker)
+    if [[ -z "$ver" ]]; then
+        warning "Could not resolve lazydocker version"
+        return 1
+    fi
+
+    local tmp
+    tmp=$(mktemp -d)
+    local url="https://github.com/jesseduffield/lazydocker/releases/download/${ver}/lazydocker_${ver#v}_Linux_${arch}.tar.gz"
+    if curl -fsSL "$url" | tar -xz -C "$tmp" lazydocker \
+        && sudo install -m 0755 "$tmp/lazydocker" /usr/local/bin/lazydocker; then
+        rm -rf "$tmp"
+        success "lazydocker installed"
+    else
+        rm -rf "$tmp"
+        warning "Failed to install lazydocker"
+        return 1
+    fi
+}
+
+# Install lazysql via GitHub release (not in apt/dnf/pacman)
+install_lazysql() {
+    if command_exists lazysql; then
+        success "lazysql already installed"
+        return 0
+    fi
+
+    info "Installing lazysql..."
+    local arch="x86_64"
+    case "$(uname -m)" in
+        aarch64|arm64) arch="arm64" ;;
+    esac
+
+    local ver
+    ver=$(gh_latest_version jorgerojas26/lazysql)
+    if [[ -z "$ver" ]]; then
+        warning "Could not resolve lazysql version"
+        return 1
+    fi
+
+    local tmp
+    tmp=$(mktemp -d)
+    local url="https://github.com/jorgerojas26/lazysql/releases/download/${ver}/lazysql_Linux_${arch}.tar.gz"
+    if curl -fsSL "$url" | tar -xz -C "$tmp" lazysql \
+        && sudo install -m 0755 "$tmp/lazysql" /usr/local/bin/lazysql; then
+        rm -rf "$tmp"
+        success "lazysql installed"
+    else
+        rm -rf "$tmp"
+        warning "Failed to install lazysql"
+        return 1
+    fi
+}
+
+# Install navi via GitHub release (not in apt on newer Ubuntu)
+install_navi() {
+    if command_exists navi; then
+        success "navi already installed"
+        return 0
+    fi
+
+    info "Installing navi..."
+    local arch="x86_64" libc="musl"
+    case "$(uname -m)" in
+        aarch64|arm64) arch="aarch64"; libc="gnu" ;;
+    esac
+
+    local ver
+    ver=$(gh_latest_version denisidoro/navi)
+    if [[ -z "$ver" ]]; then
+        warning "Could not resolve navi version"
+        return 1
+    fi
+
+    local tmp
+    tmp=$(mktemp -d)
+    local url="https://github.com/denisidoro/navi/releases/download/${ver}/navi-${ver}-${arch}-unknown-linux-${libc}.tar.gz"
+    if curl -fsSL "$url" | tar -xz -C "$tmp" \
+        && sudo install -m 0755 "$tmp/navi" /usr/local/bin/navi; then
+        rm -rf "$tmp"
+        success "navi installed"
+    else
+        rm -rf "$tmp"
+        warning "Failed to install navi"
+        return 1
+    fi
+}
+
+# Install tldr via `uv tool install` (apt package retired on newer Ubuntu)
+install_tldr() {
+    if command_exists tldr; then
+        success "tldr already installed"
+        return 0
+    fi
+
+    if ! command_exists uv; then
+        warning "uv not found, skipping tldr"
+        return 0
+    fi
+
+    info "Installing tldr via uv..."
+    if uv tool install tldr; then
+        success "tldr installed"
+    else
+        warning "Failed to install tldr"
+        return 1
+    fi
+}
+
 # Install devpod CLI (not available via package managers on Linux)
 install_devpod() {
     if command_exists devpod; then
@@ -273,24 +439,30 @@ configure_devpod_provider() {
     fi
 }
 
-# Configure npm to install globals into ~/.npm-global without sudo
-# Idempotent: only writes config if not already pointing at the user prefix
+# Configure npm to install globals without sudo.
+# - If nvm is active: defer to nvm (it manages globals per node version).
+#   Writing a `prefix` to .npmrc breaks `nvm use`, so we explicitly avoid it.
+# - Otherwise: target $HOME/.npm-global via NPM_CONFIG_PREFIX env (no .npmrc write).
 ensure_user_npm_prefix() {
-    local user_prefix="$HOME/.npm-global"
-    local current_prefix
-    current_prefix=$(npm config get prefix 2>/dev/null || echo "")
-
-    if [[ "$current_prefix" != "$user_prefix" ]]; then
-        mkdir -p "$user_prefix"
-        npm config set prefix "$user_prefix"
-        info "Set npm global prefix to $user_prefix"
+    # Detect nvm by env or installed dir; if present, skip prefix entirely.
+    if [[ -n "${NVM_DIR:-}" && -s "${NVM_DIR}/nvm.sh" ]] || [[ -s "$HOME/.nvm/nvm.sh" ]]; then
+        # Defensive: scrub any stale `prefix` line left in user .npmrc from prior runs
+        if [[ -f "$HOME/.npmrc" ]] && grep -qE '^prefix[[:space:]]*=' "$HOME/.npmrc"; then
+            npm config delete prefix --location=user >/dev/null 2>&1 || true
+            info "Removed npm prefix from ~/.npmrc (conflicts with nvm)"
+        fi
+        return 0
     fi
 
-    # Ensure prefix bin is in PATH for this script's child commands
+    local user_prefix="$HOME/.npm-global"
+    mkdir -p "$user_prefix/bin"
+    export NPM_CONFIG_PREFIX="$user_prefix"
+
     case ":$PATH:" in
         *":$user_prefix/bin:"*) ;;
         *) export PATH="$user_prefix/bin:$PATH" ;;
     esac
+    info "Set NPM_CONFIG_PREFIX=$user_prefix for this run"
 }
 
 # Install codex (OpenAI Codex CLI) - not available via apt/dnf/pacman
@@ -354,6 +526,26 @@ install_playwright_browsers() {
 
     info "Installing Chromium browser for Playwright MCP..."
 
+    # Detect Ubuntu releases newer than Playwright's supported matrix.
+    # Playwright ships browser binaries per OS release; newer Ubuntu versions
+    # often lack binaries until upstream catches up.
+    if is_linux && [[ -f /etc/os-release ]]; then
+        local ubuntu_ver=""
+        # shellcheck disable=SC1091
+        . /etc/os-release
+        if [[ "${ID:-}" == "ubuntu" ]]; then
+            ubuntu_ver="${VERSION_ID:-}"
+        fi
+        # Playwright currently supports up to Ubuntu 24.04. Skip on newer.
+        if [[ -n "$ubuntu_ver" ]] \
+            && [[ "$(printf '%s\n24.04\n' "$ubuntu_ver" | sort -V | tail -n1)" == "$ubuntu_ver" ]] \
+            && [[ "$ubuntu_ver" != "24.04" ]] && [[ "$ubuntu_ver" != "22.04" ]] && [[ "$ubuntu_ver" != "20.04" ]]; then
+            warning "Ubuntu $ubuntu_ver not in Playwright's supported matrix; skipping Chromium download"
+            info "Install system Chromium (e.g., 'sudo snap install chromium') and configure Playwright MCP --executable-path"
+            return 0
+        fi
+    fi
+
     # Get the Playwright version that @playwright/mcp depends on
     local pw_version_raw
     pw_version_raw=$(npm show @playwright/mcp dependencies.playwright 2>/dev/null | tr -d '"' || echo "")
@@ -394,8 +586,9 @@ install_playwright_browsers() {
     if PLAYWRIGHT_BROWSERS_PATH="$playwright_cache" npx -y "playwright@$pw_version" install chromium 2>&1; then
         success "Chromium browser installed for Playwright MCP"
     else
-        warning "Failed to install Chromium browser for Playwright MCP"
-        return 1
+        warning "Failed to install Chromium browser for Playwright MCP (non-fatal)"
+        info "Playwright MCP may fall back to a system browser via --executable-path"
+        return 0
     fi
     
     # Also cache the MCP package itself
@@ -490,11 +683,15 @@ main() {
         # Install tools via curl/npm when not using Homebrew (not in apt/dnf/pacman repos)
         if [[ "$pm" != "brew" ]]; then
             install_uv
+            install_tldr
+            install_lazydocker || true
+            install_lazysql || true
+            install_navi || true
             install_codex
             install_gemini_cli
         fi
         install_devpod
-        install_playwright_browsers
+        install_playwright_browsers || true
     fi
     
     # Configure devpod provider on macOS (devpod installed via Homebrew)
