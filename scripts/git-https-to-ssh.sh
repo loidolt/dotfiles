@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Convert GitHub HTTPS remotes to SSH
 #
-# Usage: 
+# Usage:
 #   ./scripts/git-https-to-ssh.sh              # Convert current repo
 #   ./scripts/git-https-to-ssh.sh /path/to/repo # Convert specific repo
 #   ./scripts/git-https-to-ssh.sh --scan ~/projects  # Scan directory for repos to convert
@@ -18,7 +18,7 @@ source "$SCRIPT_DIR/lib/utils.sh"
 
 convert_repo() {
     local repo_path="${1:-.}"
-    
+
     # Check if it's a git repo
     if ! git -C "$repo_path" rev-parse --git-dir &>/dev/null; then
         error "Not a git repository: $repo_path"
@@ -71,7 +71,7 @@ scan_directory() {
     while IFS= read -r git_dir; do
         local repo_path
         repo_path=$(dirname "$git_dir")
-        
+
         # Check if any remote is GitHub HTTPS
         if git -C "$repo_path" remote -v 2>/dev/null | grep -q "https://github.com"; then
             found=1

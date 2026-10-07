@@ -71,6 +71,7 @@ fi
 section "PATH Configuration"
 
 # Check local bin directory
+# shellcheck disable=SC2088 # literal ~ in messages is intentional
 if echo "$PATH" | grep -q ".local/bin"; then
     check_pass "~/.local/bin is in PATH"
 else
@@ -91,12 +92,12 @@ fi
 section "Shell Configuration"
 
 # Check zsh config files
-for file in .zshrc; do
+for file in .zshrc .zshenv; do
     if [ -L "$HOME/$file" ]; then
         check_pass "$file is symlinked (managed by Stow)"
     elif [ -f "$HOME/$file" ]; then
         check_warn "$file exists but is not a symlink"
-        echo "  May need to backup and restow: mv ~/.zshrc ~/.zshrc.backup && cd ~/dotfiles/stow && stow zsh"
+        echo "  May need to backup and restow: mv ~/$file ~/$file.backup && cd ~/dotfiles/stow && stow zsh"
     else
         check_fail "$file is missing"
         echo "  Run: cd ~/dotfiles && ./install.sh"
@@ -122,7 +123,7 @@ fi
 verify_stow_symlink() {
     local target="$1"
     local pkg="$2"
-    
+
     if [ -L "$target" ]; then
         local link_target
         link_target=$(readlink "$target")
@@ -146,7 +147,7 @@ verify_stow_symlink() {
 
 if [ -d "$DOTFILES_DIR/stow" ]; then
     check_pass "Dotfiles directory found: $DOTFILES_DIR"
-    
+
     # Check key stow packages with proper symlink verification
     for pkg in git tmux starship zsh; do
         if [ -d "$DOTFILES_DIR/stow/$pkg" ]; then
@@ -225,7 +226,7 @@ fi
 if command_exists docker; then
     if docker info &>/dev/null 2>&1; then
         check_pass "Docker is installed and running"
-        
+
         # Check for sequentialthinking image
         if docker images mcp/sequentialthinking --format '{{.Repository}}' 2>/dev/null | grep -q "mcp/sequentialthinking"; then
             check_pass "Docker image mcp/sequentialthinking is available"

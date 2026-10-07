@@ -38,7 +38,7 @@ main() {
     # Get email for key comment
     local email="${1:-}"
     if [[ -z "$email" ]]; then
-        read -p "Enter your GitHub email: " email
+        read -r -p "Enter your GitHub email: " email
     fi
 
     if [[ -z "$email" ]]; then
@@ -112,14 +112,14 @@ generate_key() {
     info "Press Enter for no passphrase (NOT recommended)"
     info "Or enter a strong passphrase when prompted"
     echo ""
-    
+
     # Let ssh-keygen handle the passphrase prompt interactively
     ssh-keygen -t "$KEY_TYPE" -C "$email" -f "$KEY_FILE"
-    
+
     chmod 600 "$KEY_FILE"
     chmod 644 "${KEY_FILE}.pub"
     success "SSH key generated: $KEY_FILE"
-    
+
     # If on macOS, offer to add passphrase to keychain
     if is_macos && [ -f "$KEY_FILE" ]; then
         echo ""
@@ -166,7 +166,7 @@ EOF
             awk '
                 /^Host github\.com/ { in_github=1 }
                 /^Host/ && !/^Host github\.com/ { in_github=0 }
-                in_github && /AddKeysToAgent yes/ { 
+                in_github && /AddKeysToAgent yes/ {
                     print $0
                     print "    UseKeychain yes"
                     next

@@ -373,7 +373,7 @@ Here are some popular MCP servers and their correct configurations:
       "command": "npx",
       "args": ["mcp-remote", "https://mcp.stripe.com"]
     },
-    
+
     // Local stdio servers
     "filesystem": {
       "command": "npx",
@@ -386,7 +386,7 @@ Here are some popular MCP servers and their correct configurations:
         "DATABASE_URL": "${DATABASE_URL}"
       }
     },
-    
+
     // Docker-based servers
     "memory": {
       "command": "docker",

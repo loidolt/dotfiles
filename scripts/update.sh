@@ -65,7 +65,7 @@ done
 # Update dotfiles from git
 if [ "$UPDATE_DOTFILES" = true ] && [ "$PULL_CHANGES" = true ]; then
     section "Updating Dotfiles from Git"
-    
+
     # Check if we're in a git repository
     if ! git rev-parse --git-dir > /dev/null 2>&1; then
         warning "Not in a git repository, skipping git pull"
@@ -103,18 +103,18 @@ fi
 # Update system packages
 if [ "$UPDATE_PACKAGES" = true ]; then
     section "Updating System Packages"
-    
+
     if is_macos; then
         if command_exists brew; then
             info "Updating Homebrew..."
             brew update
-            
+
             info "Upgrading Homebrew packages..."
             brew upgrade
-            
+
             info "Cleaning up..."
             brew cleanup
-            
+
             success "Homebrew packages updated"
         else
             warning "Homebrew not installed, skipping package updates"
@@ -124,23 +124,23 @@ if [ "$UPDATE_PACKAGES" = true ]; then
         if command_exists apt-get; then
             info "Updating apt package list..."
             sudo apt-get update
-            
+
             info "Upgrading packages..."
             sudo apt-get upgrade -y
-            
+
             info "Removing unused packages..."
             sudo apt-get autoremove -y
-            
+
             success "apt packages updated"
         elif command_exists dnf; then
             info "Updating dnf packages..."
             sudo dnf upgrade -y
-            
+
             success "dnf packages updated"
         elif command_exists pacman; then
             info "Updating pacman packages..."
             sudo pacman -Syu --noconfirm
-            
+
             success "pacman packages updated"
         else
             warning "No recognized package manager found, skipping system updates"
@@ -153,7 +153,7 @@ fi
 # Restow all packages to pick up any changes
 if [ "$UPDATE_DOTFILES" = true ]; then
     section "Restowing Dotfiles"
-    
+
     if [ -f "$DOTFILES_DIR/stow-all.sh" ]; then
         info "Running stow-all.sh to apply any changes..."
         bash "$DOTFILES_DIR/stow-all.sh"

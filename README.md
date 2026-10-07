@@ -116,7 +116,7 @@ See [docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md) for complete cheatsheet.
 **File Management:**
 - `eza` - Better ls with icons and git integration
 - `fd` - Fast find alternative
-- `ripgrep` - Fast grep alternative  
+- `ripgrep` - Fast grep alternative
 - `bat` - Cat with syntax highlighting
 - `zoxide` - Smart cd command that learns your habits
 
@@ -154,7 +154,7 @@ See [docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md) for complete cheatsheet.
 
 See package lists in:
 - [packages/common.txt](packages/common.txt) - Cross-platform tools
-- [packages/macos.txt](packages/macos.txt) - macOS-specific tools  
+- [packages/macos.txt](packages/macos.txt) - macOS-specific tools
 - [packages/linux.txt](packages/linux.txt) - Linux-specific tools
 
 ---
