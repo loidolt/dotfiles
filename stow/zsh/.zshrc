@@ -23,8 +23,12 @@ fi
 # ~/.local/bin is for user-installed binaries (pip install --user, cargo install, etc.)
 export PATH="$HOME/.local/bin:$PATH"
 
-# ~/.npm-global/bin is for npm globals installed without sudo (see packages/install.sh)
-export PATH="$HOME/.npm-global/bin:$PATH"
+# ~/.npm-global/bin is for npm globals installed without sudo (see packages/install.sh).
+# Only used when nvm is absent: with nvm, globals live in nvm's node, and a stale
+# ~/.npm-global/bin ahead of it shadows them.
+if [ ! -s "${NVM_DIR:-$HOME/.nvm}/nvm.sh" ]; then
+    export PATH="$HOME/.npm-global/bin:$PATH"
+fi
 
 # History configuration
 HISTFILE=~/.zsh_history

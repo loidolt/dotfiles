@@ -446,6 +446,15 @@ configure_devpod_provider() {
 ensure_user_npm_prefix() {
     # Detect nvm by env or installed dir; if present, skip prefix entirely.
     if [[ -n "${NVM_DIR:-}" && -s "${NVM_DIR}/nvm.sh" ]] || [[ -s "$HOME/.nvm/nvm.sh" ]]; then
+        # This script runs non-interactively, so nvm isn't loaded and `npm` may be a
+        # system npm. Load nvm so globals land in nvm's node, not /usr or ~/.npm-global.
+        if ! command -v nvm >/dev/null 2>&1; then
+            export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+            set +eu  # nvm.sh is not set -eu safe
+            # shellcheck disable=SC1091
+            \. "$NVM_DIR/nvm.sh"
+            set -eu
+        fi
         # Defensive: scrub any stale `prefix` line left in user .npmrc from prior runs
         if [[ -f "$HOME/.npmrc" ]] && grep -qE '^prefix[[:space:]]*=' "$HOME/.npmrc"; then
             npm config delete prefix --location=user >/dev/null 2>&1 || true
