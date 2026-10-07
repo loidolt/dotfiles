@@ -152,6 +152,7 @@ install_apt() {
     for pkg in "${packages[@]}"; do
         case "$pkg" in
             fd)    apt_name="fd-find" ;;
+            delta) apt_name="git-delta" ;;
             dust)  apt_name="du-dust" ;;
             uv|lazydocker|lazysql|navi|tldr)
                 skipped+=("$pkg")
@@ -183,17 +184,22 @@ install_apt() {
         info "Skipping apt for: ${skipped[*]} (handled by custom installers)"
     fi
 
-    # fd ships as `fdfind` on Debian/Ubuntu; create user-local `fd` shim
-    post_install_fd_symlink
+    # fd and bat ship as `fdfind`/`batcat` on Debian/Ubuntu; create user-local shims
+    post_install_debian_shims
 }
 
-# Symlink `fdfind` -> `~/.local/bin/fd` so `fd` works as expected
-post_install_fd_symlink() {
-    if command_exists fdfind && ! command_exists fd; then
-        mkdir -p "$HOME/.local/bin"
-        ln -sf "$(command -v fdfind)" "$HOME/.local/bin/fd"
-        info "Linked fdfind → ~/.local/bin/fd"
-    fi
+# Symlink Debian-renamed binaries into ~/.local/bin under their usual names
+post_install_debian_shims() {
+    local pair debian_name name
+    for pair in fdfind:fd batcat:bat; do
+        debian_name="${pair%%:*}"
+        name="${pair##*:}"
+        if command_exists "$debian_name" && ! command_exists "$name"; then
+            mkdir -p "$HOME/.local/bin"
+            ln -sf "$(command -v "$debian_name")" "$HOME/.local/bin/$name"
+            info "Linked $debian_name → ~/.local/bin/$name"
+        fi
+    done
 }
 
 # Resolve latest GitHub release tag for a repo (e.g., owner/name)

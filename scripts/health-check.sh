@@ -175,7 +175,7 @@ fi
 section "Essential Tools"
 
 # Check essential CLI tools
-for tool in git tmux fzf eza bat ripgrep fd zoxide starship; do
+for tool in git tmux fzf eza bat rg fd zoxide starship; do
     if command_exists "$tool"; then
         check_pass "$tool is installed"
     else
@@ -262,14 +262,6 @@ if [ -d "$PLAYWRIGHT_CACHE" ]; then
 else
     check_warn "Playwright browsers NOT installed"
     echo "  Install with: npx playwright install chromium"
-fi
-
-# Check MCP configuration files
-if [ -f "$HOME/.config/opencode/opencode.json" ]; then
-    check_pass "OpenCode MCP config is installed"
-else
-    check_warn "OpenCode MCP config is NOT installed"
-    echo "  Run: cd ~/dotfiles && ./stow-all.sh"
 fi
 
 section "Summary"
