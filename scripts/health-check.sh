@@ -183,6 +183,23 @@ for tool in git tmux fzf eza bat ripgrep fd zoxide starship; do
     fi
 done
 
+section "Terminal Integration (tmux / cmux)"
+
+if [ -d "$HOME/.tmux/plugins/tpm" ]; then
+    check_pass "TPM installed"
+else
+    check_warn "TPM not installed (reload tmux config to bootstrap: prefix + r)"
+fi
+
+if [ -x "$HOME/.claude/hooks/agent-notify.sh" ]; then
+    check_pass "Agent notify hook installed"
+    if ! command_exists jq; then
+        check_warn "jq missing - agent notifications will be silent"
+    fi
+else
+    check_warn "Agent notify hook missing (run: make stow-all)"
+fi
+
 section "Optional Tools"
 
 # Check optional tools
