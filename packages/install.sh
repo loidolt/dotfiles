@@ -70,7 +70,7 @@ read_packages() {
     if [[ ! -f "$file" ]]; then
         return 0
     fi
-    
+
     # Remove comments (anything after #), trim whitespace, and filter empty lines
     grep -v '^#' "$file" | sed 's/#.*//' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | grep -v '^[[:space:]]*$' | \
     while read -r pkg; do
@@ -86,14 +86,14 @@ read_packages() {
 # Install packages via Homebrew (macOS)
 install_brew() {
     local packages=("$@")
-    
+
     if ! command_exists brew; then
         warning "Homebrew not found. Installing..."
         if ! /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; then
             error "Homebrew installation failed"
             return 1
         fi
-        
+
         # Add brew to PATH
         setup_homebrew_path || true
 
@@ -102,19 +102,19 @@ install_brew() {
             error "Homebrew installed but not found in PATH"
             return 1
         fi
-        
+
         success "Homebrew installed successfully"
     fi
-    
+
     info "Updating Homebrew..."
     brew update
-    
+
     for package in "${packages[@]}"; do
         local pkg_name="$package"
         local is_cask=false
         local install_cmd="brew install"
         local check_cmd="brew list"
-        
+
         # Handle --cask prefix
         if [[ "$package" == "--cask "* ]]; then
             pkg_name="${package#--cask }"
@@ -122,7 +122,7 @@ install_brew() {
             install_cmd="brew install --cask"
             check_cmd="brew list --cask"
         fi
-        
+
         if $check_cmd "$pkg_name" &>/dev/null; then
             success "$pkg_name already installed"
         else
@@ -152,6 +152,7 @@ install_apt() {
     for pkg in "${packages[@]}"; do
         case "$pkg" in
             fd)    apt_name="fd-find" ;;
+            delta) apt_name="git-delta" ;;
             dust)  apt_name="du-dust" ;;
             uv|lazydocker|lazysql|navi|tldr)
                 skipped+=("$pkg")
@@ -183,17 +184,22 @@ install_apt() {
         info "Skipping apt for: ${skipped[*]} (handled by custom installers)"
     fi
 
-    # fd ships as `fdfind` on Debian/Ubuntu; create user-local `fd` shim
-    post_install_fd_symlink
+    # fd and bat ship as `fdfind`/`batcat` on Debian/Ubuntu; create user-local shims
+    post_install_debian_shims
 }
 
-# Symlink `fdfind` -> `~/.local/bin/fd` so `fd` works as expected
-post_install_fd_symlink() {
-    if command_exists fdfind && ! command_exists fd; then
-        mkdir -p "$HOME/.local/bin"
-        ln -sf "$(command -v fdfind)" "$HOME/.local/bin/fd"
-        info "Linked fdfind → ~/.local/bin/fd"
-    fi
+# Symlink Debian-renamed binaries into ~/.local/bin under their usual names
+post_install_debian_shims() {
+    local pair debian_name name
+    for pair in fdfind:fd batcat:bat; do
+        debian_name="${pair%%:*}"
+        name="${pair##*:}"
+        if command_exists "$debian_name" && ! command_exists "$name"; then
+            mkdir -p "$HOME/.local/bin"
+            ln -sf "$(command -v "$debian_name")" "$HOME/.local/bin/$name"
+            info "Linked $debian_name → ~/.local/bin/$name"
+        fi
+    done
 }
 
 # Resolve latest GitHub release tag for a repo (e.g., owner/name)
@@ -208,7 +214,7 @@ gh_latest_version() {
 # Install packages via dnf (Fedora/RHEL)
 install_dnf() {
     local packages=("$@")
-    
+
     for package in "${packages[@]}"; do
         if dnf list installed "$package" &>/dev/null; then
             success "$package already installed"
@@ -226,10 +232,10 @@ install_dnf() {
 # Install packages via pacman (Arch)
 install_pacman() {
     local packages=("$@")
-    
+
     info "Updating package database..."
     sudo pacman -Sy
-    
+
     for package in "${packages[@]}"; do
         if pacman -Q "$package" &>/dev/null; then
             success "$package already installed"
@@ -250,7 +256,7 @@ install_uv() {
         success "uv already installed"
         return 0
     fi
-    
+
     info "Installing uv (Python package manager)..."
     if curl -LsSf https://astral.sh/uv/install.sh | sh; then
         success "uv installed"
@@ -391,12 +397,13 @@ install_devpod() {
         success "devpod already installed"
     else
         info "Installing devpod CLI..."
-        local arch=$(uname -m)
+        local arch
+        arch=$(uname -m)
         local devpod_arch="amd64"
         if [[ "$arch" == "aarch64" || "$arch" == "arm64" ]]; then
             devpod_arch="arm64"
         fi
-        
+
         if curl -L -o /tmp/devpod "https://github.com/loft-sh/devpod/releases/latest/download/devpod-linux-${devpod_arch}" && \
            sudo install -c -m 0755 /tmp/devpod /usr/local/bin && \
            rm -f /tmp/devpod; then
@@ -406,7 +413,7 @@ install_devpod() {
             return 1
         fi
     fi
-    
+
     # Configure docker provider as default
     configure_devpod_provider
 }
@@ -416,7 +423,7 @@ configure_devpod_provider() {
     if ! command_exists devpod; then
         return 0
     fi
-    
+
     # Check if docker provider exists (strip ANSI codes and handle table formatting)
     if ! devpod provider list 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' | grep -q "docker"; then
         info "Adding devpod docker provider..."
@@ -429,7 +436,7 @@ configure_devpod_provider() {
     else
         success "docker provider already exists"
     fi
-    
+
     # Set docker as default provider
     info "Setting docker as default devpod provider..."
     if devpod provider use docker; then
@@ -446,6 +453,15 @@ configure_devpod_provider() {
 ensure_user_npm_prefix() {
     # Detect nvm by env or installed dir; if present, skip prefix entirely.
     if [[ -n "${NVM_DIR:-}" && -s "${NVM_DIR}/nvm.sh" ]] || [[ -s "$HOME/.nvm/nvm.sh" ]]; then
+        # This script runs non-interactively, so nvm isn't loaded and `npm` may be a
+        # system npm. Load nvm so globals land in nvm's node, not /usr or ~/.npm-global.
+        if ! command -v nvm >/dev/null 2>&1; then
+            export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+            set +eu  # nvm.sh is not set -eu safe
+            # shellcheck disable=SC1091
+            \. "$NVM_DIR/nvm.sh"
+            set -eu
+        fi
         # Defensive: scrub any stale `prefix` line left in user .npmrc from prior runs
         if [[ -f "$HOME/.npmrc" ]] && grep -qE '^prefix[[:space:]]*=' "$HOME/.npmrc"; then
             npm config delete prefix --location=user >/dev/null 2>&1 || true
@@ -570,7 +586,7 @@ install_playwright_browsers() {
     fi
 
     info "Using Playwright version: $pw_version"
-    
+
     # Determine the correct Playwright browser cache location based on OS
     # macOS: ~/Library/Caches/ms-playwright
     # Linux: ~/.cache/ms-playwright
@@ -580,7 +596,7 @@ install_playwright_browsers() {
     else
         playwright_cache="$HOME/.cache/ms-playwright"
     fi
-    
+
     # Install chromium to the standard Playwright browser cache location
     # This ensures @playwright/mcp can find the browsers at runtime
     if PLAYWRIGHT_BROWSERS_PATH="$playwright_cache" npx -y "playwright@$pw_version" install chromium 2>&1; then
@@ -590,7 +606,7 @@ install_playwright_browsers() {
         info "Playwright MCP may fall back to a system browser via --executable-path"
         return 0
     fi
-    
+
     # Also cache the MCP package itself
     if npx -y @playwright/mcp@latest --help &>/dev/null; then
         success "Playwright MCP package cached"
@@ -599,8 +615,9 @@ install_playwright_browsers() {
 
 # Main installation
 main() {
-    local os=$(get_os_type)
-    local pm=$(detect_package_manager)
+    local os pm
+    os=$(get_os_type)
+    pm=$(detect_package_manager)
 
     info "Detected OS: $os"
     info "Package manager: $pm"
@@ -612,12 +629,12 @@ main() {
     # Read package lists
     local common_packages=()
     local os_packages=()
-    
+
     # Read packages into array (compatible with bash 3.x)
     while IFS= read -r line; do
         [[ -n "$line" ]] && common_packages+=("$line")
     done < <(read_packages "$PACKAGES_DIR/common.txt")
-    
+
     if [[ "$os" == "macos" ]]; then
         while IFS= read -r line; do
             [[ -n "$line" ]] && os_packages+=("$line")
@@ -636,18 +653,18 @@ main() {
             done < <(read_packages "$PACKAGES_DIR/linux.txt")
         fi
     fi
-    
+
     # Combine package lists
     local all_packages=("${common_packages[@]}" "${os_packages[@]}")
-    
+
     if [[ ${#all_packages[@]} -eq 0 ]]; then
         warning "No packages to install"
         exit 0
     fi
-    
+
     info "Found ${#all_packages[@]} packages to install"
     echo ""
-    
+
     # Install packages based on package manager
     case "$pm" in
         brew)
@@ -675,7 +692,7 @@ main() {
             exit 1
             ;;
     esac
-    
+
     # Install tools that require special installation on Linux
     if [[ "$os" == "linux" ]]; then
         echo ""
@@ -693,21 +710,21 @@ main() {
         install_devpod
         install_playwright_browsers || true
     fi
-    
+
     # Configure devpod provider on macOS (devpod installed via Homebrew)
     if [[ "$os" == "macos" ]] && command_exists devpod; then
         echo ""
         info "Configuring devpod..."
         configure_devpod_provider
     fi
-    
+
     # Install Playwright browsers (for MCP server)
     if [[ "$os" == "macos" ]]; then
         echo ""
         info "Installing Playwright browsers..."
         install_playwright_browsers
     fi
-    
+
     echo ""
     success "Package installation complete!"
 }

@@ -15,7 +15,7 @@ Thank you for your interest in contributing to this dotfiles repository! This gu
    ```bash
    # Install dotfiles
    ./install.sh
-   
+
    # Test the setup
    ./scripts/health-check.sh
    ```
@@ -25,7 +25,7 @@ Thank you for your interest in contributing to this dotfiles repository! This gu
    # After making changes, restow packages
    cd ~/dotfiles/stow
    stow -R <package-name>
-   
+
    # Or restow everything
    cd ~/dotfiles
    ./stow-all.sh
@@ -50,7 +50,7 @@ Thank you for your interest in contributing to this dotfiles repository! This gu
    ```bash
    # Run health check
    ./scripts/health-check.sh
-   
+
    # Test installation in clean environment (optional)
    # Use a VM or container to test from scratch
    ```
@@ -176,7 +176,7 @@ Test on both platforms if possible:
    ```bash
    # For cross-platform: packages/common.txt
    echo "newtool" >> packages/common.txt
-   
+
    # For macOS only: packages/macos.txt
    echo "newtool" >> packages/macos.txt
    ```

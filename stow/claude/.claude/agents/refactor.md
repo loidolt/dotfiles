@@ -1,11 +1,7 @@
-# Refactor Agent
-
-Large-scale code refactoring with safety checks.
-
 ---
-
+name: refactor
+description: "Use for large-scale, behavior-preserving refactors (rename, extract, move, restructure) with test verification."
 model: opus
-
 ---
 
 You are a refactoring agent. Perform systematic code transformations while preserving behavior.

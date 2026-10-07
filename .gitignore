@@ -111,41 +111,12 @@ result
 
 # AI Tools - sensitive and runtime files
 
-# Codex - secrets and credentials
-stow/codex/.codex/auth.json
-
-# Codex - per-machine runtime state (codex rewrites these constantly)
-stow/codex/.codex/config.toml
-stow/codex/.codex/version.json
-stow/codex/.codex/.personality_migration
-stow/codex/.codex/.codex-global-state.json
-stow/codex/.codex/AGENTS.md
-stow/codex/.codex/installation_id
-stow/codex/.codex/session_index.jsonl
-stow/codex/.codex/models_cache.json
-stow/codex/.codex/history.jsonl
-
-# Codex - runtime data directories
-stow/codex/.codex/sessions/
-stow/codex/.codex/archived_sessions/
-stow/codex/.codex/log/
-stow/codex/.codex/tmp/
-stow/codex/.codex/cache/
-stow/codex/.codex/sqlite/
-stow/codex/.codex/plugins/
-stow/codex/.codex/shell_snapshots/
-stow/codex/.codex/ambient-suggestions/
-stow/codex/.codex/computer-use/
-stow/codex/.codex/vendor_imports/
-
-# Codex - sqlite log/state files (e.g. logs_2.sqlite, state_5.sqlite-wal)
-stow/codex/.codex/logs_*.sqlite*
-stow/codex/.codex/state_*.sqlite*
-
-# Codex - bundled system skills and runtime-installed skills
-# (auto-updated by codex installer, not user-managed)
-stow/codex/.codex/skills/.system/
-stow/codex/.codex/skills/pdf/
+# Codex - whitelist: codex keeps all runtime state (sqlite, sessions, auth,
+# locks, approval rules, installed skills) in ~/.codex, which is stowed here.
+# Only the hand-maintained files below are tracked.
+stow/codex/.codex/*
+!stow/codex/.codex/config.yaml
+!stow/codex/.codex/instructions.md
 
 # Gemini
 stow/gemini/.gemini/google_accounts.json
@@ -153,6 +124,23 @@ stow/gemini/.gemini/oauth_creds.json
 stow/gemini/.gemini/installation_id
 stow/gemini/.gemini/state.json
 stow/gemini/.gemini/tmp/
+stow/gemini/.gemini/projects.json
+stow/gemini/.gemini/skills/
+
+# Claude - claude.ai synced skills cache (managed by Claude Code)
+stow/claude/.claude/skills/synced/
+
+# Vendor skills installed per machine (same set lands in claude/codex/gemini).
+# Reinstall instead of tracking; see README "AI tool skills".
+stow/claude/.claude/skills/agents-sdk/
+stow/claude/.claude/skills/cloudflare/
+stow/claude/.claude/skills/cloudflare-*/
+stow/claude/.claude/skills/durable-objects/
+stow/claude/.claude/skills/sandbox-*/
+stow/claude/.claude/skills/turnstile-spin/
+stow/claude/.claude/skills/web-perf/
+stow/claude/.claude/skills/workers-best-practices/
+stow/claude/.claude/skills/wrangler/
 
 # Navi
 stow/navi/.config/navi/navi.log

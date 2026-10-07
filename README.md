@@ -116,7 +116,7 @@ See [docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md) for complete cheatsheet.
 **File Management:**
 - `eza` - Better ls with icons and git integration
 - `fd` - Fast find alternative
-- `ripgrep` - Fast grep alternative  
+- `ripgrep` - Fast grep alternative
 - `bat` - Cat with syntax highlighting
 - `zoxide` - Smart cd command that learns your habits
 
@@ -154,7 +154,7 @@ See [docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md) for complete cheatsheet.
 
 See package lists in:
 - [packages/common.txt](packages/common.txt) - Cross-platform tools
-- [packages/macos.txt](packages/macos.txt) - macOS-specific tools  
+- [packages/macos.txt](packages/macos.txt) - macOS-specific tools
 - [packages/linux.txt](packages/linux.txt) - Linux-specific tools
 
 ---
@@ -179,6 +179,39 @@ node ~/.config/claude/sync-mcp-servers.js
 ```
 
 See [stow/claude/.config/claude/README.md](stow/claude/.config/claude/README.md) for details.
+
+### Agents, Skills & Hooks
+
+`stow/claude/.claude/` is stowed into `~/.claude/`:
+- `agents/*.md` - custom subagents (YAML frontmatter: `name`, `description`, `model`)
+- `skills/<name>/SKILL.md` - slash-command skills (`/stow-manage`, `/git-sync`, ...)
+- `hooks/agent-notify.sh` - desktop notifications for Claude Code and Codex (see below)
+
+`~/.claude/settings.json` is per machine and not tracked. Register the notify hook there:
+
+```json
+"hooks": {
+  "Stop":         [{ "hooks": [{ "type": "command", "command": "~/.claude/hooks/agent-notify.sh" }] }],
+  "Notification": [{ "hooks": [{ "type": "command", "command": "~/.claude/hooks/agent-notify.sh" }] }]
+}
+```
+
+For Codex, add `notify = ["/home/<you>/.claude/hooks/agent-notify.sh"]` at the top of `~/.codex/config.toml`.
+
+### AI tool skills
+
+Vendor skill packs (e.g. Cloudflare's) install into `~/.claude/skills`, `~/.codex/skills` and `~/.gemini/skills`. They are gitignored; reinstall them per machine.
+
+---
+
+## Terminal: cmux + tmux
+
+The terminal is [cmux](https://cmux.com) (Ghostty-based, reads `~/.config/ghostty/config`), usually SSHed into a Linux box running tmux.
+
+- **Agent notifications**: `agent-notify.sh` emits OSC 777. Inside tmux it is wrapped in DCS passthrough and written to the pane's tty; `allow-passthrough all` lets it through from background windows. With `cmux ssh` it uses `cmux notify` instead.
+- **Clipboard**: tmux copy mode (`y`, mouse drag) sends OSC 52, so copies land in the Mac clipboard over ssh.
+- **Keys**: `extended-keys` (CSI u) so Shift+Enter works in Claude Code inside tmux.
+- **Plugins**: TPM and plugins bootstrap themselves on first config load.
 
 ---
 
@@ -230,8 +263,8 @@ All configurations are in the `stow/` directory:
 - `stow/git/` - Git settings and aliases
 - `stow/tmux/` - Tmux terminal multiplexer
 - `stow/starship/` - Shell prompt styling
-- `stow/ghostty/` - Ghostty terminal emulator
-- `stow/claude/` - Claude Code MCP server configuration
+- `stow/ghostty/` - Ghostty terminal config (cmux reads it too)
+- `stow/claude/` - Claude Code agents, skills, hooks, MCP server configuration
 - `stow/codex/` - OpenAI Codex configuration
 - `stow/gemini/` - Google Gemini CLI configuration
 
@@ -398,7 +431,8 @@ dotfiles/
 │   ├── git/               # Git config
 │   ├── tmux/              # Tmux config
 │   ├── starship/          # Starship prompt
-│   ├── ghostty/           # Ghostty terminal
+│   ├── ghostty/           # Ghostty/cmux terminal
+│   ├── claude/            # Claude Code agents, skills, hooks, MCP
 │   ├── navi/              # Navi cheatsheets
 │   ├── ssh/               # SSH config
 │   ├── fzf/               # FZF fuzzy finder

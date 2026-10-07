@@ -1,12 +1,10 @@
+---
+name: health-check
+description: "Diagnose a project's setup: dependencies, dev tools, git state, environment files. Use when asked to check project or environment health."
+argument-hint: "[area]"
+---
+
 # Project Health Check
-
-Diagnose project setup and environment.
-
----
-
-/health-check [area]
-
----
 
 Run diagnostic checks on project setup and development environment.
 

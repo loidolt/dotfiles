@@ -1,12 +1,10 @@
+---
+name: mcp-sync
+description: "Manage MCP servers: list, enable or disable servers from ~/.config/claude/mcp-servers.json per project. Use when asked about MCP server status or toggling servers."
+argument-hint: "[action] [server]"
+---
+
 # MCP Server Management
-
-Manage Model Context Protocol server configurations.
-
----
-
-/mcp-sync [action] [server]
-
----
 
 Manage MCP server configurations for Claude Code.
 

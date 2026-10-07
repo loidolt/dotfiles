@@ -1,12 +1,10 @@
+---
+name: git-sync
+description: "Sync a git repository: pull with rebase, commit and push, or both. Use when asked to sync, pull, or push the current repo."
+argument-hint: "[direction]"
+---
+
 # Git Sync
-
-Synchronize a git repository: pull, commit, push workflow.
-
----
-
-/git-sync [direction]
-
----
 
 Streamlined git synchronization workflow with safety checks.
 

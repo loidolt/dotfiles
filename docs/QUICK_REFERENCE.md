@@ -157,8 +157,8 @@ Alt-C   # Change directory
 │   ├── git/           # → ~/.gitconfig
 │   ├── tmux/          # → ~/.tmux.conf
 │   ├── starship/      # → ~/.config/starship.toml
-│   ├── ghostty/       # → ~/.config/ghostty/
-│   └── opencode/      # → ~/.config/opencode/
+│   ├── ghostty/       # → ~/.config/ghostty/ (also read by cmux)
+│   └── claude/        # → ~/.claude/ (agents, skills, hooks)
 ├── scripts/           # Utility scripts
 ├── packages/          # Package lists
 └── project-templates/ # Devbox templates
@@ -171,7 +171,7 @@ Alt-C   # Change directory
 - Tmux: `~/.tmux.conf` → `~/dotfiles/stow/tmux/.tmux.conf`
 - Starship: `~/.config/starship.toml` → `~/dotfiles/stow/starship/.config/starship.toml`
 - Ghostty: `~/.config/ghostty/` → `~/dotfiles/stow/ghostty/.config/ghostty/`
-- OpenCode: `~/.config/opencode/` → `~/dotfiles/stow/opencode/.config/opencode/`
+- Claude Code: `~/.claude/{agents,skills,hooks}` → `~/dotfiles/stow/claude/.claude/`
 
 ---
 

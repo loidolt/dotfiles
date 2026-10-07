@@ -94,11 +94,11 @@ detect_distro_family() {
         echo "unknown"
         return 1
     fi
-    
+
     # Check for os-release file (modern standard)
     if [ -f /etc/os-release ]; then
         . /etc/os-release
-        
+
         # Check ID_LIKE first (includes parent distros)
         if [ -n "${ID_LIKE:-}" ]; then
             # ID_LIKE can be space-separated list, check each one
@@ -119,7 +119,7 @@ detect_distro_family() {
                 esac
             done
         fi
-        
+
         # If ID_LIKE didn't match, check ID directly
         case "${ID:-}" in
             debian|ubuntu|linuxmint|pop|kali|parrot|mx|deepin|zorin|elementary|raspbian|devuan)
@@ -136,7 +136,7 @@ detect_distro_family() {
                 ;;
         esac
     fi
-    
+
     # Fallback: check for package manager binaries
     if command_exists apt-get || command_exists dpkg; then
         echo "debian"
@@ -148,7 +148,7 @@ detect_distro_family() {
         echo "arch"
         return 0
     fi
-    
+
     # Could not detect
     echo "unknown"
     return 1
@@ -236,16 +236,16 @@ get_home() {
 ask() {
     local prompt="$1"
     local default="${2:-n}"
-    
+
     if [[ "$default" == "y" ]]; then
         prompt="$prompt [Y/n] "
     else
         prompt="$prompt [y/N] "
     fi
-    
+
     read -p "$prompt" -n 1 -r
     echo
-    
+
     if [[ "$default" == "y" ]]; then
         [[ ! $REPLY =~ ^[Nn]$ ]]
     else
@@ -267,7 +267,7 @@ check_internet() {
 
 # Wait for user to press Enter
 pause() {
-    read -p "Press Enter to continue..."
+    read -r -p "Press Enter to continue..."
 }
 
 # Run stow command and filter known bugs while preserving real errors
@@ -320,8 +320,8 @@ setup_git_credentials() {
 
         if ask "Configure git credentials now?"; then
             local name email
-            read -p "Enter your name: " name
-            read -p "Enter your email: " email
+            read -r -p "Enter your name: " name
+            read -r -p "Enter your email: " email
 
             if [[ -n "$name" ]] && [[ -n "$email" ]]; then
                 git config --file "$gitconfig_local" user.name "$name"

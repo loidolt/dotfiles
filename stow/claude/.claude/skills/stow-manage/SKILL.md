@@ -1,12 +1,10 @@
+---
+name: stow-manage
+description: "Manage GNU Stow packages: list, status, stow, unstow, restow, dry-run. Use for dotfiles symlink operations."
+argument-hint: "[action] [package]"
+---
+
 # Stow Management
-
-Manage GNU Stow packages for dotfiles or any stow-managed directory.
-
----
-
-/stow-manage [action] [package]
-
----
 
 Manage symlinks using GNU Stow. Works with any stow package directory.
 

@@ -45,7 +45,7 @@ check_prerequisites() {
     if [[ ${#missing[@]} -gt 0 ]]; then
         error "Missing required tools: ${missing[*]}"
         info "Installing prerequisites..."
-        
+
         if [[ "$OS" == "macos" ]]; then
             if ! command_exists brew; then
                 error "Homebrew not installed. Install it first:"
@@ -77,12 +77,12 @@ check_prerequisites() {
 # Install packages
 install_packages() {
     info "Installing packages..."
-    
+
     if [[ ! -d "$DOTFILES_DIR/packages" ]]; then
         warning "No packages directory found, skipping package installation"
         return
     fi
-    
+
     if [[ -f "$DOTFILES_DIR/packages/install.sh" ]]; then
         bash "$DOTFILES_DIR/packages/install.sh"
     else
@@ -95,7 +95,8 @@ backup_existing() {
     local file=$1
     if [[ -f "$HOME/$file" ]] || [[ -d "$HOME/$file" ]]; then
         if [[ ! -L "$HOME/$file" ]]; then
-            local backup="$HOME/$file.backup-$(date +%Y%m%d-%H%M%S)"
+            local backup
+            backup="$HOME/$file.backup-$(date +%Y%m%d-%H%M%S)"
             warning "Backing up existing $file to ${backup##*/}"
             mv "$HOME/$file" "$backup"
         fi
@@ -155,13 +156,13 @@ stow_packages() {
 apply_host_overrides() {
     if [[ -d "$HOST_DIR" ]]; then
         info "Applying host-specific overrides for $(hostname)..."
-        
+
         # Copy any host-specific files
         if [[ -d "$HOST_DIR/files" ]]; then
             cp -r "$HOST_DIR/files/." "$HOME/"
             success "Host-specific files applied"
         fi
-        
+
         # Run host.sh to apply host-specific configuration
         if [[ -f "$HOST_DIR/host.sh" ]]; then
             info "Running host-specific setup script..."
@@ -225,7 +226,7 @@ main() {
     echo "║     Dotfiles Installation (Stow)     ║"
     echo "╚══════════════════════════════════════╝"
     echo ""
-    
+
     check_prerequisites
     install_packages
     stow_packages

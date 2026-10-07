@@ -71,6 +71,7 @@ fi
 section "PATH Configuration"
 
 # Check local bin directory
+# shellcheck disable=SC2088 # literal ~ in messages is intentional
 if echo "$PATH" | grep -q ".local/bin"; then
     check_pass "~/.local/bin is in PATH"
 else
@@ -91,12 +92,12 @@ fi
 section "Shell Configuration"
 
 # Check zsh config files
-for file in .zshrc; do
+for file in .zshrc .zshenv; do
     if [ -L "$HOME/$file" ]; then
         check_pass "$file is symlinked (managed by Stow)"
     elif [ -f "$HOME/$file" ]; then
         check_warn "$file exists but is not a symlink"
-        echo "  May need to backup and restow: mv ~/.zshrc ~/.zshrc.backup && cd ~/dotfiles/stow && stow zsh"
+        echo "  May need to backup and restow: mv ~/$file ~/$file.backup && cd ~/dotfiles/stow && stow zsh"
     else
         check_fail "$file is missing"
         echo "  Run: cd ~/dotfiles && ./install.sh"
@@ -122,7 +123,7 @@ fi
 verify_stow_symlink() {
     local target="$1"
     local pkg="$2"
-    
+
     if [ -L "$target" ]; then
         local link_target
         link_target=$(readlink "$target")
@@ -146,7 +147,7 @@ verify_stow_symlink() {
 
 if [ -d "$DOTFILES_DIR/stow" ]; then
     check_pass "Dotfiles directory found: $DOTFILES_DIR"
-    
+
     # Check key stow packages with proper symlink verification
     for pkg in git tmux starship zsh; do
         if [ -d "$DOTFILES_DIR/stow/$pkg" ]; then
@@ -174,7 +175,7 @@ fi
 section "Essential Tools"
 
 # Check essential CLI tools
-for tool in git tmux fzf eza bat ripgrep fd zoxide starship; do
+for tool in git tmux fzf eza bat rg fd zoxide starship; do
     if command_exists "$tool"; then
         check_pass "$tool is installed"
     else
@@ -182,6 +183,23 @@ for tool in git tmux fzf eza bat ripgrep fd zoxide starship; do
         echo "  Install via: cd ~/dotfiles && ./packages/install.sh"
     fi
 done
+
+section "Terminal Integration (tmux / cmux)"
+
+if [ -d "$HOME/.tmux/plugins/tpm" ]; then
+    check_pass "TPM installed"
+else
+    check_warn "TPM not installed (reload tmux config to bootstrap: prefix + r)"
+fi
+
+if [ -x "$HOME/.claude/hooks/agent-notify.sh" ]; then
+    check_pass "Agent notify hook installed"
+    if ! command_exists jq; then
+        check_warn "jq missing - agent notifications will be silent"
+    fi
+else
+    check_warn "Agent notify hook missing (run: make stow-all)"
+fi
 
 section "Optional Tools"
 
@@ -208,7 +226,7 @@ fi
 if command_exists docker; then
     if docker info &>/dev/null 2>&1; then
         check_pass "Docker is installed and running"
-        
+
         # Check for sequentialthinking image
         if docker images mcp/sequentialthinking --format '{{.Repository}}' 2>/dev/null | grep -q "mcp/sequentialthinking"; then
             check_pass "Docker image mcp/sequentialthinking is available"
@@ -244,14 +262,6 @@ if [ -d "$PLAYWRIGHT_CACHE" ]; then
 else
     check_warn "Playwright browsers NOT installed"
     echo "  Install with: npx playwright install chromium"
-fi
-
-# Check MCP configuration files
-if [ -f "$HOME/.config/opencode/opencode.json" ]; then
-    check_pass "OpenCode MCP config is installed"
-else
-    check_warn "OpenCode MCP config is NOT installed"
-    echo "  Run: cd ~/dotfiles && ./stow-all.sh"
 fi
 
 section "Summary"

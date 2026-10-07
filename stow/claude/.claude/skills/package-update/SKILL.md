@@ -1,12 +1,10 @@
+---
+name: package-update
+description: "Update project dependencies (npm, pip, cargo, go) or system packages (brew, apt, dnf). Use when asked to update or check outdated packages."
+argument-hint: "[scope]"
+---
+
 # Package Update
-
-Update project and system packages.
-
----
-
-/package-update [scope]
-
----
 
 Update installed packages using the appropriate package manager.
 
