@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- cmux agent notifications (`stow/claude/.claude/hooks/agent-notify.sh`) for Claude Code and Codex, working over ssh and inside tmux
+- tmux: passthrough for background windows, OSC 52 clipboard, extended keys, bell forwarding, TPM auto-bootstrap
+- health-check: TPM, notify hook and `.zshenv` checks
+
+### Fixed
+- Claude Code agents and skills now load (added YAML frontmatter, skills moved to `<name>/SKILL.md`)
+- `.pre-commit-config.yaml` was invalid; now uses pre-commit-hooks + shellcheck
+- Shellcheck warnings across scripts
+- npm globals prefer nvm's node
+
+### Changed
+- Codex/Gemini runtime state and vendor skills are gitignored (Codex dir uses a whitelist)
+- Removed stale OpenCode and Neovim references from docs
+
+## Nix → Stow migration
+
 ### Changed
 - **BREAKING**: Fully migrated from Nix to GNU Stow + package managers
 - Replaced update.sh with package manager-based update script

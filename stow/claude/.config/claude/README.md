@@ -251,26 +251,10 @@ This dotfiles repository has MCP configurations in multiple places. Here's how t
 |----------|---------|--------|---------|
 | `stow/claude/.config/claude/mcp-servers.json` | Global MCP server definitions | Claude format | `generate-project-mcp.js`, `sync-mcp-servers.js` |
 | `.mcp.json` (project root) | Project-specific MCP config | Claude format | Claude Code (when working on that project) |
-| `stow/opencode/.config/opencode/opencode.json` | OpenCode-specific MCP configuration | OpenCode format | OpenCode editor |
-
-**Key Differences:**
-
-- **Claude format**: Uses `command`, `args`, `env` structure
-- **OpenCode format**: Uses `type`, `enabled`, `command`/`url` structure
 
 **Workflow:**
 1. Define global servers in `~/.config/claude/mcp-servers.json` (via stow)
 2. Run `node ~/.config/claude/generate-project-mcp.js` to create `.mcp.json` files for projects
-3. OpenCode config at `~/.config/opencode/opencode.json` is maintained separately
-
-## Comparison with OpenCode
-
-| Feature | OpenCode | Claude Code |
-|---------|----------|-------------|
-| Config location | `opencode.json` in project | `~/.claude.json` globally + per-project `.claude.json` |
-| MCP format | Custom format with `type`, `enabled`, `url`/`command` | Standard MCP format with `command`, `args`, `env` |
-| Global servers | Per-project only | Global + per-project |
-| Sync mechanism | Manual file copy | Script-based merge |
 
 ## Backup and Recovery
 

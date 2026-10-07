@@ -9,10 +9,10 @@ dotfiles/
 ├── stow/                    # Stow packages (symlinked to ~)
 │   ├── zsh/                 # Shell configuration
 │   ├── git/                 # Git configuration
-│   ├── vim/                 # Vim/Neovim configuration
-│   ├── tmux/                # Tmux configuration
-│   ├── claude/              # Claude Code configuration
-│   └── ...                  # Other tool configs
+│   ├── tmux/                # Tmux configuration (cmux-aware)
+│   ├── claude/              # Claude Code agents, skills, hooks, MCP
+│   ├── codex/ gemini/       # Other AI CLIs (runtime state gitignored)
+│   └── ...                  # ghostty, starship, fzf, navi, ssh, direnv
 ├── scripts/                 # Automation scripts
 │   └── lib/utils.sh         # Shared bash utilities
 ├── packages/                # Package lists per OS
@@ -59,20 +59,27 @@ Scripts use shared utilities from `scripts/lib/utils.sh`:
 - **New tools**: Add to `packages/` lists, update install scripts
 - **Scripts**: Follow existing patterns in `scripts/`
 - **Testing**: Run `make health-check` after changes
+- **Linting**: `pre-commit run --all-files` (shellcheck, JSON/YAML/TOML checks)
+- **Git flow**: Feature branch + PR; pre-commit blocks commits to `main`
 
 ## Claude Code Integration
 
-Custom agents in `stow/claude/.claude/agents/`:
+Custom agents in `stow/claude/.claude/agents/` (`<name>.md` with `name`/`description`/`model` frontmatter):
 - Use `haiku` model for quick lookups
 - Use `sonnet` for code review and testing
 - Use `opus` for architecture and refactoring
 
-Custom skills in `stow/claude/.claude/skills/`:
+Custom skills in `stow/claude/.claude/skills/<name>/SKILL.md` (frontmatter required, flat `.md` files are ignored):
 - `/stow-manage` - GNU Stow operations
 - `/git-sync` - Git sync workflow
 - `/health-check` - Project diagnostics
 - `/package-update` - Update packages
 - `/mcp-sync` - MCP server management
+
+Hooks in `stow/claude/.claude/hooks/`:
+- `agent-notify.sh` - cmux notifications (OSC 777, tmux passthrough) for Claude Code `Stop`/`Notification` and Codex `notify`. Registered in the untracked `~/.claude/settings.json`.
+
+Vendor skills (Cloudflare etc.) and `skills/synced/` are gitignored; don't commit them.
 
 ## Platform Notes
 
