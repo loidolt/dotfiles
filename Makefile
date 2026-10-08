@@ -1,7 +1,7 @@
 # Dotfiles Makefile
 # Provides a consistent interface for common operations
 
-.PHONY: install update health-check stow-all uninstall packages help setup-git ssh
+.PHONY: install update health-check stow-all uninstall packages help setup-git ssh maintain setup-hygiene
 
 # Default target
 help:
@@ -18,6 +18,8 @@ help:
 	@echo "  packages     - Install packages only"
 	@echo "  setup-git    - Configure git user name and email"
 	@echo "  ssh          - Setup GitHub SSH key"
+	@echo "  maintain     - Clean caches/docker/VS Code servers, report stale node_modules"
+	@echo "  setup-hygiene - One-time Linux hygiene settings (sudo)"
 	@echo ""
 	@echo "Examples:"
 	@echo "  make install      # First-time setup"
@@ -32,6 +34,12 @@ update:
 
 health-check:
 	@./scripts/health-check.sh
+
+maintain:
+	@./scripts/maintenance.sh $(ARGS)
+
+setup-hygiene:
+	@bash ./scripts/setup-linux-hygiene.sh
 
 stow-all:
 	@./stow-all.sh

@@ -1,0 +1,10 @@
+[Unit]
+Description=Dotfiles weekly development-machine cleanup
+Documentation=file://%h/dotfiles/scripts/maintenance.sh
+
+[Service]
+Type=oneshot
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=%h/dotfiles/scripts/maintenance.sh
+Nice=19
+IOSchedulingClass=idle

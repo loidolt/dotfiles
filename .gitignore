@@ -144,3 +144,5 @@ stow/claude/.claude/skills/wrangler/
 
 # Navi
 stow/navi/.config/navi/navi.log
+# systemd user units - enablement links are per machine
+stow/systemd/.config/systemd/user/*.wants/

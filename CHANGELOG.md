@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- `make maintain` / weekly `dotfiles-maintenance.timer`: prunes docker objects older than 7 days, idle VS Code server versions, oversized npm/uv/pnpm/go caches; reports stale `node_modules` and unused Node versions
+- `make setup-hygiene`: journald cap, docker log rotation, unattended removal of old kernels, snap retention, memory guardrail on `user@.service`, lingering
+- health-check "Machine Hygiene" section
 - cmux agent notifications (`stow/claude/.claude/hooks/agent-notify.sh`) for Claude Code and Codex, working over ssh and inside tmux
 - tmux: passthrough for background windows, OSC 52 clipboard, extended keys, bell forwarding, TPM auto-bootstrap
 - health-check: TPM, notify hook and `.zshenv` checks

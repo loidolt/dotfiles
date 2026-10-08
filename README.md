@@ -311,6 +311,30 @@ stow my-package
 
 ---
 
+## Machine Hygiene (Linux)
+
+Keeps a long-running dev box from silting up. One-time setup (uses sudo, idempotent):
+
+```bash
+make stow-all        # installs the systemd user units
+make setup-hygiene
+```
+
+| Setting | Effect |
+|---|---|
+| journald | capped at 500M |
+| Docker | container logs rotate at 10M x 3 |
+| unattended-upgrades | removes unused kernels and dependencies; never auto-reboots |
+| Snap | keeps 2 revisions |
+| Memory guardrail | `user@.service` (tmux, agents, builds, desktop) throttled at 85% of RAM; ssh sessions stay responsive |
+| `dotfiles-maintenance.timer` | runs `scripts/maintenance.sh` Sundays ~03:00 |
+
+`make maintain` (or the timer) only deletes what regenerates: docker containers/images/build cache older than 7 days (never volumes), VS Code server versions that are neither running nor among the newest 2, the npm cache above 5G, and uv/pnpm/go caches. Stale `node_modules` (projects untouched 30+ days) and unused Node versions are only reported, in `~/.local/state/dotfiles-maintenance/`. Preview with `make maintain ARGS=--dry-run`.
+
+Also recommended: keep `/tmp` on disk (`sudo systemctl mask tmp.mount`); `make health-check` warns when it is RAM-backed.
+
+---
+
 ## Package Management Philosophy
 
 **Global (System Package Manager):** Core tools used across all projects
