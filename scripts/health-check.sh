@@ -201,6 +201,65 @@ else
     check_warn "Agent notify hook missing (run: make stow-all)"
 fi
 
+if is_linux; then
+    section "Machine Hygiene"
+
+    # /tmp in RAM fills swap; it should be on disk
+    if [ "$(findmnt -n -o FSTYPE /tmp 2>/dev/null)" = "tmpfs" ]; then
+        if [ "$(systemctl is-enabled tmp.mount 2>/dev/null)" = "masked" ]; then
+            check_warn "/tmp is tmpfs until next reboot (tmp.mount masked)"
+        else
+            check_warn "/tmp is tmpfs (RAM-backed); move to disk: sudo systemctl mask tmp.mount"
+        fi
+    else
+        check_pass "/tmp is on disk"
+    fi
+
+    swap_total=$(awk '/SwapTotal/{print $2}' /proc/meminfo)
+    swap_free=$(awk '/SwapFree/{print $2}' /proc/meminfo)
+    if [ "$swap_total" -gt 0 ]; then
+        swap_pct=$(( (swap_total - swap_free) * 100 / swap_total ))
+        if [ "$swap_pct" -ge 80 ]; then
+            check_warn "Swap ${swap_pct}% used"
+        else
+            check_pass "Swap ${swap_pct}% used"
+        fi
+    fi
+
+    journal_mb=$(du -sm /var/log/journal 2>/dev/null | cut -f1)
+    if [ "${journal_mb:-0}" -gt 1024 ]; then
+        check_warn "journald uses ${journal_mb}M (run: make setup-hygiene)"
+    else
+        check_pass "journald uses ${journal_mb:-0}M"
+    fi
+
+    if [ -d "$HOME/.npm/_cacache" ]; then
+        npm_gb=$(du -s --block-size=1G "$HOME/.npm/_cacache" 2>/dev/null | cut -f1)
+        if [ "$npm_gb" -ge 5 ]; then
+            check_warn "npm cache ${npm_gb}G (run: make maintain)"
+        else
+            check_pass "npm cache ${npm_gb}G"
+        fi
+    fi
+
+    vscode_count=$(ls -1d "$HOME"/.vscode-server/cli/servers/Stable-* 2>/dev/null | wc -l)
+    if [ "$vscode_count" -gt 3 ]; then
+        check_warn "$vscode_count VS Code server versions installed (run: make maintain)"
+    fi
+
+    if systemctl --user is-enabled dotfiles-maintenance.timer >/dev/null 2>&1; then
+        check_pass "Weekly maintenance timer enabled"
+    else
+        check_warn "Maintenance timer not enabled (run: make setup-hygiene)"
+    fi
+
+    if [ "$(systemctl show "user@$(id -u).service" -p MemoryHigh --value 2>/dev/null)" = "infinity" ]; then
+        check_warn "No memory guardrail on user session (run: make setup-hygiene)"
+    else
+        check_pass "Memory guardrail active on user session"
+    fi
+fi
+
 section "Optional Tools"
 
 # Check optional tools

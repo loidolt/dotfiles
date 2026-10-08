@@ -280,6 +280,12 @@ run_stow() {
     local output
     local exit_code=0
 
+    # Keep ~/.config/systemd/user a real directory; if stow folds it into a
+    # symlink, `systemctl --user enable` writes *.wants links into the repo
+    if [[ "$pkg" == "systemd" ]]; then
+        mkdir -p "$HOME/.config/systemd/user"
+    fi
+
     # Capture output and exit code separately
     output=$(stow "$mode" -v -t "$HOME" "$pkg" 2>&1) || exit_code=$?
 
