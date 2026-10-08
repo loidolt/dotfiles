@@ -91,7 +91,10 @@ if command_exists uv; then
     run uv cache prune
 fi
 
-if command_exists pnpm; then
+# Skip unless a pnpm store exists: with corepack, `pnpm` is a shim that
+# downloads pnpm on first use
+PNPM_STORE="${PNPM_HOME:-$HOME/.local/share/pnpm}/store"
+if command_exists pnpm && [[ -d "$PNPM_STORE" ]]; then
     run pnpm store prune
 fi
 

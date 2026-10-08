@@ -126,6 +126,10 @@ setup_maintenance_timer() {
 
 main() {
     info "Configuring system hygiene (requires sudo)"
+    if ! sudo -n true 2>/dev/null && [[ ! -t 0 ]]; then
+        error "sudo needs a password but there is no terminal; run this from an interactive shell"
+        exit 1
+    fi
     sudo -v
     setup_journald
     setup_docker_logs
