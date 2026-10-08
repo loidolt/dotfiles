@@ -242,9 +242,14 @@ if is_linux; then
         fi
     fi
 
-    vscode_count=$(ls -1d "$HOME"/.vscode-server/cli/servers/Stable-* 2>/dev/null | wc -l)
-    if [ "$vscode_count" -gt 3 ]; then
-        check_warn "$vscode_count VS Code server versions installed (run: make maintain)"
+    # Same policy as maintenance.sh: running versions plus the newest 2 are kept
+    vscode_idle=0
+    for d in "$HOME"/.vscode-server/cli/servers/Stable-*; do
+        [ -d "$d" ] || continue
+        pgrep -f "$d/" >/dev/null 2>&1 || vscode_idle=$((vscode_idle + 1))
+    done
+    if [ "$vscode_idle" -gt 2 ]; then
+        check_warn "$vscode_idle idle VS Code server versions (run: make maintain)"
     fi
 
     if systemctl --user is-enabled dotfiles-maintenance.timer >/dev/null 2>&1; then
