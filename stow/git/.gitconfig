@@ -56,3 +56,8 @@
 # User identity should be set in ~/.gitconfig.local
 # Run: git config --file ~/.gitconfig.local user.name "Your Name"
 # Run: git config --file ~/.gitconfig.local user.email "your@email.com"
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true

@@ -25,6 +25,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Codex/Gemini runtime state and vendor skills are gitignored (Codex dir uses a whitelist)
 - Removed stale OpenCode and Neovim references from docs
 
+### macOS 27 / Homebrew 7
+- gemini-cli now installed via npm on all platforms (Homebrew formula deprecated, disabled 2026-12-18)
+- Homebrew installs `tlrc` in place of the disabled `tldr` formula
+- Rosetta 2 check in setup-macos-initial.sh and health-check.sh (the macOS 27 upgrade removes it)
+- setup-macos.sh writes AppleShowAllExtensions to NSGlobalDomain (Finder domain was ignored)
+
 ## Nix → Stow migration
 
 ### Changed

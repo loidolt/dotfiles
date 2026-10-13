@@ -48,6 +48,17 @@ else
     exit 1
 fi
 
+# Rosetta 2 - upgrading to macOS 27 removes it; Docker uses it for amd64 images
+if is_arm; then
+    section "Rosetta 2"
+    if arch -x86_64 /usr/bin/true 2>/dev/null; then
+        success "Rosetta 2 is installed"
+    else
+        warning "Rosetta 2 is not installed (needed for x86_64 apps and fast amd64 containers)"
+        echo "  Install with: softwareupdate --install-rosetta"
+    fi
+fi
+
 section "macOS Setup Complete"
 success "All prerequisites installed"
 echo ""

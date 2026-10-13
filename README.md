@@ -129,7 +129,7 @@ See [docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md) for complete cheatsheet.
 - `glow` - Markdown renderer for the terminal
 - `jless` - Interactive JSON viewer
 - `yq` - YAML/TOML processor (like jq for YAML)
-- `tldr` - Simplified man pages with examples
+- `tlrc` - Simplified man pages with examples (`tldr` command)
 
 **System Utilities:**
 - `btop` - Beautiful system monitor
@@ -140,7 +140,7 @@ See [docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md) for complete cheatsheet.
 **AI Coding Tools:**
 - `claude-code` - Claude Code CLI (Anthropic)
 - `codex` - OpenAI Codex coding agent
-- `gemini-cli` - Google Gemini CLI
+- `gemini-cli` - Google Gemini CLI (installed via npm)
 
 **Languages & Runtimes:**
 - Node.js 20 (LTS)

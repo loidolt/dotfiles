@@ -89,6 +89,16 @@ if is_macos && command_exists brew; then
     fi
 fi
 
+# Rosetta 2 (Apple Silicon) - removed by the macOS 27 upgrade
+if is_macos && is_arm; then
+    if arch -x86_64 /usr/bin/true 2>/dev/null; then
+        check_pass "Rosetta 2 is installed"
+    else
+        check_warn "Rosetta 2 is NOT installed (x86_64 apps, amd64 containers)"
+        echo "  Install with: softwareupdate --install-rosetta"
+    fi
+fi
+
 section "Shell Configuration"
 
 # Check zsh config files

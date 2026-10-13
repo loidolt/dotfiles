@@ -11,7 +11,7 @@
 # AI Coding Tools
 --cask claude-code
 --cask codex     # OpenAI's Codex coding agent
-gemini-cli       # Google Gemini CLI
+# gemini-cli: installed via npm (see packages/install.sh)
 mcp-toolbox      # Google MCP Toolbox for Databases (for Looker MCP, etc.)
 
 # Fonts

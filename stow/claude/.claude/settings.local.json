@@ -28,7 +28,11 @@
       "Bash(claude mcp list:*)",
       "Bash(node:*)",
       "Bash(npm list:*)",
-      "Bash(npx:*)"
+      "Bash(npx:*)",
+      "Read(//nix/**)",
+      "Read(//private/etc/**)",
+      "Bash(dscl . -list /Users)",
+      "mcp__homeowner-guide-dev__get_page"
     ]
   },
   "disabledMcpjsonServers": [

@@ -123,6 +123,14 @@ install_brew() {
             check_cmd="brew list --cask"
         fi
 
+        # Homebrew disabled the `tldr` formula; `tlrc` is the official client
+        if [[ "$pkg_name" == "tldr" ]]; then
+            pkg_name="tlrc"
+            if brew list tldr &>/dev/null; then
+                warning "Deprecated tldr formula installed; run 'brew uninstall tldr' so tlrc can link"
+            fi
+        fi
+
         if $check_cmd "$pkg_name" &>/dev/null; then
             success "$pkg_name already installed"
         else
@@ -504,7 +512,8 @@ install_codex() {
     fi
 }
 
-# Install gemini-cli (Google Gemini CLI) - not available via apt/dnf/pacman
+# Install gemini-cli (Google Gemini CLI) via npm on all platforms
+# (not in apt/dnf/pacman; Homebrew formula deprecated, disabled 2026-12-18)
 install_gemini_cli() {
     if command_exists gemini; then
         success "gemini-cli already installed"
@@ -705,11 +714,14 @@ main() {
             install_lazysql || true
             install_navi || true
             install_codex
-            install_gemini_cli
         fi
         install_devpod
         install_playwright_browsers || true
     fi
+
+    # gemini-cli via npm on every platform (Homebrew formula deprecated upstream)
+    echo ""
+    install_gemini_cli || true
 
     # Configure devpod provider on macOS (devpod installed via Homebrew)
     if [[ "$os" == "macos" ]] && command_exists devpod; then

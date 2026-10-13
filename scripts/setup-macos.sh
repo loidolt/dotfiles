@@ -13,7 +13,7 @@ defaults write com.apple.dock show-recents -bool false
 defaults write com.apple.dock tilesize -int 48
 
 # Finder
-defaults write com.apple.finder AppleShowAllExtensions -bool true
+defaults write NSGlobalDomain AppleShowAllExtensions -bool true  # global pref, not Finder domain
 defaults write com.apple.finder ShowPathbar -bool true
 defaults write com.apple.finder ShowStatusBar -bool true
 
