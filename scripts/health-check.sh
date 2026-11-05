@@ -236,49 +236,59 @@ if is_linux; then
         fi
     fi
 
-    journal_mb=$(du -sm /var/log/journal 2>/dev/null | cut -f1)
-    if [ "${journal_mb:-0}" -gt 1024 ]; then
-        check_warn "journald uses ${journal_mb}M (run: make setup-hygiene)"
-    else
-        check_pass "journald uses ${journal_mb:-0}M"
-    fi
-
-    if [ -d "$HOME/.npm/_cacache" ]; then
-        npm_gb=$(du -s --block-size=1G "$HOME/.npm/_cacache" 2>/dev/null | cut -f1)
-        if [ "$npm_gb" -ge 5 ]; then
-            check_warn "npm cache ${npm_gb}G (run: make maintain)"
+    if has_systemd; then
+        journal_mb=$(du -sm /var/log/journal 2>/dev/null | cut -f1)
+        if [ "${journal_mb:-0}" -gt 1024 ]; then
+            check_warn "journald uses ${journal_mb}M (run: make setup-hygiene)"
         else
-            check_pass "npm cache ${npm_gb}G"
+            check_pass "journald uses ${journal_mb:-0}M"
         fi
-    fi
 
-    # Same policy as maintenance.sh: running versions plus the newest 2 are kept
-    vscode_idle=0
-    for d in "$HOME"/.vscode-server/cli/servers/Stable-*; do
-        [ -d "$d" ] || continue
-        pgrep -f "$d/" >/dev/null 2>&1 || vscode_idle=$((vscode_idle + 1))
-    done
-    if [ "$vscode_idle" -gt 2 ]; then
-        check_warn "$vscode_idle idle VS Code server versions (run: make maintain)"
-    fi
+        if systemctl --user is-enabled dotfiles-maintenance.timer >/dev/null 2>&1; then
+            check_pass "Weekly maintenance timer enabled"
+        else
+            check_warn "Maintenance timer not enabled (run: make setup-hygiene)"
+        fi
 
-    if systemctl --user is-enabled dotfiles-maintenance.timer >/dev/null 2>&1; then
-        check_pass "Weekly maintenance timer enabled"
+        if systemctl --user is-enabled dotfiles-reaper.timer >/dev/null 2>&1; then
+            check_pass "Hourly orphan reaper timer enabled"
+        else
+            check_warn "Orphan reaper timer not enabled (run: make setup-hygiene)"
+        fi
+
+        if [ "$(systemctl show "user@$(id -u).service" -p MemoryHigh --value 2>/dev/null)" = "infinity" ]; then
+            check_warn "No memory guardrail on user session (run: make setup-hygiene)"
+        else
+            check_pass "Memory guardrail active on user session"
+        fi
+    elif is_wsl; then
+        check_warn "systemd not running in WSL; timers and memory guardrail unavailable"
+        echo "  Enable: add '[boot]' + 'systemd=true' to /etc/wsl.conf, then 'wsl --shutdown' from Windows"
     else
-        check_warn "Maintenance timer not enabled (run: make setup-hygiene)"
+        check_warn "systemd not running; timers and memory guardrail unavailable"
     fi
+fi
 
-    if systemctl --user is-enabled dotfiles-reaper.timer >/dev/null 2>&1; then
-        check_pass "Hourly orphan reaper timer enabled"
-    else
-        check_warn "Orphan reaper timer not enabled (run: make setup-hygiene)"
-    fi
+# Cache checks apply on every OS (Linux section above already printed the header)
+is_macos && section "Machine Hygiene"
 
-    if [ "$(systemctl show "user@$(id -u).service" -p MemoryHigh --value 2>/dev/null)" = "infinity" ]; then
-        check_warn "No memory guardrail on user session (run: make setup-hygiene)"
+if [ -d "$HOME/.npm/_cacache" ]; then
+    npm_gb=$(size_gb "$HOME/.npm/_cacache")
+    if [ "$npm_gb" -ge 5 ]; then
+        check_warn "npm cache ${npm_gb}G (run: make maintain)"
     else
-        check_pass "Memory guardrail active on user session"
+        check_pass "npm cache ${npm_gb}G"
     fi
+fi
+
+# Same policy as maintenance.sh: running versions plus the newest 2 are kept
+vscode_idle=0
+for d in "$HOME"/.vscode-server/cli/servers/Stable-*; do
+    [ -d "$d" ] || continue
+    pgrep -f "$d/" >/dev/null 2>&1 || vscode_idle=$((vscode_idle + 1))
+done
+if [ "$vscode_idle" -gt 2 ]; then
+    check_warn "$vscode_idle idle VS Code server versions (run: make maintain)"
 fi
 
 section "Optional Tools"

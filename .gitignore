@@ -146,3 +146,7 @@ stow/claude/.claude/skills/wrangler/
 stow/navi/.config/navi/navi.log
 # systemd user units - enablement links are per machine
 stow/systemd/.config/systemd/user/*.wants/
+
+# Gemini / Antigravity runtime state (db, logs, binaries, per-machine config)
+stow/gemini/.gemini/antigravity/
+stow/gemini/.gemini/config/

@@ -89,4 +89,5 @@ Vendor skills (Cloudflare etc.) and `skills/synced/` are gitignored; don't commi
 
 - **macOS**: Uses Homebrew, zsh default
 - **Linux**: Supports apt/dnf/pacman, may need `chsh` for zsh
-- **Both**: Most configs are cross-platform
+- **Windows**: Runs inside WSL2 (`scripts/setup-windows-initial.ps1`), then the Linux path; `is_wsl` covers Windows-specific bits, `has_systemd` gates timers/journald (WSL needs `systemd=true` in `/etc/wsl.conf`)
+- **All**: Most configs are cross-platform; `systemd` stow package is Linux-only (`stow_package_supported`)
