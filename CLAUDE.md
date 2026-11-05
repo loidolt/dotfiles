@@ -12,7 +12,7 @@ dotfiles/
 │   ├── tmux/                # Tmux configuration (cmux-aware)
 │   ├── claude/              # Claude Code agents, skills, hooks, MCP
 │   ├── codex/ gemini/       # Other AI CLIs (runtime state gitignored)
-│   ├── systemd/             # User units (dotfiles-maintenance.timer)
+│   ├── systemd/             # User units (dotfiles-maintenance.timer, dotfiles-reaper.timer)
 │   └── ...                  # ghostty, starship, fzf, navi, ssh, direnv
 ├── scripts/                 # Automation scripts
 │   └── lib/utils.sh         # Shared bash utilities
@@ -31,7 +31,8 @@ make update       # Pull changes and restow
 make stow-all     # Restow all packages
 make health-check # Diagnose issues
 make maintain     # Weekly cleanup (also runs via systemd timer); ARGS=--dry-run to preview
-make setup-hygiene # One-time Linux hygiene: journald cap, docker log rotation, memory guardrail, timer
+make reap         # Kill orphaned dev servers/test workers (also hourly via systemd timer); ARGS=--dry-run
+make setup-hygiene # One-time Linux hygiene: journald cap, docker log rotation, memory guardrail, timers
 make setup-git    # Configure git credentials
 make ssh          # Setup GitHub SSH key
 ```

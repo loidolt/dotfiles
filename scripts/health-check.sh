@@ -268,6 +268,12 @@ if is_linux; then
         check_warn "Maintenance timer not enabled (run: make setup-hygiene)"
     fi
 
+    if systemctl --user is-enabled dotfiles-reaper.timer >/dev/null 2>&1; then
+        check_pass "Hourly orphan reaper timer enabled"
+    else
+        check_warn "Orphan reaper timer not enabled (run: make setup-hygiene)"
+    fi
+
     if [ "$(systemctl show "user@$(id -u).service" -p MemoryHigh --value 2>/dev/null)" = "infinity" ]; then
         check_warn "No memory guardrail on user session (run: make setup-hygiene)"
     else

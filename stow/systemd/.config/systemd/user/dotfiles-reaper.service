@@ -1,0 +1,9 @@
+[Unit]
+Description=Reap orphaned dev-tool processes (dev servers, test workers)
+Documentation=file://%h/dotfiles/scripts/reap-orphans.sh
+
+[Service]
+Type=oneshot
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=%h/dotfiles/scripts/reap-orphans.sh
+Nice=19
