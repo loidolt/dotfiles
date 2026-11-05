@@ -58,7 +58,35 @@ is_arm() {
     [[ "$(uname -m)" == "arm64" ]] || [[ "$(uname -m)" == "aarch64" ]]
 }
 
-# Get simple OS type string (macos, linux, unknown)
+# Windows Subsystem for Linux (Windows machines run the dotfiles inside WSL2).
+# is_linux is also true under WSL; use this for the Windows-specific bits.
+is_wsl() {
+    is_linux || return 1
+    [[ -n "${WSL_DISTRO_NAME:-}" ]] || grep -qi microsoft /proc/sys/kernel/osrelease 2>/dev/null
+}
+
+# systemd running as PID 1. False on macOS and on WSL unless /etc/wsl.conf
+# has [boot] systemd=true.
+has_systemd() {
+    [[ -d /run/systemd/system ]]
+}
+
+# Stow packages that only make sense on some platforms
+stow_package_supported() {
+    case "$1" in
+        systemd) is_linux ;;
+        *) return 0 ;;
+    esac
+}
+
+# Directory size in whole GiB (portable: BSD du has no --block-size)
+size_gb() {
+    local kb
+    kb="$(du -sk "$1" 2>/dev/null | cut -f1)"
+    echo $(( ${kb:-0} / 1048576 ))
+}
+
+# Get simple OS type string (macos, linux, unknown); WSL reports linux
 get_os_type() {
     if is_macos; then
         echo "macos"
@@ -79,7 +107,11 @@ detect_os() {
     elif is_linux; then
         if [ -f /etc/os-release ]; then
             . /etc/os-release
-            echo "Linux ($NAME)"
+            if is_wsl; then
+                echo "Linux ($NAME, WSL2 on Windows)"
+            else
+                echo "Linux ($NAME)"
+            fi
         else
             echo "Linux (Unknown)"
         fi
@@ -270,6 +302,10 @@ pause() {
     read -r -p "Press Enter to continue..."
 }
 
+# OS metadata files that must never be linked into $HOME (Finder drops
+# .DS_Store into package roots, which then conflicts with ~/.DS_Store)
+export STOW_IGNORE='^(\.DS_Store|\._.*|Thumbs\.db|desktop\.ini)$'
+
 # Run stow command and filter known bugs while preserving real errors
 # Usage: run_stow <package> [mode]
 #   package: The stow package directory name
@@ -287,7 +323,7 @@ run_stow() {
     fi
 
     # Capture output and exit code separately
-    output=$(stow "$mode" -v -t "$HOME" "$pkg" 2>&1) || exit_code=$?
+    output=$(stow "$mode" -v --ignore="$STOW_IGNORE" -t "$HOME" "$pkg" 2>&1) || exit_code=$?
 
     # Filter known stow bug message but show everything else
     if [[ -n "$output" ]]; then
@@ -345,7 +381,7 @@ setup_git_credentials() {
 
 # Export functions so they're available in subshells
 export -f debug info success warning error section
-export -f is_macos is_linux is_arm get_os_type detect_os
+export -f is_macos is_linux is_arm is_wsl has_systemd stow_package_supported size_gb get_os_type detect_os
 export -f detect_distro_family is_debian_based is_fedora_based is_arch_based
 export -f command_exists setup_homebrew_path is_sudo get_user get_home
 export -f ask check_internet pause run_stow setup_git_credentials

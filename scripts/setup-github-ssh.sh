@@ -207,6 +207,9 @@ copy_to_clipboard() {
     if is_macos; then
         echo "$pub_key" | pbcopy
         success "Public key copied to clipboard"
+    elif is_wsl && command_exists clip.exe; then
+        echo "$pub_key" | clip.exe
+        success "Public key copied to Windows clipboard"
     elif command_exists xclip; then
         echo "$pub_key" | xclip -selection clipboard
         success "Public key copied to clipboard"
@@ -227,6 +230,11 @@ open_github_settings() {
 
     if is_macos; then
         open "$url"
+    elif is_wsl && command_exists wslview; then
+        wslview "$url"
+    elif is_wsl && command_exists explorer.exe; then
+        # explorer.exe exits non-zero even on success
+        explorer.exe "$url" || true
     elif command_exists xdg-open; then
         xdg-open "$url"
     else

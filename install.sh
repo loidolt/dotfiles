@@ -122,11 +122,16 @@ stow_packages() {
     for package in */; do
         package=${package%/}  # Remove trailing slash
 
+        if ! stow_package_supported "$package"; then
+            info "Skipping $package (not used on $OS)"
+            continue
+        fi
+
         info "Installing $package..."
 
         # Dry-run to detect conflicts
         local stow_output
-        stow_output=$(stow -n -v -t "$HOME" "$package" 2>&1) || true
+        stow_output=$(stow -n -v --ignore="$STOW_IGNORE" -t "$HOME" "$package" 2>&1) || true
 
         # Backup conflicts before stowing
         echo "$stow_output" | grep "existing target is neither a link nor a directory" | \

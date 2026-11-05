@@ -18,6 +18,10 @@ info "Stowing all packages to $HOME..."
 failed_packages=()
 for pkg in */; do
     pkg="${pkg%/}"
+    if ! stow_package_supported "$pkg"; then
+        info "  $pkg (skipped: not used on this OS)"
+        continue
+    fi
     info "  $pkg"
     # Use -R (restow) to handle already-stowed packages gracefully
     if ! run_stow "$pkg"; then

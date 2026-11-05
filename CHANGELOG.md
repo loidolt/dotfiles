@@ -14,8 +14,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - cmux agent notifications (`stow/claude/.claude/hooks/agent-notify.sh`) for Claude Code and Codex, working over ssh and inside tmux
 - tmux: passthrough for background windows, OSC 52 clipboard, extended keys, bell forwarding, TPM auto-bootstrap
 - health-check: TPM, notify hook and `.zshenv` checks
+- `is_wsl`, `has_systemd`, `stow_package_supported`, `size_gb` helpers in `scripts/lib/utils.sh`; `detect_os` labels WSL2
 
 ### Fixed
+- macOS: `make maintain` silently stopped at the npm cache step (`du --block-size` is GNU-only)
+- macOS: Finder `.DS_Store` in package roots blocked stowing `claude`/`codex`; stow now ignores OS metadata files
+- macOS: `systemd` package no longer stowed outside Linux
+- WSL2: `make setup-hygiene` and health-check skip journald/timers/memory guardrail when systemd is off (with `/etc/wsl.conf` hint), and skip Docker Desktop's daemon config
+- WSL2: `make ssh` copies the key with `clip.exe` and opens GitHub via `wslview`/`explorer.exe`
+- Gemini/Antigravity runtime state (`antigravity/`, `config/`) gitignored
 - Claude Code agents and skills now load (added YAML frontmatter, skills moved to `<name>/SKILL.md`)
 - `.pre-commit-config.yaml` was invalid; now uses pre-commit-hooks + shellcheck
 - Shellcheck warnings across scripts

@@ -50,6 +50,12 @@ setup_docker_logs() {
         info "Docker not installed, skipping"
         return
     fi
+    # Docker Desktop (WSL integration) runs its own daemon outside this distro;
+    # log rotation is set in Docker Desktop > Settings > Docker Engine
+    if is_wsl && [[ "$(docker info --format '{{.OperatingSystem}}' 2>/dev/null)" == *"Docker Desktop"* ]]; then
+        info "Docker Desktop daemon; configure log rotation in Docker Desktop settings, skipping"
+        return
+    fi
     local conf=/etc/docker/daemon.json current merged
     current="$(sudo cat "$conf" 2>/dev/null || echo '{}')"
     merged="$(jq '. + {"log-driver": "json-file", "log-opts": ((.["log-opts"] // {}) + {"max-size": "10m", "max-file": "3"})}' <<<"$current")"
@@ -134,12 +140,26 @@ main() {
         exit 1
     fi
     sudo -v
-    setup_journald
+    if has_systemd; then
+        setup_journald
+    fi
     setup_docker_logs
     setup_apt
     setup_snap
-    setup_memory_guardrail
-    setup_maintenance_timer
+    if has_systemd; then
+        setup_memory_guardrail
+        setup_maintenance_timer
+    else
+        section "systemd"
+        warning "systemd is not running: skipped journald cap, memory guardrail and timers"
+        if is_wsl; then
+            info "Enable it with this in /etc/wsl.conf, then run 'wsl --shutdown' from Windows:"
+            echo "    [boot]"
+            echo "    systemd=true"
+            info "WSL memory is capped per VM in %UserProfile%\\.wslconfig ([wsl2] memory=...)"
+        fi
+        info "Run maintenance by hand meanwhile: make maintain / make reap"
+    fi
     echo ""
     success "System hygiene configured"
 }
