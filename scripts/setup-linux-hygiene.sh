@@ -8,7 +8,7 @@
 #   - snaps keep 2 revisions
 #   - memory guardrail: user@.service (tmux, agents, builds, desktop) throttled
 #     at 85% of RAM, so ssh sessions and the system stay responsive
-#   - user lingering + weekly dotfiles-maintenance.timer
+#   - user lingering + weekly dotfiles-maintenance.timer + hourly dotfiles-reaper.timer
 
 set -euo pipefail
 
@@ -120,8 +120,11 @@ setup_maintenance_timer() {
         return
     fi
     systemctl --user daemon-reload
-    systemctl --user enable --now dotfiles-maintenance.timer >/dev/null
-    success "dotfiles-maintenance.timer enabled: $(systemctl --user show dotfiles-maintenance.timer -p NextElapseUSecRealtime --value)"
+    local timer
+    for timer in dotfiles-maintenance.timer dotfiles-reaper.timer; do
+        systemctl --user enable --now "$timer" >/dev/null
+        success "$timer enabled"
+    done
 }
 
 main() {

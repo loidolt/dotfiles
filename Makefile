@@ -1,7 +1,7 @@
 # Dotfiles Makefile
 # Provides a consistent interface for common operations
 
-.PHONY: install update health-check stow-all uninstall packages help setup-git ssh maintain setup-hygiene
+.PHONY: install update health-check stow-all uninstall packages help setup-git ssh maintain reap setup-hygiene
 
 # Default target
 help:
@@ -19,6 +19,7 @@ help:
 	@echo "  setup-git    - Configure git user name and email"
 	@echo "  ssh          - Setup GitHub SSH key"
 	@echo "  maintain     - Clean caches/docker/VS Code servers, report stale node_modules"
+	@echo "  reap         - Kill orphaned dev servers/test workers (ARGS=--dry-run)"
 	@echo "  setup-hygiene - One-time Linux hygiene settings (sudo)"
 	@echo ""
 	@echo "Examples:"
@@ -37,6 +38,9 @@ health-check:
 
 maintain:
 	@./scripts/maintenance.sh $(ARGS)
+
+reap:
+	@./scripts/reap-orphans.sh $(ARGS)
 
 setup-hygiene:
 	@bash ./scripts/setup-linux-hygiene.sh
